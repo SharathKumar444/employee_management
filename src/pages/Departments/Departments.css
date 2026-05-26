@@ -1,0 +1,80 @@
+.departments-page {
+  padding: 24px;
+  background: #f4f7ff;
+  min-height: 100vh;
+}
+
+/* Header */
+.departments-header {
+  margin-bottom: 20px;
+}
+
+.departments-header h1 {
+  font-size: 28px;
+  font-weight: 700;
+  color: #1f2937;
+}
+
+.departments-header p {
+  color: #6b7280;
+  margin-top: 4px;
+}
+
+/* ⭐ FIXED 2-ROW GRID */
+.departments-grid {
+  display: grid;
+
+  /* 2 rows layout */
+  grid-template-rows: repeat(2, auto);
+
+  /* auto columns based on items */
+  grid-auto-flow: column;
+
+  gap: 18px;
+
+  overflow-x: auto; /* scroll if many cards */
+  padding-bottom: 10px;
+}
+
+/* Department card */
+.department-card {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 60px;
+  min-width: 220px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
+  border: 1px solid rgba(99, 102, 241, 0.08);
+  transition: 0.25s ease;
+  position: relative;
+}
+
+/* top color bar */
+.department-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 5px;
+  width: 100%;
+  background: linear-gradient(90deg, #6366f1, #22c55e, #06b6d4, #f97316);
+}
+
+/* hover */
+.department-card:hover {
+  transform: translateY(-6px);
+}
+
+/* text */
+.department-card h3 {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.department-card p {
+  font-size: 14px;
+  color: #4b5563;
+  background: #f3f4f6;
+  display: inline-block;
+  padding: 6px 10px;
+  border-radius: 8px;
+}

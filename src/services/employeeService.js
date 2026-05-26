@@ -1,49 +1,68 @@
 import axios from 'axios'
 
-const API_URL =
-  'http://127.0.0.1:8000'
+const API_URL = 'http://127.0.0.1:8000'
 
-export const fetchEmployees =
-  async () => {
-    const response =
-      await axios.get(
-        `${API_URL}/employees`
-      )
+/**
+ * GET all employees
+ */
+export const fetchEmployees = async () => {
+  try {
+    const response = await axios.get(`${API_URL}/employees`)
 
-    return response.data.data
+    // SAFE fallback (VERY IMPORTANT)
+    return response.data?.data || response.data || []
+  } catch (error) {
+    console.error('fetchEmployees error:', error)
+    return []
   }
+}
 
-export const addEmployee =
-  async employeeData => {
-    const response =
-      await axios.post(
-        `${API_URL}/employees`,
-        employeeData
-      )
+/**
+ * ADD employee
+ */
+export const addEmployee = async (employeeData) => {
+  try {
+    const response = await axios.post(
+      `${API_URL}/employees`,
+      employeeData
+    )
 
     return response.data
+  } catch (error) {
+    console.error('addEmployee error:', error)
+    throw error
   }
+}
 
-export const updateEmployee =
-  async (
-    employeeId,
-    employeeData
-  ) => {
-    const response =
-      await axios.put(
-        `${API_URL}/employees/${employeeId}`,
-        employeeData
-      )
+/**
+ * UPDATE employee
+ */
+export const updateEmployee = async (employeeId, employeeData) => {
+  try {
+    const response = await axios.put(
+      `${API_URL}/employees/${employeeId}`,
+      employeeData
+    )
 
     return response.data
+  } catch (error) {
+    console.error('updateEmployee error:', error)
+    throw error
   }
+}
 
-export const deleteEmployee =
-  async employeeId => {
-    const response =
-      await axios.delete(
-        `${API_URL}/employees/${employeeId}`
-      )
+/**
+ * DELETE employee
+ */
+export const deleteEmployee = async (employeeId) => {
+  try {
+    const response = await axios.delete(
+      `${API_URL}/employees/${employeeId}`
+    )
 
     return response.data
+  } catch (error) {
+    console.error('deleteEmployee error:', error)
+    throw error
   }
+}

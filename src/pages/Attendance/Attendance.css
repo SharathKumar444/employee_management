@@ -1,0 +1,86 @@
+.attendance-page {
+  padding: 24px;
+  background: #f4f7ff;
+  min-height: 100vh;
+}
+
+/* HEADER */
+.attendance-header h1 {
+  font-size: 28px;
+  font-weight: 700;
+  color: #1f2937;
+}
+
+.attendance-header p {
+  color: #6b7280;
+  margin-bottom: 20px;
+}
+
+/* CARD */
+.attendance-card {
+  background: white;
+  border-radius: 14px;
+  padding: 16px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+  overflow-x: auto;
+}
+
+/* TABLE */
+.attendance-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.attendance-table th {
+  text-align: left;
+  padding: 12px;
+  font-size: 13px;
+  color: #6b7280;
+  border-bottom: 1px solid #eee;
+}
+
+.attendance-table td {
+  padding: 14px 12px;
+  font-size: 14px;
+  color: #111827;
+  border-bottom: 1px solid #f1f1f1;
+}
+
+/* ROW HOVER */
+.attendance-table tbody tr:hover {
+  background: #f9fafb;
+}
+
+/* STATUS BADGES */
+.status {
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/* Active */
+.status.active {
+  background: #dcfce7;
+  color: #16a34a;
+}
+
+/* On Leave */
+.status.on-leave {
+  background: #fef3c7;
+  color: #d97706;
+}
+
+/* Inactive */
+.status.inactive {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+/* Loading */
+.status-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 60vh;
+}

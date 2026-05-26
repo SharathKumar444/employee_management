@@ -1,18 +1,19 @@
-import { useTheme } from '../../../context/ThemeContext'
-
 import './Navbar.css'
+import { useAuth } from '../../../context/AuthContext'
 
 const Navbar = () => {
-  const { theme, toggleTheme } = useTheme()
+  const { currentUser } = useAuth()
 
   return (
-    <header className="navbar">
-      <h2>Enterprise Employee Management System</h2>
+    <div className="navbar">
 
-      <button onClick={toggleTheme}>
-        {theme === 'light' ? 'Dark Mode' : 'Light Mode'}
-      </button>
-    </header>
+      <h3>Employee Management System</h3>
+
+      <div className="navbar-right">
+        <span>{currentUser?.email}</span>
+      </div>
+
+    </div>
   )
 }
 

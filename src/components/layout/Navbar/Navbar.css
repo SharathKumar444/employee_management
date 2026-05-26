@@ -1,26 +1,12 @@
 .navbar {
-  height: 70px;
-  background-color: white;
-  padding: 0 20px;
-
   display: flex;
-  align-items: center;
   justify-content: space-between;
-
-  border-bottom: 1px solid #e5e7eb;
+  align-items: center;
+  background-color: white;
+  padding:  40px;
 }
 
-.navbar h2 {
-  font-size: 20px;
-  color: #111827;
-}
-
-.navbar button {
-  padding: 8px 14px;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-
-  background-color: #111827;
-  color: white;
+.navbar-right {
+  font-weight: 500;
+  color: #555;
 }
