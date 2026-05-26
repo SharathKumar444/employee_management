@@ -1,0 +1,20 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body.light {
+  background-color: #f5f7fa;
+  color: #111827;
+}
+
+body.dark {
+  background-color: #111827;
+  color: #f9fafb;
+}
+
+body {
+  transition: all 0.3s ease;
+  font-family: Arial, sans-serif;
+}

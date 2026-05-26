@@ -1,0 +1,106 @@
+/* Full screen overlay */
+.employee-form-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 16px;
+}
+
+/* Form container */
+.employee-form {
+  width: 100%;
+  max-width: 420px;
+  background: #ffffff;
+  border-radius: 14px;
+  padding: 24px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  animation: popIn 0.25s ease-in-out;
+}
+
+/* Title */
+.employee-form h2 {
+  text-align: center;
+  margin-bottom: 10px;
+  font-size: 22px;
+  color: #111827;
+}
+
+/* Inputs & select */
+.employee-form input,
+.employee-form select {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 14px;
+  outline: none;
+  transition: 0.2s;
+  background: #fff;
+}
+
+/* Focus effect */
+.employee-form input:focus,
+.employee-form select:focus {
+  border-color: #6366f1;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+}
+
+/* Button container */
+.form-buttons {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+/* Save button */
+.form-buttons button[type="submit"] {
+  flex: 1;
+  background: #4f46e5;
+  color: white;
+  border: none;
+  padding: 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: 0.2s;
+}
+
+.form-buttons button[type="submit"]:hover {
+  background: #4338ca;
+}
+
+/* Cancel button */
+.form-buttons button[type="button"] {
+  flex: 1;
+  background: #e5e7eb;
+  color: #111827;
+  border: none;
+  padding: 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: 0.2s;
+}
+
+.form-buttons button[type="button"]:hover {
+  background: #d1d5db;
+}
+
+/* Animation */
+@keyframes popIn {
+  from {
+    transform: scale(0.9);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}

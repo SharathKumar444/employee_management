@@ -1,0 +1,23 @@
+.employee-status {
+  padding: 6px 14px;
+
+  border-radius: 20px;
+
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.active-status {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.inactive-status {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.leave-status {
+  background: #fef3c7;
+  color: #b45309;
+}
