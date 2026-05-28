@@ -94,7 +94,7 @@ const Login = () => {
           className="signup-button"
           onClick={() => navigate('/signup')}
         >
-          Create New Account
+          SIGN UP
         </button>
 
         <p className="login-footer">

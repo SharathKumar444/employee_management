@@ -59,7 +59,19 @@ const Employees = () => {
     setDeleteEmployeeId,
   ] = useState(null)
 
-  /* Load Employees */
+  /* =========================
+     CLEAR OLD NOTIFICATIONS
+  ========================= */
+
+  useEffect(() => {
+    localStorage.removeItem(
+      'notifications'
+    )
+  }, [])
+
+  /* =========================
+     LOAD EMPLOYEES
+  ========================= */
 
   const loadEmployees = async () => {
     try {
@@ -68,11 +80,16 @@ const Employees = () => {
       const data =
         await fetchEmployees()
 
-      setEmployees(data)
+      if (Array.isArray(data)) {
+        setEmployees(data)
+      } else {
+        setEmployees([])
+      }
 
       setError('')
-    // eslint-disable-next-line no-unused-vars
     } catch (err) {
+      console.error(err)
+
       setError(
         'Failed to fetch employee data'
       )
@@ -86,12 +103,46 @@ const Employees = () => {
     loadEmployees()
   }, [])
 
-  /* Add Employee */
+  /* =========================
+     ADD EMPLOYEE
+  ========================= */
 
   const handleAddEmployee =
     async employeeData => {
       try {
-        await addEmployee(employeeData)
+        await addEmployee(
+          employeeData
+        )
+
+        /* NOTIFICATION */
+
+        const oldNotifications =
+          JSON.parse(
+            localStorage.getItem(
+              'notifications'
+            )
+          ) || []
+
+        const newNotification = {
+          id: Date.now(),
+          type: 'add',
+          message: `${employeeData.name} was added successfully`,
+          time: 'Just now',
+        }
+
+        localStorage.setItem(
+          'notifications',
+          JSON.stringify([
+            newNotification,
+            ...oldNotifications,
+          ])
+        )
+
+        window.dispatchEvent(
+          new Event(
+            'notification-update'
+          )
+        )
 
         await loadEmployees()
 
@@ -100,22 +151,62 @@ const Employees = () => {
         alert(
           'Employee added successfully'
         )
-      // eslint-disable-next-line no-unused-vars
       } catch (err) {
+        console.error(err)
+
         alert(
           'Failed to add employee'
         )
       }
     }
 
-  /* Edit Employee */
+  /* =========================
+     EDIT EMPLOYEE
+  ========================= */
 
   const handleEditEmployee =
     async employeeData => {
       try {
+        if (
+          !selectedEmployee?.employee_id
+        ) {
+          alert('Employee ID missing')
+          return
+        }
+
         await updateEmployee(
-          selectedEmployee.id,
+          selectedEmployee.employee_id,
           employeeData
+        )
+
+        /* NOTIFICATION */
+
+        const oldNotifications =
+          JSON.parse(
+            localStorage.getItem(
+              'notifications'
+            )
+          ) || []
+
+        const newNotification = {
+          id: Date.now(),
+          type: 'edit',
+          message: `${employeeData.name} profile updated`,
+          time: 'Just now',
+        }
+
+        localStorage.setItem(
+          'notifications',
+          JSON.stringify([
+            newNotification,
+            ...oldNotifications,
+          ])
+        )
+
+        window.dispatchEvent(
+          new Event(
+            'notification-update'
+          )
         )
 
         await loadEmployees()
@@ -127,15 +218,18 @@ const Employees = () => {
         alert(
           'Employee updated successfully'
         )
-      // eslint-disable-next-line no-unused-vars
       } catch (err) {
+        console.error(err)
+
         alert(
           'Failed to update employee'
         )
       }
     }
 
-  /* Open Delete Modal */
+  /* =========================
+     DELETE EMPLOYEE
+  ========================= */
 
   const handleDeleteClick =
     employeeId => {
@@ -146,31 +240,81 @@ const Employees = () => {
       setShowDeleteModal(true)
     }
 
-  /* Confirm Delete */
-
   const confirmDeleteEmployee =
     async () => {
       try {
+        if (!deleteEmployeeId) {
+          alert('Employee ID missing')
+          return
+        }
+
+        const employeeToDelete =
+          employees.find(
+            employee =>
+              employee.employee_id ===
+                deleteEmployeeId ||
+              employee.id ===
+                deleteEmployeeId
+          )
+
         await deleteEmployee(
           deleteEmployeeId
+        )
+
+        /* NOTIFICATION */
+
+        const oldNotifications =
+          JSON.parse(
+            localStorage.getItem(
+              'notifications'
+            )
+          ) || []
+
+        const newNotification = {
+          id: Date.now(),
+          type: 'delete',
+          message: `${
+            employeeToDelete?.name ||
+            'Employee'
+          } deleted successfully`,
+          time: 'Just now',
+        }
+
+        localStorage.setItem(
+          'notifications',
+          JSON.stringify([
+            newNotification,
+            ...oldNotifications,
+          ])
+        )
+
+        window.dispatchEvent(
+          new Event(
+            'notification-update'
+          )
         )
 
         await loadEmployees()
 
         setShowDeleteModal(false)
 
+        setDeleteEmployeeId(null)
+
         alert(
           'Employee deleted successfully'
         )
-      // eslint-disable-next-line no-unused-vars
       } catch (err) {
+        console.error(err)
+
         alert(
           'Failed to delete employee'
         )
       }
     }
 
-  /* Open Edit Form */
+  /* =========================
+     OPEN EDIT FORM
+  ========================= */
 
   const handleEditOpen =
     employee => {
@@ -179,7 +323,9 @@ const Employees = () => {
       setShowForm(true)
     }
 
-  /* Open Add Form */
+  /* =========================
+     OPEN ADD FORM
+  ========================= */
 
   const handleAddOpen = () => {
     setSelectedEmployee(null)
@@ -187,13 +333,108 @@ const Employees = () => {
     setShowForm(true)
   }
 
-  /* Filter Employees */
+  /* =========================
+     STATUS CHANGE
+  ========================= */
+
+  const handleStatusChange =
+    async (
+      employee,
+      newStatus
+    ) => {
+      try {
+        /* PREVENT SAME STATUS */
+        if (
+          employee.status ===
+          newStatus
+        ) {
+          return
+        }
+
+        const updatedEmployee = {
+          ...employee,
+          status: newStatus,
+        }
+
+        await updateEmployee(
+          employee.employee_id ||
+            employee.id,
+          updatedEmployee
+        )
+
+        /* =========================
+           NOTIFICATIONS
+        ========================= */
+
+        const oldNotifications =
+          JSON.parse(
+            localStorage.getItem(
+              'notifications'
+            )
+          ) || []
+
+        let statusMessage = ''
+
+        if (
+          newStatus === 'Active'
+        ) {
+          statusMessage = `${employee.name} is now Active`
+        }
+
+        if (
+          newStatus === 'Inactive'
+        ) {
+          statusMessage = `${employee.name} is now Inactive`
+        }
+
+        if (
+          newStatus === 'On Leave'
+        ) {
+          statusMessage = `${employee.name} is On Leave`
+        }
+
+        const newNotification = {
+          id: Date.now(),
+          type: 'status',
+          message: statusMessage,
+          time: 'Just now',
+        }
+
+        localStorage.setItem(
+          'notifications',
+          JSON.stringify([
+            newNotification,
+            ...oldNotifications,
+          ])
+        )
+
+        /* LIVE UPDATE NAVBAR */
+
+        window.dispatchEvent(
+          new Event(
+            'notification-update'
+          )
+        )
+
+        await loadEmployees()
+      } catch (err) {
+        console.error(err)
+
+        alert(
+          'Failed to update status'
+        )
+      }
+    }
+
+  /* =========================
+     FILTER EMPLOYEES
+  ========================= */
 
   const filteredEmployees =
     employees.filter(employee => {
       const matchesSearch =
-        employee.name
-          .toLowerCase()
+        employee?.name
+          ?.toLowerCase()
           .includes(
             searchInput.toLowerCase()
           )
@@ -210,7 +451,9 @@ const Employees = () => {
       )
     })
 
-  /* Loading State */
+  /* =========================
+     LOADING
+  ========================= */
 
   if (loading) {
     return (
@@ -222,7 +465,9 @@ const Employees = () => {
     )
   }
 
-  /* Error State */
+  /* =========================
+     ERROR
+  ========================= */
 
   if (error) {
     return (
@@ -232,11 +477,17 @@ const Employees = () => {
     )
   }
 
+  /* =========================
+     UI
+  ========================= */
+
   return (
     <div className="employees-page">
-      {/* Header */}
+
+      {/* HEADER */}
 
       <div className="employees-header">
+
         <div>
           <h1>
             Employees Dashboard
@@ -253,14 +504,15 @@ const Employees = () => {
           onClick={handleAddOpen}
         >
           <FaPlus />
-
           Add Employee
         </button>
+
       </div>
 
-      {/* Statistics */}
+      {/* STATISTICS */}
 
       <div className="statistics-grid">
+
         <StatisticsCard
           title="Total Employees"
           value={employees.length}
@@ -301,9 +553,10 @@ const Employees = () => {
             <FaClipboardCheck />
           }
         />
+
       </div>
 
-      {/* Filters */}
+      {/* FILTERS */}
 
       <EmployeeFilters
         searchInput={
@@ -320,7 +573,7 @@ const Employees = () => {
         }
       />
 
-      {/* Employee Table */}
+      {/* EMPLOYEE TABLE */}
 
       <EmployeeTable
         filteredEmployees={
@@ -330,9 +583,12 @@ const Employees = () => {
         onDelete={
           handleDeleteClick
         }
+        onStatusChange={
+          handleStatusChange
+        }
       />
 
-      {/* Empty State */}
+      {/* EMPTY */}
 
       {filteredEmployees.length ===
         0 && (
@@ -343,7 +599,7 @@ const Employees = () => {
         </div>
       )}
 
-      {/* Employee Form Modal */}
+      {/* EMPLOYEE FORM */}
 
       {showForm && (
         <EmployeeForm
@@ -355,13 +611,17 @@ const Employees = () => {
               ? handleEditEmployee
               : handleAddEmployee
           }
-          onClose={() =>
+          onClose={() => {
             setShowForm(false)
-          }
+
+            setSelectedEmployee(
+              null
+            )
+          }}
         />
       )}
 
-      {/* Delete Confirmation Modal */}
+      {/* DELETE MODAL */}
 
       {showDeleteModal && (
         <ConfirmModal
@@ -370,11 +630,18 @@ const Employees = () => {
           onConfirm={
             confirmDeleteEmployee
           }
-          onCancel={() =>
-            setShowDeleteModal(false)
-          }
+          onCancel={() => {
+            setShowDeleteModal(
+              false
+            )
+
+            setDeleteEmployeeId(
+              null
+            )
+          }}
         />
       )}
+
     </div>
   )
 }

@@ -35,9 +35,7 @@ const Sidebar = () => {
           {user?.role ? user.role.toUpperCase() : 'USER'}
         </p>
 
-        <p className="user-email">
-          {user?.email || 'Not Logged In'}
-        </p>
+       
       </div>
 
       {/* Navigation */}
