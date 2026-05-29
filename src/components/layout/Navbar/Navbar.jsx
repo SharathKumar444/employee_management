@@ -5,7 +5,6 @@ import {
   FaMoon,
   FaSun,
   FaChevronDown,
- 
   FaUser,
   FaCog,
   FaSignOutAlt,
@@ -22,6 +21,7 @@ import { useAuth } from '../../../context/AuthContext'
 import './Navbar.css'
 
 const Navbar = ({ toggleSidebar }) => {
+
   const { currentUser, logout } =
     useAuth()
 
@@ -57,6 +57,7 @@ const Navbar = ({ toggleSidebar }) => {
       localStorage.getItem('theme')
 
     if (savedTheme === 'dark') {
+
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setDarkMode(true)
 
@@ -67,11 +68,13 @@ const Navbar = ({ toggleSidebar }) => {
   }, [])
 
   /* =========================
-     LIVE NOTIFICATIONS
+     LOAD NOTIFICATIONS
   ========================= */
 
   useEffect(() => {
+
     const updateNotifications = () => {
+
       const savedNotifications =
         JSON.parse(
           localStorage.getItem(
@@ -97,6 +100,7 @@ const Navbar = ({ toggleSidebar }) => {
         updateNotifications
       )
     }
+
   }, [])
 
   /* =========================
@@ -104,11 +108,13 @@ const Navbar = ({ toggleSidebar }) => {
   ========================= */
 
   const toggleTheme = () => {
+
     const newTheme = !darkMode
 
     setDarkMode(newTheme)
 
     if (newTheme) {
+
       document.body.classList.add(
         'dark-theme'
       )
@@ -117,7 +123,9 @@ const Navbar = ({ toggleSidebar }) => {
         'theme',
         'dark'
       )
+
     } else {
+
       document.body.classList.remove(
         'dark-theme'
       )
@@ -135,6 +143,7 @@ const Navbar = ({ toggleSidebar }) => {
 
   const clearNotifications =
     () => {
+
       localStorage.removeItem(
         'notifications'
       )
@@ -149,11 +158,12 @@ const Navbar = ({ toggleSidebar }) => {
     }
 
   /* =========================
-     PROFILE POPUP
+     PROFILE
   ========================= */
 
   const handleProfileClick =
     () => {
+
       setShowDropdown(false)
 
       setShowProfileModal(true)
@@ -165,6 +175,7 @@ const Navbar = ({ toggleSidebar }) => {
 
   const handleSettingsClick =
     () => {
+
       setShowDropdown(false)
 
       navigate('/settings')
@@ -175,6 +186,7 @@ const Navbar = ({ toggleSidebar }) => {
   ========================= */
 
   const handleLogout = () => {
+
     logout()
 
     localStorage.removeItem('user')
@@ -184,11 +196,14 @@ const Navbar = ({ toggleSidebar }) => {
 
   return (
     <>
+
       <header className="navbar">
 
-        {/* LEFT */}
+        {/* LEFT SECTION */}
 
         <div className="navbar-left">
+
+          {/* SIDEBAR TOGGLE BUTTON */}
 
           <button
             className="menu-btn"
@@ -197,28 +212,30 @@ const Navbar = ({ toggleSidebar }) => {
             <FaBars />
           </button>
 
-           <div className="brand-section">
+          {/* BRAND */}
 
-          <div className="brand-logo">
-            EE
-          </div>
+          <div className="brand-section">
 
-          <div>
-            <h2>EEMS</h2>
+            <div className="brand-logo">
+              EE
+            </div>
 
-            <p>
-              Enterprise Employee
-              Management
-            </p>
+            <div className="brand-text">
+
+              <h2>EEMS</h2>
+
+              <p>
+                Enterprise Employee
+                Management
+              </p>
+
+            </div>
+
           </div>
 
         </div>
 
-      </div>
-
-       
-
-        {/* RIGHT */}
+        {/* RIGHT SECTION */}
 
         <div className="navbar-right">
 
@@ -247,6 +264,7 @@ const Navbar = ({ toggleSidebar }) => {
                 )
               }
             >
+
               <FaBell />
 
               {notifications.length >
@@ -257,11 +275,13 @@ const Navbar = ({ toggleSidebar }) => {
                   }
                 </span>
               )}
+
             </button>
 
-            {/* NOTIFICATION DROPDOWN */}
+            {/* DROPDOWN */}
 
             {showNotifications && (
+
               <div className="notification-dropdown">
 
                 <div className="notification-header">
@@ -286,14 +306,18 @@ const Navbar = ({ toggleSidebar }) => {
 
                 {notifications.length ===
                 0 ? (
+
                   <div className="empty-notification">
                     No notifications
                   </div>
+
                 ) : (
+
                   notifications
                     .slice()
                     .reverse()
                     .map(notification => (
+
                       <div
                         key={
                           notification.id
@@ -342,15 +366,19 @@ const Navbar = ({ toggleSidebar }) => {
             >
 
               <div className="profile-avatar">
+
                 {currentUser?.email
                   ?.charAt(0)
                   ?.toUpperCase() || 'U'}
+
               </div>
 
               <span className="profile-name">
+
                 {currentUser?.email?.split(
                   '@'
                 )[0] || 'User'}
+
               </span>
 
               <FaChevronDown className="dropdown-icon" />
@@ -360,6 +388,7 @@ const Navbar = ({ toggleSidebar }) => {
             {/* PROFILE DROPDOWN */}
 
             {showDropdown && (
+
               <div className="profile-dropdown">
 
                 <button
@@ -397,11 +426,10 @@ const Navbar = ({ toggleSidebar }) => {
 
       </header>
 
-      {/* =========================
-          PROFILE MODAL
-      ========================= */}
+      {/* PROFILE MODAL */}
 
       {showProfileModal && (
+
         <div className="profile-popup-overlay">
 
           <div className="profile-popup">
@@ -422,15 +450,19 @@ const Navbar = ({ toggleSidebar }) => {
               </button>
 
               <div className="popup-avatar">
+
                 {currentUser?.email
                   ?.charAt(0)
                   ?.toUpperCase() || 'U'}
+
               </div>
 
               <h2>
+
                 {currentUser?.email?.split(
                   '@'
                 )[0] || 'User'}
+
               </h2>
 
               <p>
@@ -446,7 +478,8 @@ const Navbar = ({ toggleSidebar }) => {
               <div className="popup-info-card">
 
                 <span>
-                  <FaEnvelope /> Email
+                  <FaEnvelope />
+                  Email
                 </span>
 
                 <strong>
@@ -458,12 +491,15 @@ const Navbar = ({ toggleSidebar }) => {
               <div className="popup-info-card">
 
                 <span>
-                  <FaUserShield /> Role
+                  <FaUserShield />
+                  Role
                 </span>
 
                 <strong className="active-text">
+
                   {currentUser?.role ||
                     'Employee'}
+
                 </strong>
 
               </div>
@@ -477,6 +513,7 @@ const Navbar = ({ toggleSidebar }) => {
               <button
                 className="profile-settings-btn"
                 onClick={() => {
+
                   setShowProfileModal(
                     false
                   )
@@ -500,6 +537,7 @@ const Navbar = ({ toggleSidebar }) => {
 
         </div>
       )}
+
     </>
   )
 }

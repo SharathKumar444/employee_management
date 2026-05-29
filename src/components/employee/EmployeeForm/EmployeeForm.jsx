@@ -1,10 +1,4 @@
-/* eslint-disable react-hooks/set-state-in-effect */
-
-import {
-  useState,
-  useEffect,
-} from 'react'
-
+import { useState, useEffect } from 'react'
 import './EmployeeForm.css'
 
 const EmployeeForm = ({
@@ -12,65 +6,66 @@ const EmployeeForm = ({
   initialData,
   onClose,
 }) => {
-  /* =========================
-     FORM STATE
-  ========================= */
-
   const [formData, setFormData] =
     useState({
       name: '',
-      department: '',
-      designation: '',
       email: '',
       role: '',
+      department: '',
+      designation: '',
       status: 'Active',
     })
 
-  const [errors, setErrors] =
-    useState({})
+  const [errors, setErrors] = useState({})
 
   /* =========================
      LOAD EDIT DATA
   ========================= */
-
   useEffect(() => {
     if (initialData) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setFormData({
-        name:
-          initialData.name || '',
+        name: initialData.name || '',
+        email: initialData.email || '',
+        role: initialData.role || '',
         department:
           initialData.department ||
           '',
         designation:
           initialData.designation ||
           '',
-        email:
-          initialData.email || '',
-        role:
-          initialData.role || '',
         status:
           initialData.status ||
           'Active',
-      })
-    } else {
-      setFormData({
-        name: '',
-        department: '',
-        designation: '',
-        email: '',
-        role: '',
-        status: 'Active',
       })
     }
   }, [initialData])
 
   /* =========================
+     VALIDATION FUNCTION
+  ========================= */
+  const validate = (name, value) => {
+    if (!value || !value.trim()) {
+      return 'This field is required'
+    }
+
+    if (name === 'email') {
+      const emailRegex =
+        /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i
+
+      if (!emailRegex.test(value)) {
+        return 'Invalid email format'
+      }
+    }
+
+    return ''
+  }
+
+  /* =========================
      HANDLE CHANGE
   ========================= */
-
-  const handleChange = event => {
-    const { name, value } =
-      event.target
+  const handleChange = e => {
+    const { name, value } = e.target
 
     setFormData(prev => ({
       ...prev,
@@ -79,103 +74,64 @@ const EmployeeForm = ({
 
     setErrors(prev => ({
       ...prev,
-      [name]: '',
+      [name]: validate(name, value),
     }))
   }
 
   /* =========================
-     VALIDATION
+     FORM VALIDATION CHECK
   ========================= */
-
-  const validateForm = () => {
-    const newErrors = {}
-
-    if (
-      !formData.name.trim()
-    ) {
-      newErrors.name =
-        'Name is required'
-    }
-
-    if (
-      !formData.email.trim()
-    ) {
-      newErrors.email =
-        'Email is required'
-    } else if (
-      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(
-        formData.email
-      )
-    ) {
-      newErrors.email =
-        'Enter valid email'
-    }
-
-    if (
-      !formData.department.trim()
-    ) {
-      newErrors.department =
-        'Department is required'
-    }
-
-    if (
-      !formData.designation.trim()
-    ) {
-      newErrors.designation =
-        'Designation is required'
-    }
-
-    if (
-      !formData.role.trim()
-    ) {
-      newErrors.role =
-        'Role is required'
-    }
-
-    setErrors(newErrors)
-
-    return (
-      Object.keys(newErrors)
-        .length === 0
+  const isValid =
+    formData.name.trim() &&
+    formData.email.trim() &&
+    formData.role.trim() &&
+    formData.department.trim() &&
+    Object.values(errors).every(
+      err => err === ''
     )
-  }
 
   /* =========================
      SUBMIT
   ========================= */
+  const handleSubmit = e => {
+    e.preventDefault()
 
-  const handleSubmit = event => {
-    event.preventDefault()
-
-    const isValid =
-      validateForm()
-
-    if (!isValid) {
-      return
+    const newErrors = {
+      name: validate(
+        'name',
+        formData.name
+      ),
+      email: validate(
+        'email',
+        formData.email
+      ),
+      role: validate(
+        'role',
+        formData.role
+      ),
+      department: validate(
+        'department',
+        formData.department
+      ),
     }
+
+    setErrors(newErrors)
+
+    const hasError = Object.values(
+      newErrors
+    ).some(err => err)
+
+    if (hasError) return
 
     onSubmit(formData)
   }
 
-  /* =========================
-     CHECK FORM VALID
-  ========================= */
-
-  const isFormValid =
-    formData.name.trim() &&
-    formData.email.trim() &&
-    formData.department.trim() &&
-    formData.designation.trim() &&
-    formData.role.trim()
-
   return (
     <div className="employee-form-modal">
-
       <form
         className="employee-form"
         onSubmit={handleSubmit}
       >
-
         <h2>
           {initialData
             ? 'Edit Employee'
@@ -183,175 +139,128 @@ const EmployeeForm = ({
         </h2>
 
         {/* NAME */}
-
-        <div className="form-group">
-
-          <input
-            type="text"
-            name="name"
-            placeholder="Employee Name"
-            value={formData.name}
-            onChange={handleChange}
-          />
-
-          {errors.name && (
-            <p className="error-text">
-              {errors.name}
-            </p>
-          )}
-
-        </div>
+        <label>
+          Name <span className="req">*</span>
+        </label>
+        <input
+          type="text"
+          name="name"
+          value={formData.name}
+          onChange={handleChange}
+        />
+        {errors.name && (
+          <p className="error">
+            {errors.name}
+          </p>
+        )}
 
         {/* EMAIL */}
-
-        <div className="form-group">
-
-          <input
-            type="email"
-            name="email"
-            placeholder="Email Address"
-            value={formData.email}
-            onChange={handleChange}
-          />
-
-          {errors.email && (
-            <p className="error-text">
-              {errors.email}
-            </p>
-          )}
-
-        </div>
-
-        {/* DEPARTMENT */}
-
-        <div className="form-group">
-
-          <input
-            type="text"
-            name="department"
-            placeholder="Department"
-            value={
-              formData.department
-            }
-            onChange={handleChange}
-          />
-
-          {errors.department && (
-            <p className="error-text">
-              {
-                errors.department
-              }
-            </p>
-          )}
-
-        </div>
-
-        {/* DESIGNATION */}
-
-        <div className="form-group">
-
-          <input
-            type="text"
-            name="designation"
-            placeholder="Designation"
-            value={
-              formData.designation
-            }
-            onChange={handleChange}
-          />
-
-          {errors.designation && (
-            <p className="error-text">
-              {
-                errors.designation
-              }
-            </p>
-          )}
-
-        </div>
+        <label>
+          Email{' '}
+          <span className="req">*</span>
+        </label>
+        <input
+          type="email"
+          name="email"
+          value={formData.email}
+          onChange={handleChange}
+        />
+        {errors.email && (
+          <p className="error">
+            {errors.email}
+          </p>
+        )}
 
         {/* ROLE */}
+        <label>
+          Role <span className="req">*</span>
+        </label>
+        <select
+          name="role"
+          value={formData.role}
+          onChange={handleChange}
+        >
+          <option value="">
+            Select Role
+          </option>
+          <option value="Admin">
+            Admin
+          </option>
+          <option value="User">
+            User
+          </option>
+        </select>
+        {errors.role && (
+          <p className="error">
+            {errors.role}
+          </p>
+        )}
 
-        <div className="form-group">
+        {/* DEPARTMENT */}
+        <label>
+          Department{' '}
+          <span className="req">*</span>
+        </label>
+        <input
+          type="text"
+          name="department"
+          value={formData.department}
+          onChange={handleChange}
+        />
+        {errors.department && (
+          <p className="error">
+            {errors.department}
+          </p>
+        )}
 
-          <select
-            name="role"
-            value={formData.role}
-            onChange={handleChange}
-          >
-
-            <option value="">
-              Select Role
-            </option>
-
-            <option value="Admin">
-              Admin
-            </option>
-
-            <option value="User">
-              User
-            </option>
-
-          </select>
-
-          {errors.role && (
-            <p className="error-text">
-              {errors.role}
-            </p>
-          )}
-
-        </div>
+        {/* DESIGNATION */}
+        <label>Designation</label>
+        <input
+          type="text"
+          name="designation"
+          value={formData.designation}
+          onChange={handleChange}
+        />
 
         {/* STATUS */}
-
-        <div className="form-group">
-
-          <select
-            name="status"
-            value={formData.status}
-            onChange={handleChange}
-          >
-
-            <option value="Active">
-              Active
-            </option>
-
-            <option value="Inactive">
-              Inactive
-            </option>
-
-            <option value="On Leave">
-              On Leave
-            </option>
-
-          </select>
-
-        </div>
+        <label>Status</label>
+        <select
+          name="status"
+          value={formData.status}
+          onChange={handleChange}
+        >
+          <option value="Active">
+            Active
+          </option>
+          <option value="On Leave">
+            On Leave
+          </option>
+          <option value="Inactive">
+            Inactive
+          </option>
+        </select>
 
         {/* BUTTONS */}
-
         <div className="form-buttons">
-
           <button
             type="submit"
+            disabled={!isValid}
             className="save-btn"
-            disabled={!isFormValid}
           >
-            Save Employee
+            {initialData
+              ? 'Update'
+              : 'Add Employee'}
           </button>
 
           <button
             type="button"
-            className="cancel-btn"
             onClick={onClose}
+            className="cancel-btn"
           >
             Cancel
           </button>
-
         </div>
-
       </form>
-
     </div>
   )
 }

@@ -1,5 +1,4 @@
 import { useState } from 'react'
-
 import { Outlet } from 'react-router-dom'
 
 import Sidebar from './Sidebar/Sidebar'
@@ -12,14 +11,19 @@ const MainLayout = () => {
     useState(true)
 
   const toggleSidebar = () => {
-    setSidebarOpen(!sidebarOpen)
+    setSidebarOpen(prev => !prev)
   }
 
   return (
     <div className="main-layout">
 
-      <Sidebar isOpen={sidebarOpen} />
+      {/* SIDEBAR */}
+      <Sidebar
+        isOpen={sidebarOpen}
+        toggleSidebar={toggleSidebar}
+      />
 
+      {/* MAIN CONTENT */}
       <div
         className={`main-content ${
           sidebarOpen
@@ -28,10 +32,12 @@ const MainLayout = () => {
         }`}
       >
 
+        {/* NAVBAR */}
         <Navbar
           toggleSidebar={toggleSidebar}
         />
 
+        {/* PAGE CONTENT */}
         <div className="page-content">
           <Outlet />
         </div>

@@ -1434,3 +1434,23 @@
 .logout-btn {
   color: #dc2626;
 }
+.navbar{
+  height:70px;
+  background:white;
+  display:flex;
+  align-items:center;
+  gap:15px;
+  padding:0 20px;
+  border-bottom:1px solid #e5e7eb;
+}
+
+.menu-btn{
+  border:none;
+  background:#f1f5f9;
+  padding:10px;
+  border-radius:8px;
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
