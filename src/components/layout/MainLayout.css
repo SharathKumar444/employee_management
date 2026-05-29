@@ -1,0 +1,52 @@
+.main-layout {
+  display: flex;
+
+  width: 100%;
+  min-height: 100vh;
+
+  background: #f8fafc;
+}
+
+/* SIDEBAR SPACE */
+
+.main-content {
+  flex: 1;
+
+  display: flex;
+  flex-direction: column;
+
+  transition: all 0.3s ease;
+}
+
+/* PAGE */
+
+.page-content {
+  padding: 24px;
+
+  min-height: calc(100vh - 72px);
+
+  overflow-y: auto;
+}
+
+/* DESKTOP */
+
+.sidebar-open {
+  margin-left: 260px;
+}
+
+.sidebar-close {
+  margin-left: 90px;
+}
+
+/* MOBILE */
+
+@media screen and (max-width: 768px) {
+  .sidebar-open,
+  .sidebar-close {
+    margin-left: 0;
+  }
+
+  .page-content {
+    padding: 16px;
+  }
+}

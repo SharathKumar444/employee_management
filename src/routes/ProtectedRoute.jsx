@@ -1,13 +1,23 @@
 import { Navigate } from 'react-router-dom'
+
 import { useAuth } from '../context/AuthContext'
 
-const ProtectedRoute = ({ children }) => {
-  const { user, loading } = useAuth()
+const ProtectedRoute = ({
+  children,
+  allowedRoles,
+}) => {
+  const { currentUser } = useAuth()
 
-  if (loading) return <h2>Loading...</h2>
-
-  if (!user) {
+  if (!currentUser) {
     return <Navigate to="/login" />
+  }
+
+  if (
+    !allowedRoles.includes(
+      currentUser.role
+    )
+  ) {
+    return <Navigate to="/dashboard" />
   }
 
   return children

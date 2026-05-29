@@ -1,187 +1,311 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+
+import {
+  FaEye,
+  FaEyeSlash,
+} from 'react-icons/fa'
+
 import './Signup.css'
- 
+
 const Signup = () => {
- 
   const navigate = useNavigate()
- 
-  const [name, setName] = useState("")
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [role, setRole] = useState('user')
-  const [error, setError] = useState('')
-  const [loading, setLoading] = useState(false)
- 
-  const handleSignup = async (e) => {
- 
+
+  /* =========================
+     STATES
+  ========================= */
+
+  const [name, setName] =
+    useState('')
+
+  const [email, setEmail] =
+    useState('')
+
+  const [password, setPassword] =
+    useState('')
+
+  const [role, setRole] =
+    useState('user')
+
+  const [error, setError] =
+    useState('')
+
+  const [loading, setLoading] =
+    useState(false)
+
+  const [
+    showPassword,
+    setShowPassword,
+  ] = useState(false)
+
+  /* =========================
+     SIGNUP
+  ========================= */
+
+  const handleSignup = async e => {
     e.preventDefault()
- 
+
     try {
- 
       setLoading(true)
+
       setError('')
- 
+
+      // VALIDATION
+
+      if (
+        !name.trim() ||
+        !email.trim() ||
+        !password.trim()
+      ) {
+        setError(
+          'Please fill all fields'
+        )
+        return
+      }
+
+      // GET EXISTING USERS
+
+      const existingUsers =
+        JSON.parse(
+          localStorage.getItem(
+            'users'
+          )
+        ) || []
+
+      // CHECK EMAIL EXISTS
+
+      const emailExists =
+        existingUsers.find(
+          user =>
+            user.email === email
+        )
+
+      if (emailExists) {
+        setError(
+          'Email already exists'
+        )
+        return
+      }
+
+      // CREATE USER
+
       const userData = {
+        id: Date.now(),
         name,
         email,
         password,
         role,
       }
- 
-      // Save user to localStorage
+
+      // SAVE USERS
+
+      const updatedUsers = [
+        ...existingUsers,
+        userData,
+      ]
+
       localStorage.setItem(
-        'user',
-        JSON.stringify(userData)
+        'users',
+        JSON.stringify(updatedUsers)
       )
- 
-      console.log('User registered:', userData)
- 
-      // Redirect to login
+
+      alert(
+        'Account created successfully'
+      )
+
       navigate('/login')
- 
-    // eslint-disable-next-line no-unused-vars
+
     } catch (err) {
- 
-      setError('Signup failed. Try again.')
- 
+      console.error(err)
+
+      setError(
+        'Signup failed. Try again.'
+      )
     } finally {
- 
       setLoading(false)
     }
   }
- 
+
   return (
- 
     <div className="signup-container">
- 
+
       <div className="signup-card">
- 
+
         <h1>Create Account</h1>
- 
+
         <p className="signup-subtitle">
-          Register a new employee account
-</p>
- 
+          Register a new employee
+          account
+        </p>
+
         <form
           onSubmit={handleSignup}
           className="signup-form"
->
- 
-          {/* Name */}
-<div className="input-group">
- 
-            <label>Full Name</label>
- 
+        >
+
+          {/* NAME */}
+
+          <div className="input-group">
+
+            <label>
+              Full Name
+            </label>
+
             <input
               type="text"
               value={name}
-              onChange={(e) =>
-                setName(e.target.value)
+              onChange={e =>
+                setName(
+                  e.target.value
+                )
               }
               placeholder="Enter full name"
               required
             />
- 
+
           </div>
- 
-          {/* Email */}
-<div className="input-group">
- 
-            <label>Email</label>
- 
+
+          {/* EMAIL */}
+
+          <div className="input-group">
+
+            <label>
+              Email
+            </label>
+
             <input
               type="email"
               value={email}
-              onChange={(e) =>
-                setEmail(e.target.value)
+              onChange={e =>
+                setEmail(
+                  e.target.value
+                )
               }
               placeholder="Enter email"
               required
             />
- 
+
           </div>
- 
-          {/* Password */}
-<div className="input-group">
- 
-            <label>Password</label>
- 
-            <input
-              type="password"
-              value={password}
-              onChange={(e) =>
-                setPassword(e.target.value)
-              }
-              placeholder="Enter password"
-              required
-            />
- 
+
+          {/* PASSWORD */}
+
+          <div className="input-group">
+
+            <label>
+              Password
+            </label>
+
+            <div className="password-wrapper">
+
+              <input
+                type={
+                  showPassword
+                    ? 'text'
+                    : 'password'
+                }
+                value={password}
+                onChange={e =>
+                  setPassword(
+                    e.target.value
+                  )
+                }
+                placeholder="Enter password"
+                required
+              />
+
+              <span
+                className="password-eye"
+                onClick={() =>
+                  setShowPassword(
+                    !showPassword
+                  )
+                }
+              >
+                {showPassword ? (
+                  <FaEyeSlash />
+                ) : (
+                  <FaEye />
+                )}
+              </span>
+
+            </div>
+
           </div>
- 
-          {/* Role */}
-<div className="input-group">
- 
-            <label>Role</label>
- 
+
+          {/* ROLE */}
+
+          <div className="input-group">
+
+            <label>
+              Role
+            </label>
+
             <select
               value={role}
-              onChange={(e) =>
-                setRole(e.target.value)
+              onChange={e =>
+                setRole(
+                  e.target.value
+                )
               }
->
-<option value="user">
+            >
+
+              <option value="user">
                 User
-</option>
- 
+              </option>
+
               <option value="admin">
                 Admin
-</option>
-</select>
- 
+              </option>
+
+            </select>
+
           </div>
- 
-          {/* Error */}
+
+          {/* ERROR */}
+
           {error && (
-<p className="error-text">
+            <p className="error-text">
               {error}
-</p>
+            </p>
           )}
- 
-          {/* Button */}
-<button
+
+          {/* BUTTON */}
+
+          <button
             type="submit"
             className="signup-button"
             disabled={loading}
->
- 
+          >
+
             {loading
               ? 'Creating account...'
               : 'Sign Up'}
- 
+
           </button>
- 
+
         </form>
- 
+
+        {/* LOGIN */}
+
         <p className="signup-footer">
- 
+
           Already have an account?
- 
+
           <span
             onClick={() =>
               navigate('/login')
             }
             className="login-link"
->
+          >
             Login here
-</span>
- 
+          </span>
+
         </p>
- 
+
       </div>
- 
+
     </div>
   )
 }
- 
+
 export default Signup
