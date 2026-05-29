@@ -135,3 +135,77 @@
     grid-template-columns: 1fr;
   }
 }
+/* LIGHT THEME DEFAULT */
+
+body{
+  background: #f4f7fb;
+  color: #111827;
+  transition: all 0.3s ease;
+}
+
+/* DARK THEME */
+
+body.dark-theme{
+  background: #0f172a;
+  color: #f8fafc;
+}
+
+/* CARDS */
+
+body.dark-theme .setting-card,
+body.dark-theme .statistics-card,
+body.dark-theme .attendance-card,
+body.dark-theme .recent-employees-card,
+body.dark-theme .calendar-popup,
+body.dark-theme .navbar,
+body.dark-theme .sidebar{
+  background: #1e293b !important;
+  color: #f8fafc !important;
+}
+
+/* TABLE */
+
+body.dark-theme table{
+  color: #f8fafc;
+}
+
+body.dark-theme th{
+  background: #334155;
+}
+
+body.dark-theme td{
+  border-color: #334155;
+}
+
+/* INPUTS */
+
+body.dark-theme input,
+body.dark-theme select{
+  background: #1e293b;
+  color: white;
+  border: 1px solid #475569;
+}
+
+/* CALENDAR */
+
+body.dark-theme .react-calendar{
+  background: #1e293b;
+  color: white;
+}
+
+body.dark-theme .react-calendar button{
+  color: white;
+}
+
+/* BUTTON */
+
+.theme-btn{
+  width: 42px;
+  height: 42px;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  background: #4f46e5;
+  color: white;
+  font-size: 16px;
+}

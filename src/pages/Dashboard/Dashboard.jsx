@@ -5,7 +5,11 @@ import {
   FaUserCheck,
   FaBuilding,
   FaClipboardCheck,
+  FaCalendarAlt,
 } from 'react-icons/fa'
+
+import Calendar from 'react-calendar'
+import 'react-calendar/dist/Calendar.css'
 
 import StatisticsCard from '../../components/employee/StatisticsCard/StatisticsCard'
 import DepartmentChart from '../../components/analytics/DepartmentChart'
@@ -19,6 +23,10 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
 
+  // CALENDAR STATE
+  const [date, setDate] = useState(new Date())
+  const [showCalendar, setShowCalendar] = useState(false)
+
   useEffect(() => {
     const loadData = async () => {
       try {
@@ -26,12 +34,13 @@ const Dashboard = () => {
 
         const data = await fetchEmployees()
 
-        // SAFE fallback
+        // SAFE FALLBACK
         setEmployees(Array.isArray(data) ? data : [])
 
         setError('')
-      // eslint-disable-next-line no-unused-vars
       } catch (err) {
+        console.error(err)
+
         setError('Failed to load dashboard data')
         setEmployees([])
       } finally {
@@ -75,17 +84,21 @@ const Dashboard = () => {
 
   const departmentsCount = [
     ...new Set(
-      employees.map((emp) => emp?.department).filter(Boolean)
+      employees
+        .map((emp) => emp?.department)
+        .filter(Boolean)
     ),
   ].length
 
   const attendancePercentage =
     totalEmployees === 0
       ? 0
-      : Math.round((activeEmployees / totalEmployees) * 100)
+      : Math.round(
+          (activeEmployees / totalEmployees) * 100
+        )
 
   // ---------------------------
-  // RECENT EMPLOYEES (SAFE)
+  // RECENT EMPLOYEES
   // ---------------------------
   const recentEmployees = employees
     .slice()
@@ -95,14 +108,52 @@ const Dashboard = () => {
   return (
     <div className="dashboard-container">
 
-      {/* HEADER */}
-      <div className="dashboard-header">
-        <h1>Dashboard</h1>
-        <p>Employee Analytics Overview</p>
+      {/* HEADER + SMALL CALENDAR */}
+      <div className="dashboard-top">
+
+        <div className="dashboard-header">
+          <h1>Dashboard</h1>
+          <p>Employee Analytics Overview</p>
+        </div>
+
+        {/* SMALL DATE INPUT */}
+        <div className="calendar-wrapper">
+
+          <div
+            className="calendar-input"
+            onClick={() =>
+              setShowCalendar(!showCalendar)
+            }
+          >
+            <FaCalendarAlt />
+
+            <span>
+              {date.toDateString()}
+            </span>
+          </div>
+
+          {/* SHOW CALENDAR ONLY ON CLICK */}
+          {showCalendar && (
+            <div className="calendar-popup">
+
+              <Calendar
+                onChange={(selectedDate) => {
+                  setDate(selectedDate)
+                  setShowCalendar(false)
+                }}
+                value={date}
+              />
+
+            </div>
+          )}
+
+        </div>
+
       </div>
 
       {/* STATS CARDS */}
       <div className="statistics-grid">
+
         <StatisticsCard
           title="Total Employees"
           value={totalEmployees}
@@ -126,6 +177,7 @@ const Dashboard = () => {
           value={`${attendancePercentage}%`}
           icon={<FaClipboardCheck />}
         />
+
       </div>
 
       {/* ANALYTICS SECTION */}
@@ -134,16 +186,22 @@ const Dashboard = () => {
         <DepartmentChart employees={employees} />
 
         <div className="attendance-card">
+
           <h3>Attendance Overview</h3>
 
           <div className="progress-bar">
             <div
               className="progress-fill"
-              style={{ width: `${attendancePercentage}%` }}
+              style={{
+                width: `${attendancePercentage}%`,
+              }}
             />
           </div>
 
-          <p>{attendancePercentage}% Employees Present</p>
+          <p>
+            {attendancePercentage}% Employees Present
+          </p>
+
         </div>
 
       </div>
@@ -157,6 +215,7 @@ const Dashboard = () => {
           <p>No employees found</p>
         ) : (
           <table className="recent-table">
+
             <thead>
               <tr>
                 <th>Name</th>
@@ -167,9 +226,14 @@ const Dashboard = () => {
 
             <tbody>
               {recentEmployees.map((emp, index) => (
-                <tr key={emp.id || index}>
-                  <td>{emp?.name}</td>
-                  <td>{emp?.department}</td>
+                <tr key={emp?.id || index}>
+
+                  <td>{emp?.name || 'N/A'}</td>
+
+                  <td>
+                    {emp?.department || 'N/A'}
+                  </td>
+
                   <td>
                     <span
                       className={
@@ -178,12 +242,14 @@ const Dashboard = () => {
                           : 'status-inactive'
                       }
                     >
-                      {emp?.status}
+                      {emp?.status || 'Unknown'}
                     </span>
                   </td>
+
                 </tr>
               ))}
             </tbody>
+
           </table>
         )}
 
