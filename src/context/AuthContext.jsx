@@ -5,18 +5,19 @@ import {
   useEffect,
 } from 'react'
 
-const AuthContext =
-  createContext()
+const AuthContext = createContext()
 
 export const AuthProvider = ({
   children,
 }) => {
-  const [currentUser, setCurrentUser] =
-    useState(null)
+  const [
+    currentUser,
+    setCurrentUser,
+  ] = useState(null)
 
-  // =========================
-  // LOAD USER
-  // =========================
+  /* =========================
+     LOAD USER
+  ========================= */
 
   useEffect(() => {
     const savedUser =
@@ -32,15 +33,14 @@ export const AuthProvider = ({
     }
   }, [])
 
-  // =========================
-  // LOGIN
-  // =========================
+  /* =========================
+     LOGIN
+  ========================= */
 
   const login = async (
     email,
     password
   ) => {
-    // GET REGISTERED USERS
     const users =
       JSON.parse(
         localStorage.getItem(
@@ -48,32 +48,105 @@ export const AuthProvider = ({
         )
       ) || []
 
-    // FIND MATCHING USER
-    const matchedUser = users.find(
-      user =>
-        user.email === email &&
-        user.password === password
-    )
+    const matchedUser =
+      users.find(
+        user =>
+          user.email === email &&
+          user.password === password
+      )
 
-    // USER NOT FOUND
     if (!matchedUser) {
       return null
     }
 
-    // SAVE LOGGED IN USER
+    const loggedInUser = {
+      ...matchedUser,
+      role:
+        matchedUser.role ||
+        'user',
+    }
+
     localStorage.setItem(
       'currentUser',
-      JSON.stringify(matchedUser)
+      JSON.stringify(
+        loggedInUser
+      )
     )
 
-    setCurrentUser(matchedUser)
+    setCurrentUser(
+      loggedInUser
+    )
 
-    return matchedUser
+    return loggedInUser
   }
 
-  // =========================
-  // LOGOUT
-  // =========================
+  /* =========================
+     UPDATE CURRENT USER
+  ========================= */
+
+  const updateCurrentUser = (
+    updatedUser
+  ) => {
+    setCurrentUser(
+      updatedUser
+    )
+
+    localStorage.setItem(
+      'currentUser',
+      JSON.stringify(
+        updatedUser
+      )
+    )
+  }
+
+  /* =========================
+     REFRESH USER DATA
+  ========================= */
+
+  const refreshCurrentUser =
+    () => {
+      const users =
+        JSON.parse(
+          localStorage.getItem(
+            'users'
+          )
+        ) || []
+
+      const savedUser =
+        JSON.parse(
+          localStorage.getItem(
+            'currentUser'
+          )
+        )
+
+      if (!savedUser) {
+        return
+      }
+
+      const latestUser =
+        users.find(
+          user =>
+            user.email ===
+            savedUser.email
+        )
+
+      if (latestUser) {
+        setCurrentUser(
+          latestUser
+        )
+
+        localStorage.setItem(
+          'currentUser',
+          JSON.stringify(
+            latestUser
+          )
+        )
+      }
+    }
+
+  /* =========================
+     LOGOUT
+  ========================= */
 
   const logout = () => {
     localStorage.removeItem(
@@ -89,6 +162,8 @@ export const AuthProvider = ({
         currentUser,
         login,
         logout,
+        updateCurrentUser,
+        refreshCurrentUser,
       }}
     >
       {children}

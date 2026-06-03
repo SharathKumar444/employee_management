@@ -13,7 +13,9 @@ const EmployeeTable = ({
 }) => {
   return (
     <div className="employee-table-container">
+
       <table className="employee-table">
+
         <thead>
           <tr>
             <th>Employee</th>
@@ -26,7 +28,9 @@ const EmployeeTable = ({
         </thead>
 
         <tbody>
-          {filteredEmployees.length === 0 ? (
+
+          {filteredEmployees.length ===
+          0 ? (
             <tr>
               <td
                 colSpan="6"
@@ -36,108 +40,157 @@ const EmployeeTable = ({
               </td>
             </tr>
           ) : (
-            filteredEmployees.map(employee => (
-              <tr key={employee.employee_id}>
-                {/* Employee */}
-                <td>
-                  <div className="employee-info">
-                    <div className="employee-avatar">
-                      {employee.name?.charAt(0)}
+            filteredEmployees.map(
+              employee => (
+                <tr
+                  key={
+                    employee.id
+                  }
+                >
+
+                  {/* EMPLOYEE */}
+
+                  <td>
+                    <div className="employee-info">
+
+                      <div className="employee-avatar">
+                        {employee.name
+                          ?.charAt(
+                            0
+                          )
+                          ?.toUpperCase()}
+                      </div>
+
+                      <div>
+                        <h4>
+                          {
+                            employee.name
+                          }
+                        </h4>
+
+                        <p>
+                          {
+                            employee.email
+                          }
+                        </p>
+                      </div>
+
                     </div>
+                  </td>
 
-                    <div>
-                      <h4>{employee.name}</h4>
+                  {/* ROLE */}
 
-                      <p>{employee.email}</p>
-                    </div>
-                  </div>
-                </td>
+                  <td>
+                    <span className="role-badge">
+                      {employee.role ||
+                        'Employee'}
+                    </span>
+                  </td>
 
-                {/* Role */}
-                <td>
-                  <span className="role-badge">
-                    {employee.role ||
-                      'Employee'}
-                  </span>
-                </td>
+                  {/* DEPARTMENT */}
 
-                {/* Department */}
-                <td>
-                  {employee.department}
-                </td>
-
-                {/* Email */}
-                <td>{employee.email}</td>
-
-                {/* STATUS DROPDOWN */}
-                <td>
-                  <select
-                    value={
-                      employee.status
+                  <td>
+                    {
+                      employee.department
                     }
-                    onChange={e =>
-                      onStatusChange(
-                        employee,
-                        e.target.value
-                      )
+                  </td>
+
+                  {/* EMAIL */}
+
+                  <td>
+                    {
+                      employee.email
                     }
-                    className={`status-dropdown ${
-                      employee.status ===
-                      'Active'
-                        ? 'active-status'
-                        : employee.status ===
-                          'Inactive'
-                        ? 'inactive-status'
-                        : 'leave-status'
-                    }`}
-                  >
-                    <option value="Active">
-                      Active
-                    </option>
+                  </td>
 
-                    <option value="Inactive">
-                      Inactive
-                    </option>
+                  {/* STATUS */}
 
-                    <option value="On Leave">
-                      On Leave
-                    </option>
-                  </select>
-                </td>
+                  <td>
 
-                {/* Actions */}
-                <td>
-                  <div className="action-buttons">
-                    {/* EDIT */}
-                    <button
-                      type="button"
-                      className="edit-btn"
-                      onClick={() =>
-                        onEdit(employee)
+                    <select
+                      value={
+                        employee.status
                       }
-                    >
-                      <FaEdit />
-                    </button>
-
-                    {/* DELETE */}
-                    <button
-                      type="button"
-                      className="delete-btn"
-                      onClick={() =>
-                        onDelete(
-                          employee.employee_id
+                      onChange={e =>
+                        onStatusChange(
+                          employee,
+                          e.target.value
                         )
                       }
+                      className={`status-dropdown ${
+                        employee.status ===
+                        'Active'
+                          ? 'active-status'
+                          : employee.status ===
+                            'Inactive'
+                          ? 'inactive-status'
+                          : 'leave-status'
+                      }`}
                     >
-                      <FaTrash />
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            ))
+
+                      <option value="Active">
+                        Active
+                      </option>
+
+                      <option value="Inactive">
+                        Inactive
+                      </option>
+
+                      <option value="On Leave">
+                        On Leave
+                      </option>
+
+                    </select>
+
+                  </td>
+
+                  {/* ACTIONS */}
+
+                  <td>
+
+                    <div className="action-buttons">
+
+                      {/* EDIT */}
+
+                      <button
+                        type="button"
+                        className="edit-btn"
+                        onClick={() =>
+                          onEdit(
+                            employee
+                          )
+                        }
+                      >
+                        <FaEdit />
+                      </button>
+
+                      {/* DELETE */}
+
+                      <button
+                        type="button"
+                        className="delete-btn"
+                        onClick={() =>
+                          onDelete(
+                            employee
+                          )
+                        }
+                      >
+                        <FaTrash />
+                      </button>
+
+                    </div>
+
+                  </td>
+
+                </tr>
+              )
+            )
           )}
+
         </tbody>
+
       </table>
+
     </div>
   )
 }

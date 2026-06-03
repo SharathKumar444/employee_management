@@ -148,3 +148,20 @@
     top: 0;
   }
 }
+.company-badge {
+  margin-top: 8px;
+  background: #e3f2fd;
+  color: #1565c0;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+  display: inline-block;
+}
+
+.company-id {
+  display: block;
+  margin-top: 4px;
+  color: #888;
+  font-size: 11px;
+}

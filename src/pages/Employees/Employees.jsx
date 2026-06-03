@@ -54,11 +54,6 @@ const Employees = () => {
     setShowDeleteModal,
   ] = useState(false)
 
-  const [
-    deleteEmployeeId,
-    setDeleteEmployeeId,
-  ] = useState(null)
-
   /* =========================
      CLEAR OLD NOTIFICATIONS
   ========================= */
@@ -114,8 +109,6 @@ const Employees = () => {
           employeeData
         )
 
-        /* NOTIFICATION */
-
         const oldNotifications =
           JSON.parse(
             localStorage.getItem(
@@ -167,19 +160,20 @@ const Employees = () => {
   const handleEditEmployee =
     async employeeData => {
       try {
-        if (
-          !selectedEmployee?.employee_id
-        ) {
+        const employeeId =
+          selectedEmployee?._id ||
+          selectedEmployee?.employee_id ||
+          selectedEmployee?.id
+
+        if (!employeeId) {
           alert('Employee ID missing')
           return
         }
 
         await updateEmployee(
-          selectedEmployee.employee_id,
+          employeeId,
           employeeData
         )
-
-        /* NOTIFICATION */
 
         const oldNotifications =
           JSON.parse(
@@ -232,10 +226,8 @@ const Employees = () => {
   ========================= */
 
   const handleDeleteClick =
-    employeeId => {
-      setDeleteEmployeeId(
-        employeeId
-      )
+    employee => {
+      setSelectedEmployee(employee)
 
       setShowDeleteModal(true)
     }
@@ -243,25 +235,19 @@ const Employees = () => {
   const confirmDeleteEmployee =
     async () => {
       try {
-        if (!deleteEmployeeId) {
+        const employeeId =
+          selectedEmployee?._id ||
+          selectedEmployee?.employee_id ||
+          selectedEmployee?.id
+
+        if (!employeeId) {
           alert('Employee ID missing')
           return
         }
 
-        const employeeToDelete =
-          employees.find(
-            employee =>
-              employee.employee_id ===
-                deleteEmployeeId ||
-              employee.id ===
-                deleteEmployeeId
-          )
-
         await deleteEmployee(
-          deleteEmployeeId
+          employeeId
         )
-
-        /* NOTIFICATION */
 
         const oldNotifications =
           JSON.parse(
@@ -274,7 +260,7 @@ const Employees = () => {
           id: Date.now(),
           type: 'delete',
           message: `${
-            employeeToDelete?.name ||
+            selectedEmployee?.name ||
             'Employee'
           } deleted successfully`,
           time: 'Just now',
@@ -294,11 +280,20 @@ const Employees = () => {
           )
         )
 
-        await loadEmployees()
+        setEmployees(prev =>
+          prev.filter(
+            employee =>
+              (
+                employee._id ||
+                employee.employee_id ||
+                employee.id
+              ) !== employeeId
+          )
+        )
 
         setShowDeleteModal(false)
 
-        setDeleteEmployeeId(null)
+        setSelectedEmployee(null)
 
         alert(
           'Employee deleted successfully'
@@ -343,7 +338,6 @@ const Employees = () => {
       newStatus
     ) => {
       try {
-        /* PREVENT SAME STATUS */
         if (
           employee.status ===
           newStatus
@@ -356,15 +350,15 @@ const Employees = () => {
           status: newStatus,
         }
 
-        await updateEmployee(
+        const employeeId =
+          employee._id ||
           employee.employee_id ||
-            employee.id,
+          employee.id
+
+        await updateEmployee(
+          employeeId,
           updatedEmployee
         )
-
-        /* =========================
-           NOTIFICATIONS
-        ========================= */
 
         const oldNotifications =
           JSON.parse(
@@ -407,8 +401,6 @@ const Employees = () => {
             ...oldNotifications,
           ])
         )
-
-        /* LIVE UPDATE NAVBAR */
 
         window.dispatchEvent(
           new Event(
@@ -635,7 +627,7 @@ const Employees = () => {
               false
             )
 
-            setDeleteEmployeeId(
+            setSelectedEmployee(
               null
             )
           }}

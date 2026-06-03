@@ -10,14 +10,24 @@ from app.config.database import (
 )
 
 from app.models.employee_model import Employee
+from app.models.role_request_model import RoleRequest
 
-from app.routes.employee_routes import router as employee_router
+from app.routes.employee_routes import (
+    router as employee_router
+)
+
+from app.routes.role_request_routes import (
+    router as role_request_router
+)
 
 # Create database tables
 Base.metadata.create_all(bind=engine)
 
 # FastAPI App
-app = FastAPI()
+app = FastAPI(
+    title="Enterprise Employee Management System",
+    version="1.0.0"
+)
 
 # CORS
 origins = [
@@ -35,6 +45,7 @@ app.add_middleware(
 
 # Include Routes
 app.include_router(employee_router)
+app.include_router(role_request_router)
 
 # Seed Employee Data
 db: Session = SessionLocal()
@@ -170,8 +181,9 @@ if existingEmployees < 15:
     ]
 
     db.add_all(employees)
-
     db.commit()
+
+db.close()
 
 # Root Route
 @app.get("/")

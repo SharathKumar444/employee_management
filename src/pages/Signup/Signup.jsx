@@ -11,10 +11,6 @@ import './Signup.css'
 const Signup = () => {
   const navigate = useNavigate()
 
-  /* =========================
-     STATES
-  ========================= */
-
   const [name, setName] =
     useState('')
 
@@ -27,6 +23,9 @@ const Signup = () => {
   const [role, setRole] =
     useState('user')
 
+  const [companyId, setCompanyId] =
+    useState('COMP001')
+
   const [error, setError] =
     useState('')
 
@@ -38,19 +37,12 @@ const Signup = () => {
     setShowPassword,
   ] = useState(false)
 
-  /* =========================
-     SIGNUP
-  ========================= */
-
   const handleSignup = async e => {
     e.preventDefault()
 
     try {
       setLoading(true)
-
       setError('')
-
-      // VALIDATION
 
       if (
         !name.trim() ||
@@ -63,16 +55,12 @@ const Signup = () => {
         return
       }
 
-      // GET EXISTING USERS
-
       const existingUsers =
         JSON.parse(
           localStorage.getItem(
             'users'
           )
         ) || []
-
-      // CHECK EMAIL EXISTS
 
       const emailExists =
         existingUsers.find(
@@ -87,17 +75,14 @@ const Signup = () => {
         return
       }
 
-      // CREATE USER
-
       const userData = {
         id: Date.now(),
         name,
         email,
         password,
         role,
+        companyId,
       }
-
-      // SAVE USERS
 
       const updatedUsers = [
         ...existingUsers,
@@ -114,7 +99,6 @@ const Signup = () => {
       )
 
       navigate('/login')
-
     } catch (err) {
       console.error(err)
 
@@ -128,14 +112,12 @@ const Signup = () => {
 
   return (
     <div className="signup-container">
-
       <div className="signup-card">
 
         <h1>Create Account</h1>
 
         <p className="signup-subtitle">
-          Register a new employee
-          account
+          Register a new employee account
         </p>
 
         <form
@@ -146,7 +128,6 @@ const Signup = () => {
           {/* NAME */}
 
           <div className="input-group">
-
             <label>
               Full Name
             </label>
@@ -162,13 +143,11 @@ const Signup = () => {
               placeholder="Enter full name"
               required
             />
-
           </div>
 
           {/* EMAIL */}
 
           <div className="input-group">
-
             <label>
               Email
             </label>
@@ -184,19 +163,16 @@ const Signup = () => {
               placeholder="Enter email"
               required
             />
-
           </div>
 
           {/* PASSWORD */}
 
           <div className="input-group">
-
             <label>
               Password
             </label>
 
             <div className="password-wrapper">
-
               <input
                 type={
                   showPassword
@@ -227,15 +203,12 @@ const Signup = () => {
                   <FaEye />
                 )}
               </span>
-
             </div>
-
           </div>
 
           {/* ROLE */}
 
           <div className="input-group">
-
             <label>
               Role
             </label>
@@ -248,7 +221,6 @@ const Signup = () => {
                 )
               }
             >
-
               <option value="user">
                 User
               </option>
@@ -256,9 +228,36 @@ const Signup = () => {
               <option value="admin">
                 Admin
               </option>
-
             </select>
+          </div>
 
+          {/* COMPANY */}
+
+          <div className="input-group">
+            <label>
+              Company
+            </label>
+
+            <select
+              value={companyId}
+              onChange={e =>
+                setCompanyId(
+                  e.target.value
+                )
+              }
+            >
+              <option value="COMP001">
+                Company A
+              </option>
+
+              <option value="COMP002">
+                Company B
+              </option>
+
+              <option value="COMP003">
+                Company C
+              </option>
+            </select>
           </div>
 
           {/* ERROR */}
@@ -276,19 +275,14 @@ const Signup = () => {
             className="signup-button"
             disabled={loading}
           >
-
             {loading
               ? 'Creating account...'
               : 'Sign Up'}
-
           </button>
 
         </form>
 
-        {/* LOGIN */}
-
         <p className="signup-footer">
-
           Already have an account?
 
           <span
@@ -299,11 +293,9 @@ const Signup = () => {
           >
             Login here
           </span>
-
         </p>
 
       </div>
-
     </div>
   )
 }

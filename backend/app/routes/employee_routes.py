@@ -5,8 +5,14 @@ from fastapi import (
 )
 
 from sqlalchemy.orm import Session
-from app.models.employee_schema import EmployeeSchema
-from app.config.database import SessionLocal
+
+from app.config.database import (
+    SessionLocal
+)
+
+from app.models.employee_schema import (
+    EmployeeSchema
+)
 
 from app.controllers.employee_controller import (
     get_all_employees,
@@ -16,12 +22,12 @@ from app.controllers.employee_controller import (
     delete_employee
 )
 
-from app.models.employee_schema import ( # type: ignore
-    EmployeeSchema
-)
-
 router = APIRouter()
 
+
+# =========================
+# DATABASE SESSION
+# =========================
 
 def get_db():
     db = SessionLocal()
@@ -33,6 +39,10 @@ def get_db():
         db.close()
 
 
+# =========================
+# SERIALIZER
+# =========================
+
 def serialize_employee(employee):
     return {
         "id": employee.id,
@@ -40,68 +50,118 @@ def serialize_employee(employee):
         "department": employee.department,
         "designation": employee.designation,
         "email": employee.email,
-        "status": employee.status
+        "status": employee.status,
+        "companyId": employee.company_id
     }
 
+# =========================
+# GET ALL EMPLOYEES
+# =========================
 
 @router.get("/employees")
 def fetch_employees(
     db: Session = Depends(get_db)
 ):
-    employees = get_all_employees(db)
+    try:
 
-    return {
-        "success": True,
-        "data": [
-            serialize_employee(employee)
-            for employee in employees
-        ]
-    }
+        employees = get_all_employees(
+            db
+        )
 
+        return {
+            "success": True,
+            "data": [
+                serialize_employee(
+                    employee
+                )
+                for employee in employees
+            ]
+        }
+
+    except Exception as error:
+
+        raise HTTPException(
+            status_code=500,
+            detail=str(error)
+        )
+
+
+# =========================
+# GET SINGLE EMPLOYEE
+# =========================
 
 @router.get("/employees/{employee_id}")
 def fetch_employee(
     employee_id: int,
     db: Session = Depends(get_db)
 ):
-    employee = get_employee_by_id(
-        db,
-        employee_id
-    )
+    try:
 
-    if not employee:
+        employee = get_employee_by_id(
+            db,
+            employee_id
+        )
+
+        if not employee:
+            raise HTTPException(
+                status_code=404,
+                detail="Employee not found"
+            )
+
+        return {
+            "success": True,
+            "data": serialize_employee(
+                employee
+            )
+        }
+
+    except HTTPException:
+        raise
+
+    except Exception as error:
+
         raise HTTPException(
-            status_code=404,
-            detail="Employee not found"
+            status_code=500,
+            detail=str(error)
         )
 
-    return {
-        "success": True,
-        "data": serialize_employee(
-            employee
-        )
-    }
 
+# =========================
+# ADD EMPLOYEE
+# =========================
 
 @router.post("/employees")
 def add_employee(
     employee: EmployeeSchema,
     db: Session = Depends(get_db)
 ):
-    new_employee = create_employee(
-        db,
-        employee
-    )
+    try:
 
-    return {
-        "success": True,
-        "message":
-            "Employee added successfully",
-        "data": serialize_employee(
-            new_employee
+        new_employee = create_employee(
+            db,
+            employee
         )
-    }
 
+        return {
+            "success": True,
+            "message":
+                "Employee added successfully",
+            "data": serialize_employee(
+                new_employee
+            )
+        }
+
+    except Exception as error:
+
+        raise HTTPException(
+            status_code=500,
+            detail=str(error)
+        )
+
+
+# =========================
+# UPDATE EMPLOYEE
+# =========================
 
 @router.put("/employees/{employee_id}")
 def edit_employee(
@@ -109,46 +169,76 @@ def edit_employee(
     employee: EmployeeSchema,
     db: Session = Depends(get_db)
 ):
-    updated_employee = update_employee(
-        db,
-        employee_id,
-        employee
-    )
+    try:
 
-    if not updated_employee:
+        updated_employee = update_employee(
+            db,
+            employee_id,
+            employee
+        )
+
+        if not updated_employee:
+            raise HTTPException(
+                status_code=404,
+                detail="Employee not found"
+            )
+
+        return {
+            "success": True,
+            "message":
+                "Employee updated successfully",
+            "data": serialize_employee(
+                updated_employee
+            )
+        }
+
+    except HTTPException:
+        raise
+
+    except Exception as error:
+
         raise HTTPException(
-            status_code=404,
-            detail="Employee not found"
+            status_code=500,
+            detail=str(error)
         )
 
-    return {
-        "success": True,
-        "message":
-            "Employee updated successfully",
-        "data": serialize_employee(
-            updated_employee
-        )
-    }
 
+# =========================
+# DELETE EMPLOYEE
+# =========================
 
 @router.delete("/employees/{employee_id}")
 def remove_employee(
     employee_id: int,
     db: Session = Depends(get_db)
 ):
-    deleted_employee = delete_employee(
-        db,
-        employee_id
-    )
+    try:
 
-    if not deleted_employee:
-        raise HTTPException(
-            status_code=404,
-            detail="Employee not found"
+        deleted_employee = delete_employee(
+            db,
+            employee_id
         )
 
-    return {
-        "success": True,
-        "message":
-            "Employee deleted successfully"
-    }
+        if not deleted_employee:
+            raise HTTPException(
+                status_code=404,
+                detail="Employee not found"
+            )
+
+        return {
+            "success": True,
+            "message":
+                "Employee deleted successfully",
+            "deleted_employee_id":
+                employee_id
+        }
+
+    except HTTPException:
+        raise
+
+    except Exception as error:
+
+        raise HTTPException(
+            status_code=500,
+            detail=str(error)
+        )
