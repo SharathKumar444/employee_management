@@ -10,6 +10,7 @@ from app.models.audit_log_model import AuditLog
 from app.routes.employee_routes import router as employee_router
 from app.routes.role_request_routes import router as role_request_router
 from app.routes.audit_routes import router as audit_router
+from app.routes.analytics_routes import router as analytics_router
 
 # =========================
 # CREATE TABLES
@@ -47,7 +48,7 @@ app.add_middleware(
 app.include_router(employee_router)
 app.include_router(role_request_router)
 app.include_router(audit_router)
-
+app.include_router(analytics_router)
 # =========================
 # DATABASE SESSION
 # =========================

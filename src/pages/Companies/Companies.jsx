@@ -10,9 +10,6 @@ const Companies = () => {
     ) ||
     {}
 
-  const userCompanyId =
-    currentUser.companyId || 'COMPz001'
-
   const companies = [
     {
       companyName: 'Company A',
@@ -34,6 +31,11 @@ const Companies = () => {
     },
   ]
 
+  // SAFE COMPANY ID
+  const userCompanyId =
+    currentUser?.companyId ||
+    'COMP001'
+
   const currentCompany =
     companies.find(
       company =>
@@ -43,8 +45,8 @@ const Companies = () => {
 
   return (
     <div className="companies-page">
-      {/* HEADER */}
 
+      {/* HEADER */}
       <div className="companies-header">
         <h1>Companies</h1>
 
@@ -55,7 +57,6 @@ const Companies = () => {
       </div>
 
       {/* CURRENT COMPANY */}
-
       <div className="current-company-card">
         <h2>Current Company</h2>
 
@@ -64,7 +65,8 @@ const Companies = () => {
         </h3>
 
         <p>
-          Company ID:{' '}
+          Company ID:
+          {' '}
           {currentCompany.companyId}
         </p>
 
@@ -74,7 +76,6 @@ const Companies = () => {
       </div>
 
       {/* DEBUG */}
-
       <div
         style={{
           marginBottom: '15px',
@@ -82,14 +83,14 @@ const Companies = () => {
           fontSize: '14px',
         }}
       >
-        Logged Company ID:{' '}
+        Logged Company ID:
+        {' '}
         <strong>
           {userCompanyId}
         </strong>
       </div>
 
       {/* TABLE */}
-
       <div className="companies-table-card">
         <table className="companies-table">
           <thead>
@@ -104,9 +105,7 @@ const Companies = () => {
 
           <tbody>
             {companies.map(company => (
-              <tr
-                key={company.companyId}
-              >
+              <tr key={company.companyId}>
                 <td>
                   {company.companyName}
                 </td>
@@ -140,6 +139,7 @@ const Companies = () => {
           </tbody>
         </table>
       </div>
+
     </div>
   )
 }

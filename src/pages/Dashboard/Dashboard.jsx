@@ -6,6 +6,7 @@ import {
   FaBuilding,
   FaClipboardCheck,
   FaCalendarAlt,
+  FaSyncAlt,
 } from 'react-icons/fa'
 
 import Calendar from 'react-calendar'
@@ -13,6 +14,8 @@ import 'react-calendar/dist/Calendar.css'
 
 import StatisticsCard from '../../components/employee/StatisticsCard/StatisticsCard'
 import DepartmentChart from '../../components/analytics/DepartmentChart'
+import RoleChart from '../../components/analytics/RoleChart'
+import StatusChart from '../../components/analytics/StatusChart'
 
 import { fetchEmployees } from '../../services/employeeService'
 
@@ -23,37 +26,45 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
 
-  // CALENDAR STATE
   const [date, setDate] = useState(new Date())
   const [showCalendar, setShowCalendar] = useState(false)
 
-  useEffect(() => {
-    const loadData = async () => {
-      try {
-        setLoading(true)
+  const [pendingRequests, setPendingRequests] =
+    useState(0)
 
-        const data = await fetchEmployees()
+  const loadDashboardData = async () => {
+    try {
+      setLoading(true)
 
-        // SAFE FALLBACK
-        setEmployees(Array.isArray(data) ? data : [])
+      const employeeData =
+        await fetchEmployees()
 
-        setError('')
-      } catch (err) {
-        console.error(err)
+      setEmployees(
+        Array.isArray(employeeData)
+          ? employeeData
+          : []
+      )
 
-        setError('Failed to load dashboard data')
-        setEmployees([])
-      } finally {
-        setLoading(false)
-      }
+      // temporary until API created
+      setPendingRequests(5)
+
+      setError('')
+    } catch (err) {
+      console.error(err)
+
+      setError(
+        'Failed to load dashboard data'
+      )
+    } finally {
+      setLoading(false)
     }
+  }
 
-    loadData()
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    loadDashboardData()
   }, [])
 
-  // ---------------------------
-  // LOADING STATE
-  // ---------------------------
   if (loading) {
     return (
       <div className="status-container">
@@ -62,9 +73,6 @@ const Dashboard = () => {
     )
   }
 
-  // ---------------------------
-  // ERROR STATE
-  // ---------------------------
   if (error) {
     return (
       <div className="status-container">
@@ -73,85 +81,94 @@ const Dashboard = () => {
     )
   }
 
-  // ---------------------------
-  // SAFE CALCULATIONS
-  // ---------------------------
-  const totalEmployees = employees.length
+  const totalEmployees =
+    employees.length
 
-  const activeEmployees = employees.filter(
-    (emp) => emp?.status === 'Active'
-  ).length
+  const activeEmployees =
+    employees.filter(
+      emp => emp?.status === 'Active'
+    ).length
 
-  const departmentsCount = [
+  const totalDepartments = [
     ...new Set(
       employees
-        .map((emp) => emp?.department)
+        .map(emp => emp.department)
         .filter(Boolean)
     ),
   ].length
 
   const attendancePercentage =
-    totalEmployees === 0
-      ? 0
-      : Math.round(
-          (activeEmployees / totalEmployees) * 100
+    totalEmployees > 0
+      ? Math.round(
+          (activeEmployees /
+            totalEmployees) *
+            100
         )
+      : 0
 
-  // ---------------------------
-  // RECENT EMPLOYEES
-  // ---------------------------
-  const recentEmployees = employees
-    .slice()
-    .reverse()
-    .slice(0, 5)
+  const recentEmployees =
+    employees.slice(-5).reverse()
 
   return (
     <div className="dashboard-container">
 
-      {/* HEADER + SMALL CALENDAR */}
+      {/* HEADER */}
+
       <div className="dashboard-top">
 
         <div className="dashboard-header">
           <h1>Dashboard</h1>
-          <p>Employee Analytics Overview</p>
+          <p>
+            Employee Analytics Overview
+          </p>
         </div>
 
-        {/* SMALL DATE INPUT */}
-        <div className="calendar-wrapper">
+        <div className="dashboard-actions">
 
-          <div
-            className="calendar-input"
-            onClick={() =>
-              setShowCalendar(!showCalendar)
-            }
+          <button
+            className="refresh-btn"
+            onClick={loadDashboardData}
           >
-            <FaCalendarAlt />
+            <FaSyncAlt />
+            Refresh
+          </button>
 
-            <span>
-              {date.toDateString()}
-            </span>
-          </div>
+          <div className="calendar-wrapper">
 
-          {/* SHOW CALENDAR ONLY ON CLICK */}
-          {showCalendar && (
-            <div className="calendar-popup">
-
-              <Calendar
-                onChange={(selectedDate) => {
-                  setDate(selectedDate)
-                  setShowCalendar(false)
-                }}
-                value={date}
-              />
-
+            <div
+              className="calendar-input"
+              onClick={() =>
+                setShowCalendar(
+                  !showCalendar
+                )
+              }
+            >
+              <FaCalendarAlt />
+              <span>
+                {date.toDateString()}
+              </span>
             </div>
-          )}
+
+            {showCalendar && (
+              <div className="calendar-popup">
+                <Calendar
+                  value={date}
+                  onChange={selectedDate => {
+                    setDate(selectedDate)
+                    setShowCalendar(false)
+                  }}
+                />
+              </div>
+            )}
+
+          </div>
 
         </div>
 
       </div>
 
-      {/* STATS CARDS */}
+      {/* KPI WIDGETS */}
+
       <div className="statistics-grid">
 
         <StatisticsCard
@@ -168,90 +185,127 @@ const Dashboard = () => {
 
         <StatisticsCard
           title="Departments"
-          value={departmentsCount}
+          value={totalDepartments}
           icon={<FaBuilding />}
         />
 
         <StatisticsCard
-          title="Attendance %"
-          value={`${attendancePercentage}%`}
+          title="Pending Requests"
+          value={pendingRequests}
           icon={<FaClipboardCheck />}
         />
 
       </div>
 
-      {/* ANALYTICS SECTION */}
-      <div className="analytics-section">
+      {/* CHARTS */}
 
-        <DepartmentChart employees={employees} />
+      <div className="analytics-grid">
 
-        <div className="attendance-card">
+        <div className="chart-card">
+          <h3>
+            Employee Distribution
+            by Department
+          </h3>
 
-          <h3>Attendance Overview</h3>
+          <DepartmentChart
+            employees={employees}
+          />
+        </div>
 
-          <div className="progress-bar">
-            <div
-              className="progress-fill"
-              style={{
-                width: `${attendancePercentage}%`,
-              }}
-            />
-          </div>
+        <div className="chart-card">
+          <h3>
+            Employee Count by Role
+          </h3>
 
-          <p>
-            {attendancePercentage}% Employees Present
-          </p>
+          <RoleChart
+            employees={employees}
+          />
+        </div>
 
+        <div className="chart-card">
+          <h3>
+            Employee Status Overview
+          </h3>
+
+          <StatusChart
+            employees={employees}
+          />
         </div>
 
       </div>
 
+      {/* ATTENDANCE */}
+
+      <div className="attendance-card">
+
+        <h3>
+          Attendance Overview
+        </h3>
+
+        <div className="progress-bar">
+
+          <div
+            className="progress-fill"
+            style={{
+              width: `${attendancePercentage}%`,
+            }}
+          />
+
+        </div>
+
+        <p>
+          {attendancePercentage}%
+          Employees Active
+        </p>
+
+      </div>
+
       {/* RECENT EMPLOYEES */}
+
       <div className="recent-employees-card">
 
         <h3>Recent Employees</h3>
 
-        {recentEmployees.length === 0 ? (
-          <p>No employees found</p>
-        ) : (
-          <table className="recent-table">
+        <table className="recent-table">
 
-            <thead>
-              <tr>
-                <th>Name</th>
-                <th>Department</th>
-                <th>Status</th>
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Department</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+
+          <tbody>
+
+            {recentEmployees.map(emp => (
+              <tr key={emp.id}>
+
+                <td>{emp.name}</td>
+
+                <td>
+                  {emp.department}
+                </td>
+
+                <td>
+                  <span
+                    className={
+                      emp.status ===
+                      'Active'
+                        ? 'status-active'
+                        : 'status-inactive'
+                    }
+                  >
+                    {emp.status}
+                  </span>
+                </td>
+
               </tr>
-            </thead>
+            ))}
 
-            <tbody>
-              {recentEmployees.map((emp, index) => (
-                <tr key={emp?.id || index}>
+          </tbody>
 
-                  <td>{emp?.name || 'N/A'}</td>
-
-                  <td>
-                    {emp?.department || 'N/A'}
-                  </td>
-
-                  <td>
-                    <span
-                      className={
-                        emp?.status === 'Active'
-                          ? 'status-active'
-                          : 'status-inactive'
-                      }
-                    >
-                      {emp?.status || 'Unknown'}
-                    </span>
-                  </td>
-
-                </tr>
-              ))}
-            </tbody>
-
-          </table>
-        )}
+        </table>
 
       </div>
 
