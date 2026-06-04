@@ -23,6 +23,20 @@ import {
 
 import './Employees.css'
 
+const currentUser =
+  JSON.parse(
+    localStorage.getItem('currentUser')
+  ) ||
+  JSON.parse(
+    localStorage.getItem('user')
+  ) ||
+  {}
+
+ 
+const userCompanyId =
+  currentUser.companyId
+
+
 const Employees = () => {
   const [employees, setEmployees] =
     useState([])
@@ -67,37 +81,53 @@ const Employees = () => {
   /* =========================
      LOAD EMPLOYEES
   ========================= */
+const loadEmployees = async () => {
+  setLoading(true)
 
-  const loadEmployees = async () => {
-    try {
-      setLoading(true)
+  try {
+    console.log(
+      'Fetching employees...'
+    )
 
-      const data =
-        await fetchEmployees()
+    const data =
+      await fetchEmployees()
 
-      if (Array.isArray(data)) {
-        setEmployees(data)
-      } else {
-        setEmployees([])
-      }
+    console.log(
+      'Employee API Response:',
+      data
+    )
 
-      setError('')
-    } catch (err) {
-      console.error(err)
+    setEmployees(
+      Array.isArray(data)
+        ? data
+        : []
+    )
 
-      setError(
-        'Failed to fetch employee data'
-      )
-    } finally {
-      setLoading(false)
-    }
+    setError('')
+  } catch (err) {
+    console.error(
+      'Employee Load Error:',
+      err
+    )
+
+    setError(
+      err?.response?.data?.message ||
+      'Failed to load employees'
+    )
+  } finally {
+    setLoading(false)
   }
+}
 
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    loadEmployees()
-  }, [])
+/* =========================
+   CALL API ON PAGE LOAD
+========================= */
 
+useEffect(() => {
+  // eslint-disable-next-line react-hooks/set-state-in-effect
+  loadEmployees()
+}, [])
+  
   /* =========================
      ADD EMPLOYEE
   ========================= */
@@ -105,9 +135,10 @@ const Employees = () => {
   const handleAddEmployee =
     async employeeData => {
       try {
-        await addEmployee(
-          employeeData
-        )
+        await addEmployee({
+  ...employeeData,
+  company_id: userCompanyId,
+})
 
         const oldNotifications =
           JSON.parse(
@@ -171,9 +202,12 @@ const Employees = () => {
         }
 
         await updateEmployee(
-          employeeId,
-          employeeData
-        )
+  employeeId,
+  {
+    ...employeeData,
+    company_id: userCompanyId,
+  }
+)
 
         const oldNotifications =
           JSON.parse(
@@ -346,9 +380,17 @@ const Employees = () => {
         }
 
         const updatedEmployee = {
-          ...employee,
-          status: newStatus,
-        }
+  name: employee.name,
+  department: employee.department,
+  designation: employee.designation,
+  email: employee.email,
+  status: newStatus,
+  company_id:
+    employee.companyId ||
+    employee.company_id ||
+    userCompanyId,
+}
+        
 
         const employeeId =
           employee._id ||
@@ -421,27 +463,30 @@ const Employees = () => {
   /* =========================
      FILTER EMPLOYEES
   ========================= */
+   const filteredEmployees = (employees || [])
+  .filter(employee => {
+    if (!userCompanyId) return true
 
-  const filteredEmployees =
-    employees.filter(employee => {
-      const matchesSearch =
-        employee?.name
-          ?.toLowerCase()
-          .includes(
-            searchInput.toLowerCase()
-          )
+    return (
+      String(employee.companyId) ===
+      String(userCompanyId)
+    )
+  })
+  .filter(employee => {
+    const matchesSearch =
+      employee?.name
+        ?.toLowerCase()
+        .includes(searchInput.toLowerCase())
 
-      const matchesDepartment =
-        departmentFilter ===
-          'All' ||
-        employee.department ===
-          departmentFilter
+    const matchesDepartment =
+      departmentFilter === 'All' ||
+      employee.department === departmentFilter
 
-      return (
-        matchesSearch &&
-        matchesDepartment
-      )
-    })
+    return (
+      matchesSearch &&
+      matchesDepartment
+    )
+  })
 
   /* =========================
      LOADING
@@ -501,52 +546,54 @@ const Employees = () => {
 
       </div>
 
-      {/* STATISTICS */}
+     {/* STATISTICS */}
 
-      <div className="statistics-grid">
+<div className="statistics-grid">
 
-        <StatisticsCard
-          title="Total Employees"
-          value={employees.length}
-          icon={<FaUsers />}
-        />
+  <StatisticsCard
+    title="Total Employees"
+    value={filteredEmployees.length}
+    icon={<FaUsers />}
+  />
 
-        <StatisticsCard
-          title="Active Employees"
-          value={
-            employees.filter(
+  <StatisticsCard
+    title="Active Employees"
+    value={
+      filteredEmployees.filter(
+        employee =>
+          employee?.status === 'Active'
+      ).length
+    }
+    icon={<FaUserCheck />}
+  />
+
+  <StatisticsCard
+    title="Departments"
+    value={
+      [
+        ...new Set(
+          filteredEmployees
+            .filter(
               employee =>
-                employee.status ===
-                'Active'
-            ).length
-          }
-          icon={<FaUserCheck />}
-        />
+                employee?.department
+            )
+            .map(
+              employee =>
+                employee.department
+            )
+        ),
+      ].length
+    }
+    icon={<FaBuilding />}
+  />
 
-        <StatisticsCard
-          title="Departments"
-          value={
-            [
-              ...new Set(
-                employees.map(
-                  employee =>
-                    employee.department
-                )
-              ),
-            ].length
-          }
-          icon={<FaBuilding />}
-        />
+  <StatisticsCard
+    title="Attendance"
+    value="92%"
+    icon={<FaClipboardCheck />}
+  />
 
-        <StatisticsCard
-          title="Attendance"
-          value="92%"
-          icon={
-            <FaClipboardCheck />
-          }
-        />
-
-      </div>
+</div>
 
       {/* FILTERS */}
 

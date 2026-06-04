@@ -1,6 +1,8 @@
 .sidebar {
   width: 260px;
-  min-height: 100vh;
+
+  height: 100vh; /* FIXED HEIGHT */
+  overflow-y: auto;
 
   background: linear-gradient(
     180deg,
@@ -16,10 +18,13 @@
   display: flex;
   flex-direction: column;
 
-  position: sticky;
+  position: fixed; /* FIX */
+  left: 0;
   top: 0;
 
   box-shadow: 4px 0 20px rgba(0, 0, 0, 0.2);
+
+  z-index: 1000;
 }
 
 .logo {

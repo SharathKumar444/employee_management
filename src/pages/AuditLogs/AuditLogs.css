@@ -1,0 +1,33 @@
+.audit-page {
+  padding: 20px;
+}
+
+.audit-table-container {
+  margin-top: 20px;
+  overflow-x: auto;
+}
+
+.audit-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.audit-table th,
+.audit-table td {
+  padding: 12px;
+  border-bottom: 1px solid #eee;
+  text-align: left;
+}
+
+.audit-table th {
+  background: #f4f4f4;
+  font-weight: bold;
+}
+
+.status-container {
+  text-align: center;
+  padding: 50px;
+}

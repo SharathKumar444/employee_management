@@ -1,9 +1,14 @@
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel
 
 
 class EmployeeSchema(BaseModel):
     name: str
     department: str
     designation: str
-    email: EmailStr
+    email: str
     status: str
+    company_id: str   # ✅ MUST exist
+
+
+class Config:
+    orm_mode = True

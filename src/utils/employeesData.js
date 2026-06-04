@@ -1,6 +1,4 @@
 const employeesData = [
-  // COMPANY A (COMP001)
-
   {
     id: 1,
     name: 'John Doe',
@@ -8,7 +6,6 @@ const employeesData = [
     designation: 'Frontend Developer',
     status: 'Active',
     email: 'john@example.com',
-    companyId: 'COMP001',
   },
   {
     id: 2,
@@ -17,7 +14,6 @@ const employeesData = [
     designation: 'HR Manager',
     status: 'Inactive',
     email: 'sarah@example.com',
-    companyId: 'COMP001',
   },
   {
     id: 3,
@@ -26,7 +22,6 @@ const employeesData = [
     designation: 'Accountant',
     status: 'Active',
     email: 'michael@example.com',
-    companyId: 'COMP001',
   },
   {
     id: 4,
@@ -35,7 +30,6 @@ const employeesData = [
     designation: 'Backend Developer',
     status: 'Active',
     email: 'emily@example.com',
-    companyId: 'COMP001',
   },
   {
     id: 5,
@@ -44,7 +38,6 @@ const employeesData = [
     designation: 'Marketing Specialist',
     status: 'Active',
     email: 'david@example.com',
-    companyId: 'COMP001',
   },
   {
     id: 6,
@@ -53,7 +46,6 @@ const employeesData = [
     designation: 'UI/UX Designer',
     status: 'Inactive',
     email: 'sophia@example.com',
-    companyId: 'COMP001',
   },
   {
     id: 7,
@@ -62,11 +54,7 @@ const employeesData = [
     designation: 'Full Stack Developer',
     status: 'Active',
     email: 'james@example.com',
-    companyId: 'COMP001',
   },
-
-  // COMPANY B (COMP002)
-
   {
     id: 8,
     name: 'Olivia Martinez',
@@ -74,7 +62,6 @@ const employeesData = [
     designation: 'Recruiter',
     status: 'Active',
     email: 'olivia@example.com',
-    companyId: 'COMP002',
   },
   {
     id: 9,
@@ -83,7 +70,6 @@ const employeesData = [
     designation: 'Financial Analyst',
     status: 'Inactive',
     email: 'daniel@example.com',
-    companyId: 'COMP002',
   },
   {
     id: 10,
@@ -92,7 +78,6 @@ const employeesData = [
     designation: 'React Developer',
     status: 'Active',
     email: 'emma@example.com',
-    companyId: 'COMP002',
   },
   {
     id: 11,
@@ -101,7 +86,6 @@ const employeesData = [
     designation: 'Operations Manager',
     status: 'Active',
     email: 'william@example.com',
-    companyId: 'COMP002',
   },
   {
     id: 12,
@@ -110,7 +94,6 @@ const employeesData = [
     designation: 'Graphic Designer',
     status: 'Inactive',
     email: 'ava@example.com',
-    companyId: 'COMP002',
   },
   {
     id: 13,
@@ -119,7 +102,6 @@ const employeesData = [
     designation: 'DevOps Engineer',
     status: 'Active',
     email: 'benjamin@example.com',
-    companyId: 'COMP002',
   },
   {
     id: 14,
@@ -128,20 +110,14 @@ const employeesData = [
     designation: 'SEO Specialist',
     status: 'Active',
     email: 'mia@example.com',
-    companyId: 'COMP002',
   },
-
-  // COMPANY C (COMP003)
-
   {
     id: 15,
     name: 'Lucas Hall',
     department: 'Support',
-    designation:
-      'Customer Support Executive',
+    designation: 'Customer Support Executive',
     status: 'Inactive',
     email: 'lucas@example.com',
-    companyId: 'COMP003',
   },
   {
     id: 16,
@@ -150,7 +126,6 @@ const employeesData = [
     designation: 'Software Engineer',
     status: 'Active',
     email: 'charlotte@example.com',
-    companyId: 'COMP003',
   },
   {
     id: 17,
@@ -159,7 +134,6 @@ const employeesData = [
     designation: 'Payroll Manager',
     status: 'Active',
     email: 'henry@example.com',
-    companyId: 'COMP003',
   },
   {
     id: 18,
@@ -168,7 +142,6 @@ const employeesData = [
     designation: 'Product Designer',
     status: 'Active',
     email: 'amelia@example.com',
-    companyId: 'COMP003',
   },
   {
     id: 19,
@@ -177,17 +150,14 @@ const employeesData = [
     designation: 'Team Lead',
     status: 'Inactive',
     email: 'alexander@example.com',
-    companyId: 'COMP003',
   },
   {
     id: 20,
     name: 'Harper Green',
     department: 'Engineering',
-    designation:
-      'Mobile App Developer',
+    designation: 'Mobile App Developer',
     status: 'Active',
     email: 'harper@example.com',
-    companyId: 'COMP003',
   },
 ]
 

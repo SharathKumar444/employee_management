@@ -11,6 +11,7 @@ import Attendance from '../pages/Attendance/Attendance'
 import Settings from '../pages/Settings/Settings'
 import Companies from '../pages/Companies/Companies'
 import AdminRoleRequests from '../pages/AdminRoleRequests/AdminRoleRequests'
+import AuditLogs from '../pages/AuditLogs/AuditLogs'
 
 import DashboardLayout from '../components/layout/DashboardLayout/DashboardLayout'
 
@@ -39,12 +40,11 @@ const AppRoutes = () => {
         element={<ForgotPassword />}
       />
 
-      {/* DASHBOARD LAYOUT ROUTES */}
+      {/* DASHBOARD ROUTES */}
       <Route
         path="/"
         element={<DashboardLayout />}
       >
-
         <Route
           path="dashboard"
           element={<Dashboard />}
@@ -80,6 +80,11 @@ const AppRoutes = () => {
           element={<AdminRoleRequests />}
         />
 
+        {/* AUDIT LOGS INSIDE LAYOUT */}
+        <Route
+          path="audit-logs"
+          element={<AuditLogs />}
+        />
       </Route>
 
     </Routes>

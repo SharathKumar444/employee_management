@@ -1,6 +1,4 @@
 import './Companies.css'
-// eslint-disable-next-line no-unused-vars
-import employeesData from '../../utils/employeesData'
 
 const Companies = () => {
   const currentUser =
@@ -13,67 +11,38 @@ const Companies = () => {
     {}
 
   const userCompanyId =
-    currentUser.companyId || 'COMP001'
-
-  const allEmployees =
-    JSON.parse(
-      localStorage.getItem('employees')
-    ) || []
-
-  const allUsers =
-    JSON.parse(
-      localStorage.getItem('users')
-    ) || []
+    currentUser.companyId || 'COMPz001'
 
   const companies = [
     {
       companyName: 'Company A',
       companyId: 'COMP001',
+      employees: 25,
+      users: 5,
     },
     {
       companyName: 'Company B',
       companyId: 'COMP002',
+      employees: 18,
+      users: 3,
     },
     {
       companyName: 'Company C',
       companyId: 'COMP003',
+      employees: 12,
+      users: 2,
     },
   ]
 
-  const companiesWithCounts =
-    companies.map(company => ({
-      ...company,
-
-      employees:
-        allEmployees.filter(
-          employee =>
-            employee.companyId ===
-            company.companyId
-        ).length,
-
-      users:
-        allUsers.filter(
-          user =>
-            user.companyId ===
-            company.companyId
-        ).length,
-    }))
-
   const currentCompany =
-    companiesWithCounts.find(
+    companies.find(
       company =>
         company.companyId ===
         userCompanyId
-    ) || {
-      companyName: 'Company A',
-      companyId: 'COMP001',
-      employees: 0,
-      users: 0,
-    }
+    ) || companies[0]
 
   return (
     <div className="companies-page">
-
       {/* HEADER */}
 
       <div className="companies-header">
@@ -99,22 +68,27 @@ const Companies = () => {
           {currentCompany.companyId}
         </p>
 
-        <p>
-          Employees:{' '}
-          {currentCompany.employees}
-        </p>
-
-        <p>
-          Users:{' '}
-          {currentCompany.users}
-        </p>
-
         <span className="active-badge">
           Active
         </span>
       </div>
 
-      {/* COMPANY TABLE */}
+      {/* DEBUG */}
+
+      <div
+        style={{
+          marginBottom: '15px',
+          color: '#666',
+          fontSize: '14px',
+        }}
+      >
+        Logged Company ID:{' '}
+        <strong>
+          {userCompanyId}
+        </strong>
+      </div>
+
+      {/* TABLE */}
 
       <div className="companies-table-card">
         <table className="companies-table">
@@ -129,42 +103,40 @@ const Companies = () => {
           </thead>
 
           <tbody>
-            {companiesWithCounts.map(
-              company => (
-                <tr
-                  key={company.companyId}
-                >
-                  <td>
-                    {company.companyName}
-                  </td>
+            {companies.map(company => (
+              <tr
+                key={company.companyId}
+              >
+                <td>
+                  {company.companyName}
+                </td>
 
-                  <td>
-                    {company.companyId}
-                  </td>
+                <td>
+                  {company.companyId}
+                </td>
 
-                  <td>
-                    {company.employees}
-                  </td>
+                <td>
+                  {company.employees}
+                </td>
 
-                  <td>
-                    {company.users}
-                  </td>
+                <td>
+                  {company.users}
+                </td>
 
-                  <td>
-                    {company.companyId ===
-                    userCompanyId ? (
-                      <span className="current-company-badge">
-                        Current Company
-                      </span>
-                    ) : (
-                      <span className="isolated-company-badge">
-                        Isolated Tenant
-                      </span>
-                    )}
-                  </td>
-                </tr>
-              )
-            )}
+                <td>
+                  {company.companyId ===
+                  userCompanyId ? (
+                    <span className="current-company-badge">
+                      Current Company
+                    </span>
+                  ) : (
+                    <span className="isolated-company-badge">
+                      Isolated Tenant
+                    </span>
+                  )}
+                </td>
+              </tr>
+            ))}
           </tbody>
         </table>
       </div>
