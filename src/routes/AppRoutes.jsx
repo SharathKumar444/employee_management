@@ -13,6 +13,11 @@ import Companies from '../pages/Companies/Companies'
 import AdminRoleRequests from '../pages/AdminRoleRequests/AdminRoleRequests'
 import AuditLogs from '../pages/AuditLogs/AuditLogs'
 
+
+import Invitations from '../pages/Invitations/Invitations'
+
+import DeactivatedAccount from '../pages/DeactivatedAccount/DeactivatedAccount'
+
 import DashboardLayout from '../components/layout/DashboardLayout/DashboardLayout'
 
 const AppRoutes = () => {
@@ -20,27 +25,26 @@ const AppRoutes = () => {
     <Routes>
 
       {/* AUTH ROUTES */}
-      <Route
-        path="/"
-        element={<Login />}
-      />
 
-      <Route
-        path="/login"
-        element={<Login />}
-      />
+      <Route path="/" element={<Login />} />
 
-      <Route
-        path="/signup"
-        element={<Signup />}
-      />
+      <Route path="/login" element={<Login />} />
+
+      <Route path="/signup" element={<Signup />} />
 
       <Route
         path="/forgot-password"
         element={<ForgotPassword />}
       />
 
-      {/* DASHBOARD ROUTES */}
+      {/* DEACTIVATED PAGE */}
+      <Route
+        path="/account-deactivated"
+        element={<DeactivatedAccount />}
+      />
+
+      {/* DASHBOARD LAYOUT */}
+
       <Route
         path="/"
         element={<DashboardLayout />}
@@ -80,11 +84,19 @@ const AppRoutes = () => {
           element={<AdminRoleRequests />}
         />
 
-        {/* AUDIT LOGS INSIDE LAYOUT */}
         <Route
           path="audit-logs"
           element={<AuditLogs />}
         />
+
+        
+
+        <Route
+          path="invitations"
+          element={<Invitations />}
+        />
+
+        
       </Route>
 
     </Routes>

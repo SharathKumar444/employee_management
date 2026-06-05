@@ -1,0 +1,53 @@
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(
+    0,
+    0,
+    0,
+    0.5
+  );
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.invite-modal {
+  background: white;
+  width: 420px;
+  padding: 24px;
+  border-radius: 12px;
+}
+
+.form-group {
+  margin-bottom: 16px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 6px;
+}
+
+.form-group input,
+.form-group select {
+  width: 100%;
+  padding: 10px;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.cancel-btn {
+  padding: 10px 16px;
+}
+
+.invite-btn {
+  background: #2563eb;
+  color: white;
+  border: none;
+  padding: 10px 16px;
+}

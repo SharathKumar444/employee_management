@@ -11,7 +11,8 @@ from app.routes.employee_routes import router as employee_router
 from app.routes.role_request_routes import router as role_request_router
 from app.routes.audit_routes import router as audit_router
 from app.routes.analytics_routes import router as analytics_router
-
+from app.routes.member_routes import router as member_router
+from app.routes.reactivation_routes import router as reactivation_router
 # =========================
 # CREATE TABLES
 # =========================
@@ -49,6 +50,8 @@ app.include_router(employee_router)
 app.include_router(role_request_router)
 app.include_router(audit_router)
 app.include_router(analytics_router)
+app.include_router(member_router)
+app.include_router(reactivation_router)
 # =========================
 # DATABASE SESSION
 # =========================

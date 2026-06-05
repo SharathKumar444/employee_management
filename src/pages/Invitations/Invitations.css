@@ -1,0 +1,147 @@
+.invitation-page {
+  padding: 24px;
+}
+
+.invitation-page h1 {
+  margin-bottom: 20px;
+}
+
+.invite-form {
+  background: white;
+  padding: 20px;
+  border-radius: 12px;
+  margin-bottom: 24px;
+
+  display: flex;
+  gap: 12px;
+  align-items: center;
+
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+}
+
+.invite-form input,
+.invite-form select {
+  flex: 1;
+  padding: 10px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+}
+
+.invite-form button {
+  border: none;
+  background: #2563eb;
+  color: white;
+  padding: 10px 18px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.invite-form button:hover {
+  background: #1d4ed8;
+}
+
+.invitation-table {
+  width: 100%;
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  border-collapse: collapse;
+}
+
+.invitation-table th {
+  background: #f8fafc;
+  padding: 14px;
+  text-align: left;
+}
+
+.invitation-table td {
+  padding: 14px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.pending-badge {
+  color: #f59e0b;
+  font-weight: 600;
+}
+
+.copy-btn {
+  background: #22c55e;
+  color: white;
+  border: none;
+  padding: 7px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.revoke-btn {
+  background: #ef4444;
+  color: white;
+  border: none;
+  padding: 7px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.user-management-page {
+  padding: 20px;
+}
+
+.tabs-container {
+  display: flex;
+  gap: 10px;
+  margin: 20px 0;
+}
+
+.tab-btn {
+  padding: 12px 20px;
+  border: none;
+  cursor: pointer;
+  border-radius: 8px;
+  background: #e5e7eb;
+  font-weight: 600;
+}
+
+.tab-btn.active {
+  background: #2563eb;
+  color: white;
+}
+
+.invite-card,
+.pending-card {
+  background: white;
+  padding: 20px;
+  border-radius: 12px;
+  margin-bottom: 20px;
+}
+
+.invite-form {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.invite-form input,
+.invite-form select {
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+}
+
+.invite-form button {
+  background: #2563eb;
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 8px;
+}
+
+.pending-card table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.pending-card th,
+.pending-card td {
+  padding: 12px;
+  border-bottom: 1px solid #eee;
+  text-align: left;
+}

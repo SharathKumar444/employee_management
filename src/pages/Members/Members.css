@@ -1,0 +1,96 @@
+.members-page {
+  padding: 24px;
+}
+
+.members-page h1 {
+  font-size: 30px;
+  margin-bottom: 24px;
+  color: #1e293b;
+}
+
+.members-table {
+  width: 100%;
+  background: white;
+  border-radius: 16px;
+  overflow: hidden;
+  border-collapse: collapse;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.08);
+}
+
+.members-table thead {
+  background: linear-gradient(
+    135deg,
+    #2563eb,
+    #3b82f6
+  );
+  color: white;
+}
+
+.members-table th,
+.members-table td {
+  padding: 16px;
+  text-align: left;
+}
+
+.members-table tbody tr {
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.members-table tbody tr:hover {
+  background: #f8fafc;
+}
+
+.status-active {
+  background: #dcfce7;
+  color: #15803d;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.status-deactivated {
+  background: #fee2e2;
+  color: #dc2626;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.deactivate-btn {
+  border: none;
+  background: #ef4444;
+  color: white;
+  padding: 10px 16px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.deactivate-btn:hover {
+  background: #dc2626;
+}
+
+.activate-btn {
+  border: none;
+  background: #22c55e;
+  color: white;
+  padding: 10px 16px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.activate-btn:hover {
+  background: #16a34a;
+}
+
+.empty-state {
+  background: white;
+  padding: 30px;
+  text-align: center;
+  border-radius: 16px;
+  color: #64748b;
+  box-shadow: 0 4px 18px rgba(0,0,0,0.08);
+}
