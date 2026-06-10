@@ -1,92 +1,72 @@
 import axios from 'axios'
 
-const API =
-  'http://127.0.0.1:8000'
+const API_URL = 'http://127.0.0.1:8000'
 
-// =======================
-// GET ALL MEMBERS
-// =======================
-export const fetchMembers =
-  async () => {
-    try {
-      const response =
-        await axios.get(
-          `${API}/members`
-        )
+export const getMembers = async companyId => {
+  try {
+    const response = await axios.get(
+      `${API_URL}/members`,
+      {
+        params: {
+          company_id: companyId,
+        },
+        timeout: 8000,
+      }
+    )
 
-      return Array.isArray(
-        response.data
-      )
-        ? response.data
-        : []
-    } catch (error) {
-      console.error(
-        'Fetch Members Error:',
-        error
-      )
-      return []
-    }
+    return response.data
+  } catch (error) {
+    console.error('getMembers error:', error)
+    return []
   }
+}
 
-// =======================
-// DEACTIVATE USER
-// =======================
-export const deactivateUser =
-  async id => {
-    try {
-      const response =
-        await axios.put(
-          `${API}/members/${id}/deactivate`
-        )
+export const deactivateMember = async (
+  memberId,
+  admin_email,
+  company_id
+) => {
+  try {
+    const response = await axios.put(
+      `${API_URL}/members/${memberId}/deactivate`,
+      null,
+      {
+        params: {
+          admin_email,
+          company_id,
+        },
+        timeout: 8000,
+      }
+    )
 
-      return response.data
-    } catch (error) {
-      console.error(
-        'Deactivate User Error:',
-        error
-      )
-      throw error
-    }
+    return response.data
+  } catch (error) {
+    console.error('deactivateMember error:', error)
+    throw error
   }
+}
 
-// =======================
-// ACTIVATE USER
-// =======================
-export const activateUser =
-  async id => {
-    try {
-      const response =
-        await axios.put(
-          `${API}/members/${id}/activate`
-        )
+export const reactivateMember = async (
+  memberId,
+  admin_email,
+  company_id
+) => {
+  try {
+    const response = await axios.put(
+      `${API_URL}/members/${memberId}/reactivate`,
+      null,
+      {
+        params: {
+          admin_email,
+          company_id,
+        },
+        timeout: 8000,
+      }
+    )
 
-      return response.data
-    } catch (error) {
-      console.error(
-        'Activate User Error:',
-        error
-      )
-      throw error
-    }
+    return response.data
+  } catch (error) {
+    console.error('reactivateMember error:', error)
+    throw error
   }
-
-// =======================
-// DELETE MEMBER
-// =======================
-export const deleteMember =
-  async id => {
-    try {
-      const response =
-        await axios.delete(
-          `${API}/members/${id}`
-        )
-
-      return response.data
-    } catch (error) {
-      console.error(
-        'Delete Member Error:',
-        error
-      )
-      throw error
-    }
-  }
+}

@@ -1,199 +1,197 @@
 import { useEffect, useState } from 'react'
-
+import { useAuth } from '../../context/AuthContext'
 import {
-  fetchMembers,
-  deactivateUser,
+  getMembers,
+  deactivateMember,
+  reactivateMember,
 } from '../../services/memberService'
 
 import './Members.css'
 
 const Members = () => {
-  const [members, setMembers] =
-    useState([])
+  const { currentUser } = useAuth()
+  const companyId =
+    currentUser?.companyId ||
+    currentUser?.company_id
+
+  const [members, setMembers] = useState([])
+  const [search, setSearch] = useState('')
+  const [loading, setLoading] = useState(false)
 
   const loadMembers = async () => {
-    try {
-      const data =
-        await fetchMembers()
-
-      setMembers(
-        Array.isArray(data)
-          ? data
-          : []
-      )
-    } catch (error) {
-      console.error(error)
+    if (!companyId) {
       setMembers([])
+      return
+    }
+
+    try {
+      setLoading(true)
+      const response = await getMembers(companyId)
+      const membersData =
+        Array.isArray(response)
+          ? response
+          : response?.members ||
+            response?.data?.members ||
+            response?.data ||
+            []
+
+      setMembers(membersData)
+    } catch (error) {
+      console.error('Load members error:', error)
+      setMembers([])
+    } finally {
+      setLoading(false)
     }
   }
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    loadMembers()
-  }, [])
-
-  const handleDeactivate =
-    async member => {
-      try {
-        await deactivateUser(
-          member.id
-        )
-
-        // Create Reactivation Request
-
-        const existingRequests =
-          JSON.parse(
-            localStorage.getItem(
-              'reactivationRequests'
-            )
-          ) || []
-
-        const requestExists =
-          existingRequests.find(
-            request =>
-              request.email ===
-                member.email &&
-              request.status ===
-                'Pending'
-          )
-
-        if (!requestExists) {
-          const newRequest = {
-            // eslint-disable-next-line react-hooks/purity
-            id: Date.now(),
-
-            name:
-              member.name,
-
-            email:
-              member.email,
-
-            role:
-              member.role,
-
-            status:
-              'Pending',
-
-            requestedAt:
-              new Date().toLocaleString(),
-          }
-
-          localStorage.setItem(
-            'reactivationRequests',
-            JSON.stringify([
-              ...existingRequests,
-              newRequest,
-            ])
-          )
-        }
-
-        // Update Members UI
-
-        setMembers(prev =>
-          prev.map(item =>
-            item.id === member.id
-              ? {
-                  ...item,
-                  status:
-                    'Deactivated',
-                }
-              : item
-          )
-        )
-
-        alert(
-          `${member.name} has been deactivated`
-        )
-      } catch (error) {
-        console.error(error)
-
-        alert(
-          'Failed to deactivate member'
-        )
-      }
+    if (companyId) {
+      loadMembers()
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [companyId])
+
+  const handleDeactivate = async memberId => {
+    try {
+      await deactivateMember(
+        memberId,
+        currentUser?.email,
+        companyId
+      )
+      await loadMembers()
+    } catch (error) {
+      console.error('Deactivate member error:', error)
+      alert('Unable to deactivate member')
+    }
+  }
+
+  const handleReactivate = async memberId => {
+    try {
+      await reactivateMember(
+        memberId,
+        currentUser?.email,
+        companyId
+      )
+      await loadMembers()
+    } catch (error) {
+      console.error('Reactivate member error:', error)
+      alert('Unable to reactivate member')
+    }
+  }
+
+  const filteredMembers = members.filter(member => {
+    const term = search.toLowerCase()
+    return (
+      member?.name?.toLowerCase().includes(term) ||
+      member?.email?.toLowerCase().includes(term)
+    )
+  })
+
+  const activeMembers = filteredMembers.filter(
+    member => member.is_active !== false
+  )
+
+  const inactiveMembers = filteredMembers.filter(
+    member => member.is_active === false
+  )
+
+  if (!currentUser) {
+    return <h2>Loading user...</h2>
+  }
 
   return (
     <div className="members-page">
-      <h1>
-        Company Members
-      </h1>
+      <h1>Company Members</h1>
+      <p className="page-subtitle">
+        Manage all users for {currentUser?.companyName || currentUser?.company || 'your company'}.
+      </p>
 
-      {members.length ===
-      0 ? (
-        <div className="empty-state">
-          No Members Found
-        </div>
-      ) : (
-        <table className="members-table">
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>Email</th>
-              <th>Role</th>
-              <th>Status</th>
-              <th>Action</th>
-            </tr>
-          </thead>
+      <div className="members-header">
+        <input
+          className="search-box"
+          type="text"
+          placeholder="Search members..."
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+        />
+      </div>
 
-          <tbody>
-            {members.map(
-              member => (
-                <tr
-                  key={member.id}
-                >
+      {loading && <p>Loading members...</p>}
+
+      <section className="members-block">
+        <h2>Active Members</h2>
+
+        {activeMembers.length === 0 ? (
+          <p>No active members found.</p>
+        ) : (
+          <table className="members-table">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Role</th>
+                <th>Status</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {activeMembers.map(member => (
+                <tr key={member.id || member.email}>
+                  <td>{member.name}</td>
+                  <td>{member.email}</td>
+                  <td>{member.role || 'User'}</td>
+                  <td className="status active">Active</td>
                   <td>
-                    {member.name}
-                  </td>
-
-                  <td>
-                    {member.email}
-                  </td>
-
-                  <td>
-                    {member.role}
-                  </td>
-
-                  <td>
-                    <span
-                      className={
-                        member.status ===
-                        'Active'
-                          ? 'status-active'
-                          : 'status-inactive'
-                      }
+                    <button
+                      className="danger-btn"
+                      onClick={() => handleDeactivate(member.id)}
                     >
-                      {
-                        member.status
-                      }
-                    </span>
-                  </td>
-
-                  <td>
-                    {member.status ===
-                    'Active' ? (
-                      <button
-                        className="deactivate-btn"
-                        onClick={() =>
-                          handleDeactivate(
-                            member
-                          )
-                        }
-                      >
-                        Deactivate
-                      </button>
-                    ) : (
-                      <span className="deactivated-text">
-                        Deactivated
-                      </span>
-                    )}
+                      Deactivate
+                    </button>
                   </td>
                 </tr>
-              )
-            )}
-          </tbody>
-        </table>
-      )}
+              ))}
+            </tbody>
+          </table>
+        )}
+      </section>
+
+      <section className="members-block">
+        <h2>Inactive Members</h2>
+
+        {inactiveMembers.length === 0 ? (
+          <p>No inactive members found.</p>
+        ) : (
+          <table className="members-table">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Role</th>
+                <th>Status</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {inactiveMembers.map(member => (
+                <tr key={member.id || member.email}>
+                  <td>{member.name}</td>
+                  <td>{member.email}</td>
+                  <td>{member.role || 'User'}</td>
+                  <td className="status inactive">Inactive</td>
+                  <td>
+                    <button
+                      onClick={() => handleReactivate(member.id)}
+                    >
+                      Reactivate
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </section>
     </div>
   )
 }

@@ -1,147 +1,111 @@
-.invitation-page {
-  padding: 24px;
+.invitations-page {
+  padding: 2rem;
 }
 
-.invitation-page h1 {
-  margin-bottom: 20px;
+.page-subtitle {
+  margin-bottom: 1.5rem;
+  color: #555;
 }
 
-.invite-form {
-  background: white;
-  padding: 20px;
-  border-radius: 12px;
-  margin-bottom: 24px;
-
-  display: flex;
-  gap: 12px;
-  align-items: center;
-
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
-}
-
-.invite-form input,
-.invite-form select {
-  flex: 1;
-  padding: 10px;
-  border: 1px solid #cbd5e1;
-  border-radius: 8px;
-}
-
-.invite-form button {
-  border: none;
-  background: #2563eb;
-  color: white;
-  padding: 10px 18px;
-  border-radius: 8px;
-  cursor: pointer;
-}
-
-.invite-form button:hover {
-  background: #1d4ed8;
-}
-
-.invitation-table {
-  width: 100%;
-  background: white;
-  border-radius: 12px;
-  overflow: hidden;
-  border-collapse: collapse;
-}
-
-.invitation-table th {
-  background: #f8fafc;
-  padding: 14px;
-  text-align: left;
-}
-
-.invitation-table td {
-  padding: 14px;
-  border-bottom: 1px solid #e5e7eb;
-}
-
-.pending-badge {
-  color: #f59e0b;
-  font-weight: 600;
-}
-
-.copy-btn {
-  background: #22c55e;
-  color: white;
-  border: none;
-  padding: 7px 12px;
-  border-radius: 6px;
-  cursor: pointer;
-}
-
-.revoke-btn {
-  background: #ef4444;
-  color: white;
-  border: none;
-  padding: 7px 12px;
-  border-radius: 6px;
-  cursor: pointer;
-}
-.user-management-page {
-  padding: 20px;
-}
-
-.tabs-container {
-  display: flex;
-  gap: 10px;
-  margin: 20px 0;
-}
-
-.tab-btn {
-  padding: 12px 20px;
-  border: none;
-  cursor: pointer;
-  border-radius: 8px;
-  background: #e5e7eb;
-  font-weight: 600;
-}
-
-.tab-btn.active {
-  background: #2563eb;
-  color: white;
+.invite-grid {
+  display: grid;
+  gap: 1.5rem;
 }
 
 .invite-card,
-.pending-card {
-  background: white;
-  padding: 20px;
+.members-section {
+  background: #fff;
   border-radius: 12px;
-  margin-bottom: 20px;
+  padding: 1.5rem;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+}
+
+.invite-card h2,
+.members-section h2 {
+  margin-bottom: 1rem;
 }
 
 .invite-form {
+  display: grid;
+  gap: 1rem;
+}
+
+.invite-form label {
   display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
+  flex-direction: column;
+  gap: 0.5rem;
+  font-weight: 600;
 }
 
 .invite-form input,
 .invite-form select {
-  padding: 10px;
-  border: 1px solid #ddd;
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #dcdcdc;
   border-radius: 8px;
 }
 
-.invite-form button {
-  background: #2563eb;
-  color: white;
+.invite-form button,
+.members-section button,
+.action-cell button {
   border: none;
-  padding: 10px 16px;
+  background: #2f80ed;
+  color: #fff;
+  padding: 0.75rem 1rem;
   border-radius: 8px;
+  cursor: pointer;
 }
 
-.pending-card table {
+.invite-form button.primary-btn,
+.reactivation-card .primary-btn,
+.deactivated-actions .primary-btn {
+  width: 100%;
+}
+
+.table-wrap {
+  overflow-x: auto;
+}
+
+table {
   width: 100%;
   border-collapse: collapse;
 }
 
-.pending-card th,
-.pending-card td {
-  padding: 12px;
-  border-bottom: 1px solid #eee;
+thead th {
   text-align: left;
+  padding: 0.75rem 0.5rem;
+  border-bottom: 1px solid #e7e7e7;
+  color: #333;
+}
+
+tbody td {
+  padding: 0.75rem 0.5rem;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.status-badge.active {
+  color: #227f4b;
+  background: #e6f8ec;
+}
+
+.status-badge.inactive {
+  color: #c23a3a;
+  background: #fbe7e7;
+}
+
+.action-cell button {
+  margin-right: 0.5rem;
+}
+
+button.danger-btn {
+  background: #eb5757;
 }

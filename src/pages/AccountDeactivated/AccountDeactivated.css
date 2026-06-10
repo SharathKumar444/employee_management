@@ -1,0 +1,54 @@
+.deactivated-page {
+  min-height: calc(100vh - 80px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+}
+
+.deactivated-card {
+  max-width: 520px;
+  width: 100%;
+  background: #fff;
+  border-radius: 16px;
+  padding: 2rem;
+  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.08);
+  text-align: center;
+}
+
+.deactivated-card h1 {
+  margin-bottom: 1rem;
+}
+
+.deactivated-card p {
+  margin-bottom: 1.5rem;
+  color: #555;
+}
+
+.deactivated-actions {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.primary-btn,
+.secondary-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.9rem 1.2rem;
+  border-radius: 10px;
+  text-decoration: none;
+  font-weight: 700;
+}
+
+.primary-btn {
+  background: #2f80ed;
+  color: #fff;
+}
+
+.secondary-btn {
+  background: #f2f2f2;
+  color: #333;
+}

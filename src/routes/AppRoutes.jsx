@@ -1,9 +1,13 @@
 import { Routes, Route } from 'react-router-dom'
+import { useAuth } from '../context/AuthContext'
+import ProtectedRoute from './ProtectedRoute'
 
+// AUTH
 import Login from '../pages/Login/Login'
 import Signup from '../pages/Signup/Signup'
 import ForgotPassword from '../pages/ForgotPassword/ForgotPassword'
 
+// MAIN PAGES
 import Dashboard from '../pages/Dashboard/Dashboard'
 import Employees from '../pages/Employees/Employees'
 import Departments from '../pages/Departments/Departments'
@@ -12,91 +16,111 @@ import Settings from '../pages/Settings/Settings'
 import Companies from '../pages/Companies/Companies'
 import AdminRoleRequests from '../pages/AdminRoleRequests/AdminRoleRequests'
 import AuditLogs from '../pages/AuditLogs/AuditLogs'
-
-
+import Members from '../pages/Members/Members'
 import Invitations from '../pages/Invitations/Invitations'
+import AdminReactivationRequests from '../pages/AdminReactivationRequests/AdminReactivationRequests'
+import AccountDeactivated from '../pages/AccountDeactivated/AccountDeactivated'
+import Reactivation from '../pages/Reactivation/Reactivation'
 
-import DeactivatedAccount from '../pages/DeactivatedAccount/DeactivatedAccount'
-
+// LAYOUT
 import DashboardLayout from '../components/layout/DashboardLayout/DashboardLayout'
 
+
+
 const AppRoutes = () => {
+  // eslint-disable-next-line no-unused-vars
+  const { currentUser, loadingUser } = useAuth()
+
+  // =========================
+  // GLOBAL LOADING GUARD
+  // =========================
+  if (loadingUser) {
+    return (
+      <div className="status-container">
+        <h2>Loading application...</h2>
+      </div>
+    )
+  }
+
   return (
     <Routes>
 
-      {/* AUTH ROUTES */}
-
+      {/* =========================
+          PUBLIC ROUTES
+      ========================= */}
       <Route path="/" element={<Login />} />
-
       <Route path="/login" element={<Login />} />
-
       <Route path="/signup" element={<Signup />} />
+      <Route path="/forgot-password" element={<ForgotPassword />} />
+      <Route path="/account-deactivated" element={<AccountDeactivated />} />
+      <Route path="/request-reactivation" element={<Reactivation />} />
 
-      <Route
-        path="/forgot-password"
-        element={<ForgotPassword />}
-      />
-
-      {/* DEACTIVATED PAGE */}
-      <Route
-        path="/account-deactivated"
-        element={<DeactivatedAccount />}
-      />
-
-      {/* DASHBOARD LAYOUT */}
-
+      {/* =========================
+          PROTECTED ROUTES
+      ========================= */}
       <Route
         path="/"
-        element={<DashboardLayout />}
+        element={
+          <ProtectedRoute>
+            <DashboardLayout />
+          </ProtectedRoute>
+        }
       >
-        <Route
-          path="dashboard"
-          element={<Dashboard />}
-        />
-
-        <Route
-          path="employees"
-          element={<Employees />}
-        />
-
-        <Route
-          path="departments"
-          element={<Departments />}
-        />
-
-        <Route
-          path="attendance"
-          element={<Attendance />}
-        />
-
-        <Route
-          path="settings"
-          element={<Settings />}
-        />
-
-        <Route
-          path="companies"
-          element={<Companies />}
-        />
-
+        <Route path="dashboard" element={<Dashboard />} />
+        <Route path="employees" element={<Employees />} />
+        <Route path="departments" element={<Departments />} />
+        <Route path="attendance" element={<Attendance />} />
+        <Route path="settings" element={<Settings />} />
+        <Route path="companies" element={<Companies />} />
         <Route
           path="admin-role-requests"
-          element={<AdminRoleRequests />}
+          element={
+            <ProtectedRoute allowedRoles={["admin"]}>
+              <AdminRoleRequests />
+            </ProtectedRoute>
+          }
         />
-
         <Route
           path="audit-logs"
-          element={<AuditLogs />}
+          element={
+            <ProtectedRoute allowedRoles={["admin"]}>
+              <AuditLogs />
+            </ProtectedRoute>
+          }
         />
-
-        
-
         <Route
-          path="invitations"
-          element={<Invitations />}
+          path="members"
+          element={
+            <ProtectedRoute allowedRoles={["admin"]}>
+              <Members />
+            </ProtectedRoute>
+          }
         />
-
+        <Route
+          path="user-invitations"
+          element={
+            <ProtectedRoute allowedRoles={["admin"]}>
+              <Invitations />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="reactivation-requests"
+          element={
+            <ProtectedRoute allowedRoles={["admin"]}>
+              <AdminReactivationRequests />
+            </ProtectedRoute>
+          }
+        />
         
+        
+      
+          
+        
+        
+
+   
+
       </Route>
 
     </Routes>

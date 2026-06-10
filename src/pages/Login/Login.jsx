@@ -1,92 +1,67 @@
 import { useState } from 'react'
-
-import {
-  useNavigate,
-} from 'react-router-dom'
-
-import {
-  FaEye,
-  FaEyeSlash,
-} from 'react-icons/fa'
-
-import {
-  useAuth,
-} from '../../context/AuthContext'
-
+import { useNavigate } from 'react-router-dom'
+import { FaEye, FaEyeSlash } from 'react-icons/fa'
+import { useAuth } from '../../context/AuthContext'
 import './Login.css'
 
 const Login = () => {
   const navigate = useNavigate()
-
   const { login } = useAuth()
 
-  /* =========================
-     STATES
-  ========================= */
+  /* ================= STATES ================= */
 
-  const [email, setEmail] =
-    useState('')
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
+  const [error, setError] = useState('')
+  const [loading, setLoading] = useState(false)
 
-  const [
-    password,
-    setPassword,
-  ] = useState('')
+  /* ================= LOGIN ================= */
 
-  const [
-    showPassword,
-    setShowPassword,
-  ] = useState(false)
+  const handleLogin = async (e) => {
+    e.preventDefault()
 
-  const [error, setError] =
-    useState('')
-
-  const [
-    loading,
-    setLoading,
-  ] = useState(false)
-
-  /* =========================
-     LOGIN
-  ========================= */
-
-  const handleLogin = async (
-    event
-  ) => {
-    event.preventDefault()
+    if (loading) return
 
     try {
       setLoading(true)
-
       setError('')
 
-      const user =
-        await login(
-          email,
-          password
-        )
+      console.log("📡 Sending login request...", {
+        email,
+        password,
+      })
+
+      const user = await login(email, password)
+
+      console.log("✅ LOGIN RESPONSE:", user)
 
       if (!user) {
-        setError(
-          'Invalid email or password'
-        )
-
+        setError('Invalid email or password')
         return
       }
 
-      /* ROLE BASED REDIRECT */
-
-      if (
-        user.role === 'admin'
-      ) {
-        navigate('/dashboard')
-      } else {
-        navigate('/dashboard')
+      // Save user safety check
+      if (!user.companyId) {
+        setError('Company not assigned to user')
+        return
       }
 
-      // eslint-disable-next-line no-unused-vars
+      /* ================= ROLE ROUTING ================= */
+
+      if (user.is_active === false) {
+        navigate('/account-deactivated')
+        return
+      }
+
+      navigate('/dashboard')
+
     } catch (err) {
+      console.error("❌ LOGIN ERROR:", err)
+
       setError(
-        'Invalid email or password'
+        err?.response?.data?.message ||
+        'Server error or backend not running'
       )
     } finally {
       setLoading(false)
@@ -95,97 +70,57 @@ const Login = () => {
 
   return (
     <div className="login-container">
-
       <div className="login-card">
 
-        {/* TITLE */}
-
-        <h1>
-          Employee Management
-        </h1>
+        <h1>Employee Management</h1>
 
         <p className="login-subtitle">
-          Welcome back!
-          Please login to continue.
+          Welcome back! Please login to continue.
         </p>
 
-        {/* FORM */}
-
-        <form
-          className="login-form"
-          onSubmit={handleLogin}
-        >
+        <form className="login-form" onSubmit={handleLogin}>
 
           {/* EMAIL */}
-
           <div className="input-group">
-
-            <label>
-              Email Address
-            </label>
+            <label>Email Address</label>
 
             <input
               type="email"
               value={email}
-              onChange={e =>
-                setEmail(
-                  e.target.value
-                )
-              }
+              onChange={(e) => setEmail(e.target.value)}
               placeholder="Enter your email"
+              autoComplete="username"
               required
             />
-
           </div>
 
           {/* PASSWORD */}
-
           <div className="input-group">
-
-            <label>
-              Password
-            </label>
+            <label>Password</label>
 
             <div className="password-input-wrapper">
 
               <input
-                type={
-                  showPassword
-                    ? 'text'
-                    : 'password'
-                }
+                type={showPassword ? 'text' : 'password'}
                 value={password}
-                onChange={e =>
-                  setPassword(
-                    e.target.value
-                  )
-                }
+                onChange={(e) => setPassword(e.target.value)}
                 placeholder="Enter your password"
+                autoComplete="current-password"
                 required
               />
 
               <button
                 type="button"
                 className="eye-btn"
-                onClick={() =>
-                  setShowPassword(
-                    !showPassword
-                  )
-                }
+                onClick={() => setShowPassword(!showPassword)}
               >
-                {showPassword ? (
-                  <FaEyeSlash />
-                ) : (
-                  <FaEye />
-                )}
+                {showPassword ? <FaEyeSlash /> : <FaEye />}
               </button>
 
             </div>
-
           </div>
 
           {/* ERROR */}
-
           {error && (
             <p className="error-text">
               {error}
@@ -193,54 +128,37 @@ const Login = () => {
           )}
 
           {/* LOGIN BUTTON */}
-
           <button
             type="submit"
             className="login-button"
             disabled={loading}
           >
-
-            {loading
-              ? 'Logging in...'
-              : 'Login'}
-
+            {loading ? 'Logging in...' : 'Login'}
           </button>
 
           {/* FORGOT PASSWORD */}
-
           <p
             className="forgot-password-text"
-            onClick={() =>
-              navigate(
-                '/forgot-password'
-              )
-            }
+            onClick={() => navigate('/forgot-password')}
           >
             Forgot Password?
           </p>
 
         </form>
 
-        {/* SIGNUP BUTTON */}
-
+        {/* SIGNUP */}
         <button
           className="signup-button"
-          onClick={() =>
-            navigate('/signup')
-          }
+          onClick={() => navigate('/signup')}
         >
           SIGN UP
         </button>
 
-        {/* FOOTER */}
-
         <p className="login-footer">
-          Enterprise Employee
-          Management System
+          Enterprise Employee Management System
         </p>
 
       </div>
-
     </div>
   )
 }

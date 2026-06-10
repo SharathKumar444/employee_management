@@ -7,6 +7,35 @@ import {
 
 const AuthContext = createContext()
 
+const normalizeUser = user => {
+  if (!user) {
+    return null
+  }
+
+  const companyId =
+    user.companyId ||
+    user.company_id ||
+    user.company?.companyId ||
+    user.company?.company_id ||
+    undefined
+
+  const isActive =
+    user.is_active !== undefined
+      ? user.is_active
+      : user.isActive !== undefined
+        ? user.isActive
+        : true
+
+  return {
+    ...user,
+    role: user.role || user.role_name || 'user',
+    companyId,
+    company_id: companyId,
+    is_active: isActive,
+    isActive,
+  }
+}
+
 export const AuthProvider = ({
   children,
 }) => {
@@ -14,6 +43,7 @@ export const AuthProvider = ({
     currentUser,
     setCurrentUser,
   ] = useState(null)
+  const [loadingUser, setLoadingUser] = useState(true)
 
   /* =========================
      LOAD USER
@@ -29,8 +59,10 @@ export const AuthProvider = ({
 
     if (savedUser) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
-      setCurrentUser(savedUser)
+      setCurrentUser(normalizeUser(savedUser))
     }
+
+    setLoadingUser(false)
   }, [])
 
   /* =========================
@@ -59,24 +91,17 @@ export const AuthProvider = ({
       return null
     }
 
-    const loggedInUser = {
+    const loggedInUser = normalizeUser({
       ...matchedUser,
-      role:
-        matchedUser.role ||
-        'user',
-    }
+      role: matchedUser.role || 'user',
+    })
 
     localStorage.setItem(
       'currentUser',
-      JSON.stringify(
-        loggedInUser
-      )
+      JSON.stringify(loggedInUser)
     )
 
-    setCurrentUser(
-      loggedInUser
-    )
-
+    setCurrentUser(loggedInUser)
     return loggedInUser
   }
 
@@ -87,15 +112,12 @@ export const AuthProvider = ({
   const updateCurrentUser = (
     updatedUser
   ) => {
-    setCurrentUser(
-      updatedUser
-    )
+    const normalized = normalizeUser(updatedUser)
 
+    setCurrentUser(normalized)
     localStorage.setItem(
       'currentUser',
-      JSON.stringify(
-        updatedUser
-      )
+      JSON.stringify(normalized)
     )
   }
 
@@ -103,56 +125,48 @@ export const AuthProvider = ({
      REFRESH USER DATA
   ========================= */
 
-  const refreshCurrentUser =
-    () => {
-      const users =
-        JSON.parse(
-          localStorage.getItem(
-            'users'
-          )
-        ) || []
-
-      const savedUser =
-        JSON.parse(
-          localStorage.getItem(
-            'currentUser'
-          )
+  const refreshCurrentUser = () => {
+    const users =
+      JSON.parse(
+        localStorage.getItem(
+          'users'
         )
+      ) || []
 
-      if (!savedUser) {
-        return
-      }
-
-      const latestUser =
-        users.find(
-          user =>
-            user.email ===
-            savedUser.email
+    const savedUser =
+      JSON.parse(
+        localStorage.getItem(
+          'currentUser'
         )
+      )
 
-      if (latestUser) {
-        setCurrentUser(
-          latestUser
-        )
-
-        localStorage.setItem(
-          'currentUser',
-          JSON.stringify(
-            latestUser
-          )
-        )
-      }
+    if (!savedUser) {
+      return
     }
+
+    const latestUser =
+      users.find(
+        user =>
+          user.email === savedUser.email
+      )
+
+    if (latestUser) {
+      const normalized = normalizeUser(latestUser)
+      setCurrentUser(normalized)
+      localStorage.setItem(
+        'currentUser',
+        JSON.stringify(normalized)
+      )
+    }
+  }
 
   /* =========================
      LOGOUT
   ========================= */
 
   const logout = () => {
-    localStorage.removeItem(
-      'currentUser'
-    )
-
+    localStorage.removeItem('currentUser')
+    localStorage.removeItem('user')
     setCurrentUser(null)
   }
 
@@ -160,6 +174,8 @@ export const AuthProvider = ({
     <AuthContext.Provider
       value={{
         currentUser,
+        user: currentUser,
+        loadingUser,
         login,
         logout,
         updateCurrentUser,

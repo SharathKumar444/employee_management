@@ -1,15 +1,18 @@
-import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useState, useEffect } from 'react'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 
 import {
   FaEye,
   FaEyeSlash,
 } from 'react-icons/fa'
 
+import { validateInvite, signupWithInvite } from '../../services/invitationService'
 import './Signup.css'
 
 const Signup = () => {
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
+  const inviteToken = searchParams.get('invite')
 
   const [name, setName] =
     useState('')
@@ -37,6 +40,36 @@ const Signup = () => {
     setShowPassword,
   ] = useState(false)
 
+  const [inviteLoading, setInviteLoading] =
+    useState(false)
+
+  useEffect(() => {
+    if (inviteToken) {
+      loadInvitation(inviteToken)
+    }
+  }, [inviteToken])
+
+  const loadInvitation = async (token) => {
+    try {
+      setInviteLoading(true)
+      const response = await validateInvite(token)
+
+      if (response?.success && response?.data) {
+        const invitation = response.data
+        setEmail(invitation.email || '')
+        setRole(invitation.role || 'user')
+        setCompanyId(invitation.company_id || 'COMP001')
+      } else {
+        setError(response?.message || 'Invalid or expired invitation link')
+      }
+    } catch (err) {
+      console.error('Load invitation error:', err)
+      setError('Could not load invitation details')
+    } finally {
+      setInviteLoading(false)
+    }
+  }
+
   const handleSignup = async e => {
     e.preventDefault()
 
@@ -55,55 +88,31 @@ const Signup = () => {
         return
       }
 
-      const existingUsers =
-        JSON.parse(
-          localStorage.getItem(
-            'users'
-          )
-        ) || []
-
-      const emailExists =
-        existingUsers.find(
-          user =>
-            user.email === email
-        )
-
-      if (emailExists) {
-        setError(
-          'Email already exists'
-        )
-        return
-      }
-
-      const userData = {
-        id: Date.now(),
-        name,
-        email,
-        password,
+      const response = await signupWithInvite(
+        name.trim(),
+        email.trim(),
+        password.trim(),
         role,
         companyId,
+        inviteToken
+      )
+
+      if (response?.success) {
+        alert('Account created successfully')
+        navigate('/login')
+      } else {
+        setError(
+          response?.message ||
+          'Signup failed. Try again.'
+        )
       }
-
-      const updatedUsers = [
-        ...existingUsers,
-        userData,
-      ]
-
-      localStorage.setItem(
-        'users',
-        JSON.stringify(updatedUsers)
-      )
-
-      alert(
-        'Account created successfully'
-      )
-
-      navigate('/login')
     } catch (err) {
-      console.error(err)
+      console.error('Signup error:', err)
 
       setError(
-        'Signup failed. Try again.'
+        err.response?.data?.message ||
+        err.message ||
+        'Signup failed. Server error.'
       )
     } finally {
       setLoading(false)
@@ -268,16 +277,26 @@ const Signup = () => {
             </p>
           )}
 
+          {/* LOADING INVITE */}
+
+          {inviteLoading && (
+            <p className="info-text">
+              Loading invitation details...
+            </p>
+          )}
+
           {/* BUTTON */}
 
           <button
             type="submit"
             className="signup-button"
-            disabled={loading}
+            disabled={loading || inviteLoading}
           >
             {loading
               ? 'Creating account...'
-              : 'Sign Up'}
+              : inviteLoading
+                ? 'Loading...'
+                : 'Sign Up'}
           </button>
 
         </form>

@@ -9,12 +9,15 @@ class AuditLog(Base):
 
     id = Column(Integer, primary_key=True, index=True)
 
-    user_name = Column(String, nullable=False)
+    performed_by = Column(String, nullable=False)
 
     action = Column(String, nullable=False)
 
-    timestamp = Column(DateTime, default=datetime.utcnow)
+    target_user = Column(String)
 
-    related_user = Column(String, nullable=True)
+    company_id = Column(String)
 
-    role = Column(String, nullable=True)
+    timestamp = Column(
+        DateTime,
+        default=datetime.utcnow
+    )
