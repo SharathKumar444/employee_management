@@ -19,6 +19,7 @@ import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../../context/AuthContext'
 
 import './Navbar.css'
+import { getNotifications, markAllNotificationsRead } from '../../../services/notificationService'
 
 const Navbar = ({ toggleSidebar }) => {
 
@@ -72,34 +73,28 @@ const Navbar = ({ toggleSidebar }) => {
   ========================= */
 
   useEffect(() => {
-
-    const updateNotifications = () => {
-
-      const savedNotifications =
-        JSON.parse(
-          localStorage.getItem(
-            'notifications'
-          )
-        ) || []
-
-      setNotifications(
-        savedNotifications
-      )
+    const load = async () => {
+      if (!currentUser?.id) return
+      try {
+        const res = await getNotifications(currentUser.id)
+        if (res?.success) {
+          const mapped = res.data.map(n => ({
+            id: n.id,
+            message: n.payload,
+            time: new Date(n.created_at).toLocaleString(),
+            is_read: n.is_read,
+          }))
+          setNotifications(mapped)
+          localStorage.setItem('notifications', JSON.stringify(mapped))
+        }
+      } catch (err) {
+        // fallback to localStorage
+        const saved = JSON.parse(localStorage.getItem('notifications')) || []
+        setNotifications(saved)
+      }
     }
 
-    updateNotifications()
-
-    window.addEventListener(
-      'notification-update',
-      updateNotifications
-    )
-
-    return () => {
-      window.removeEventListener(
-        'notification-update',
-        updateNotifications
-      )
-    }
+    load()
 
   }, [])
 
@@ -144,17 +139,12 @@ const Navbar = ({ toggleSidebar }) => {
   const clearNotifications =
     () => {
 
-      localStorage.removeItem(
-        'notifications'
-      )
+      if (currentUser?.id) {
+        markAllNotificationsRead(currentUser.id).catch(() => {})
+      }
 
+      localStorage.removeItem('notifications')
       setNotifications([])
-
-      window.dispatchEvent(
-        new Event(
-          'notification-update'
-        )
-      )
     }
 
   /* =========================

@@ -15,6 +15,7 @@ const Reactivation = () => {
   const [submitStatus, setSubmitStatus] = useState('')
   const [requests, setRequests] = useState([])
   const [submitted, setSubmitted] = useState(false)
+  const [reason, setReason] = useState('')
 
   const companyId =
     currentUser?.companyId ||
@@ -34,7 +35,9 @@ const Reactivation = () => {
     }
 
     // Load reactivation requests when page loads
+    // eslint-disable-next-line react-hooks/immutability
     loadRequests()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentUser, navigate, companyId])
 
   // ================= LOAD REQUESTS =================
@@ -80,7 +83,7 @@ const Reactivation = () => {
 
     try {
       setLoading(true)
-      const response = await createReactivationRequest(userId, companyId)
+      const response = await createReactivationRequest(userId, companyId, reason)
 
       if (response?.success) {
         setSubmitStatus('✅ Reactivation request submitted successfully.')
@@ -131,6 +134,15 @@ const Reactivation = () => {
             Your account is currently inactive. Submit a reactivation request and an
             administrator will review it shortly.
           </p>
+
+            <label htmlFor="reason">Reason (optional)</label>
+            <textarea
+              id="reason"
+              value={reason}
+              onChange={e => setReason(e.target.value)}
+              rows={4}
+              placeholder="Briefly explain why you'd like your account reactivated (optional)."
+            />
 
           {submitStatus && (
             <div
@@ -189,6 +201,9 @@ const Reactivation = () => {
                           >
                             {request.status}
                           </span>
+                          {request.reason && (
+                            <div className="request-reason">Reason: {request.reason}</div>
+                          )}
                         </td>
                       </tr>
                     ))}

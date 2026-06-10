@@ -1,5 +1,10 @@
 import { useEffect, useState } from 'react'
 import { useAuth } from '../../context/AuthContext'
+import {
+  getReactivationRequests,
+  approveRequest,
+  rejectRequest,
+} from '../../services/reactivationService'
 
 import './Settings.css'
 
@@ -30,6 +35,23 @@ const Settings = () => {
   const [pendingRequests, setPendingRequests] =
     useState([])
 
+  const [pendingReactivationRequests, setPendingReactivationRequests] =
+    useState([])
+
+  const [loadingReactivation, setLoadingReactivation] =
+    useState(false)
+
+  const [processingReactivationId, setProcessingReactivationId] =
+    useState(null)
+
+  const [reactivationMessage, setReactivationMessage] =
+    useState('')
+
+  const companyId =
+    currentUser?.companyId ||
+    currentUser?.company_id
+
+
   useEffect(() => {
     const savedTheme =
       localStorage.getItem('theme')
@@ -45,8 +67,30 @@ const Settings = () => {
 
     // eslint-disable-next-line react-hooks/immutability
     loadPendingRequests()
+    
+    // Load reactivation requests if admin
+    if (currentUser?.role === 'admin' && companyId) {
+      // eslint-disable-next-line react-hooks/immutability
+      loadReactivationRequests()
+    }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  }, [currentUser, companyId])
+
+  const loadReactivationRequests = async () => {
+    try {
+      setLoadingReactivation(true)
+      const res = await getReactivationRequests(companyId)
+      if (res?.success && res?.data) {
+        const pending = res.data.filter(r => r.status === 'Pending')
+        setPendingReactivationRequests(pending)
+      }
+    } catch (err) {
+      console.error('Load reactivation requests error:', err)
+    } finally {
+      setLoadingReactivation(false)
+    }
+  }
+
 
   const loadPendingRequests = () => {
     const requests =
@@ -201,7 +245,7 @@ const Settings = () => {
     setAdminEmail('')
   }
 
-  const approveRequest = request => {
+  const approveRoleRequest = request => {
     const users =
       JSON.parse(
         localStorage.getItem('users')
@@ -277,7 +321,7 @@ const Settings = () => {
     loadPendingRequests()
   }
 
-  const rejectRequest = request => {
+  const rejectRoleRequest = request => {
     const requests =
       JSON.parse(
         localStorage.getItem(
@@ -303,6 +347,78 @@ const Settings = () => {
     )
 
     loadPendingRequests()
+  }
+
+  const handleApproveReactivation = async (requestId) => {
+    if (!currentUser?.name) {
+      setReactivationMessage('❌ Unable to determine admin name')
+      return
+    }
+    
+    const comment = window.prompt('Optional comment for this approval:')
+    if (comment === null) return // User cancelled
+    
+    try {
+      setProcessingReactivationId(requestId)
+      setReactivationMessage('')
+      
+      console.log('Approving request:', { requestId, adminName: currentUser?.name, comment })
+      const res = await approveRequest(requestId, currentUser?.name, comment)
+      console.log('Approve response:', res)
+      
+      if (res?.success) {
+        setReactivationMessage('✅ User reactivated successfully!')
+        setTimeout(() => setReactivationMessage(''), 3000)
+        await loadReactivationRequests()
+      } else {
+        const errorMsg = res?.message || res?.detail || 'Failed to reactivate user'
+        setReactivationMessage('❌ ' + errorMsg)
+        setTimeout(() => setReactivationMessage(''), 4000)
+      }
+    } catch (err) {
+      console.error('Approve error:', err)
+      const errorMsg = err.response?.data?.message || err.response?.data?.detail || err.message || 'Failed to reactivate'
+      setReactivationMessage('❌ ' + errorMsg)
+      setTimeout(() => setReactivationMessage(''), 4000)
+    } finally {
+      setProcessingReactivationId(null)
+    }
+  }
+
+  const handleRejectReactivation = async (requestId) => {
+    if (!currentUser?.name) {
+      setReactivationMessage('❌ Unable to determine admin name')
+      return
+    }
+    
+    const comment = window.prompt('Optional comment for this rejection:')
+    if (comment === null) return // User cancelled
+    
+    try {
+      setProcessingReactivationId(requestId)
+      setReactivationMessage('')
+      
+      console.log('Rejecting request:', { requestId, adminName: currentUser?.name, comment })
+      const res = await rejectRequest(requestId, currentUser?.name, comment)
+      console.log('Reject response:', res)
+      
+      if (res?.success) {
+        setReactivationMessage('✅ Request rejected successfully!')
+        setTimeout(() => setReactivationMessage(''), 3000)
+        await loadReactivationRequests()
+      } else {
+        const errorMsg = res?.message || res?.detail || 'Failed to reject request'
+        setReactivationMessage('❌ ' + errorMsg)
+        setTimeout(() => setReactivationMessage(''), 4000)
+      }
+    } catch (err) {
+      console.error('Reject error:', err)
+      const errorMsg = err.response?.data?.message || err.response?.data?.detail || err.message || 'Failed to reject'
+      setReactivationMessage('❌ ' + errorMsg)
+      setTimeout(() => setReactivationMessage(''), 4000)
+    } finally {
+      setProcessingReactivationId(null)
+    }
   }
 
   return (
@@ -446,6 +562,7 @@ const Settings = () => {
 
         {currentUser?.role ===
           'admin' && (
+          <>
           <div className="settings-card pending-requests">
             <div className="card-title">
               <FaUserShield />
@@ -484,7 +601,7 @@ const Settings = () => {
                     <div className="request-actions">
                       <button
                         onClick={() =>
-                          approveRequest(
+                          approveRoleRequest(
                             request
                           )
                         }
@@ -494,7 +611,7 @@ const Settings = () => {
 
                       <button
                         onClick={() =>
-                          rejectRequest(
+                          rejectRoleRequest(
                             request
                           )
                         }
@@ -507,6 +624,93 @@ const Settings = () => {
               )
             )}
           </div>
+
+          <div className="settings-card pending-reactivation-requests">
+            <div className="card-title">
+              <FaBell />
+              <h3>
+                Pending Reactivation
+                Requests
+              </h3>
+            </div>
+
+            {reactivationMessage && (
+              <div className="reactivation-message">
+                {reactivationMessage}
+              </div>
+            )}
+
+            {loadingReactivation ? (
+              <p>Loading requests...</p>
+            ) : pendingReactivationRequests.length ===
+            0 ? (
+              <p>
+                No pending reactivation requests.
+              </p>
+            ) : (
+              pendingReactivationRequests.map(
+                request => (
+                  <div
+                    key={request.id}
+                    className="request-item reactivation"
+                  >
+                    <h4>
+                      User #{request.user_id}
+                    </h4>
+
+                    <p className="request-email">
+                      {request.user_email || 'N/A'} requested account reactivation.
+                    </p>
+
+                    {request.reason && (
+                      <p className="request-message">
+                        📝 {request.reason}
+                      </p>
+                    )}
+
+                    <p className="request-date">
+                      📅 {new Date(request.created_at).toLocaleString()}
+                    </p>
+
+                    <div className="request-actions">
+                      <button
+                        className="approve-btn"
+                        onClick={() =>
+                          handleApproveReactivation(
+                            request.id
+                          )
+                        }
+                        disabled={
+                          processingReactivationId === request.id
+                        }
+                      >
+                        {processingReactivationId === request.id
+                          ? '⏳ Processing...'
+                          : '✓ Reactivate'}
+                      </button>
+
+                      <button
+                        className="reject-btn"
+                        onClick={() =>
+                          handleRejectReactivation(
+                            request.id
+                          )
+                        }
+                        disabled={
+                          processingReactivationId === request.id
+                        }
+                      >
+                        {processingReactivationId === request.id
+                          ? '⏳ Processing...'
+                          : '✕ Reject'}
+                      </button>
+                    </div>
+                  </div>
+                )
+              )
+            )}
+          </div>
+          </>
         )}
 
       </div>

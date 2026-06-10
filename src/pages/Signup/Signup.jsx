@@ -6,13 +6,16 @@ import {
   FaEyeSlash,
 } from 'react-icons/fa'
 
+import { useAuth } from '../../context/AuthContext'
 import { validateInvite, signupWithInvite } from '../../services/invitationService'
 import './Signup.css'
 
 const Signup = () => {
   const navigate = useNavigate()
+  const { updateCurrentUser } = useAuth()
   const [searchParams] = useSearchParams()
   const inviteToken = searchParams.get('invite')
+
 
   const [name, setName] =
     useState('')
@@ -99,7 +102,19 @@ const Signup = () => {
 
       if (response?.success) {
         alert('Account created successfully')
-        navigate('/login')
+        
+        // Auto-login the newly created user
+        if (response?.data) {
+          const newUser = {
+            ...response.data,
+            companyId: response.data.company_id,
+            is_active: true,
+            isActive: true,
+          }
+          updateCurrentUser(newUser)
+        }
+        
+        navigate('/dashboard')
       } else {
         setError(
           response?.message ||

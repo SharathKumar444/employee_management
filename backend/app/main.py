@@ -20,6 +20,7 @@ from app.routes.auth_routes import router as auth_router
 from app.routes.invitation_routes import router as invitation_router
 from app.routes.member_routes import router as member_router
 from app.routes.reactivation_routes import router as reactivation_router
+from app.routes.notification_routes import router as notification_router
 
 
 def ensure_invitation_schema():
@@ -114,6 +115,7 @@ app.include_router(auth_router)
 app.include_router(invitation_router)
 app.include_router(member_router)
 app.include_router(reactivation_router)
+app.include_router(notification_router)
 
 # =========================
 # DATABASE SESSION

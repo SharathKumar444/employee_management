@@ -235,19 +235,43 @@
    ADMIN REQUESTS
 ========================= */
 
-.pending-requests {
+.pending-requests,
+.pending-reactivation-requests {
   grid-column: 1 / -1;
 }
 
 .request-item {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 16px;
+  flex-direction: column;
+  padding: 18px;
   border-radius: 12px;
   border: 1px solid #e2e8f0;
   margin-top: 12px;
   background: #fafafa;
+  transition: all 0.3s ease;
+}
+
+.request-item:hover {
+  border-color: #cbd5e1;
+  background: #f8fafc;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.request-item.reactivation {
+  background: linear-gradient(135deg, #f0fdf4 0%, #f8fafc 100%);
+  border-color: #dcfce7;
+}
+
+.request-item.reactivation:hover {
+  border-color: #86efac;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.08);
+}
+
+.request-item h4 {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1e293b;
+  margin: 0 0 8px 0;
 }
 
 .request-user {
@@ -259,11 +283,30 @@
 .request-email {
   color: #64748b;
   margin-top: 5px;
+  font-size: 14px;
+}
+
+.request-message {
+  color: #475569;
+  font-size: 14px;
+  margin-top: 8px;
+  padding: 8px;
+  background: rgba(71, 85, 105, 0.05);
+  border-left: 3px solid #64748b;
+  border-radius: 4px;
+}
+
+.request-date {
+  color: #94a3b8;
+  font-size: 13px;
+  margin-top: 8px;
+  font-weight: 500;
 }
 
 .request-actions {
   display: flex;
   gap: 10px;
+  margin-top: 12px;
 }
 
 /* =========================
@@ -294,7 +337,7 @@
   background: #fff;
   color: #ef4444;
   border: 1px solid #ef4444;
-  padding: 30px 22px;
+  padding: 10px 22px;
   border-radius: 10px;
   font-weight: 600;
   cursor: pointer;
@@ -305,6 +348,46 @@
   background: #ef4444;
   color: white;
   transform: translateY(-2px);
+}
+
+.reject-btn:disabled,
+.approve-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.reject-btn:disabled:hover,
+.approve-btn:disabled:hover {
+  transform: none;
+  background: inherit;
+}
+
+/* =========================
+   REACTIVATION MESSAGE
+========================= */
+
+.reactivation-message {
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin-bottom: 12px;
+  font-weight: 600;
+  font-size: 14px;
+  animation: slideIn 0.3s ease;
+  background: #d1fae5;
+  color: #065f46;
+  border-left: 4px solid #10b981;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* =========================

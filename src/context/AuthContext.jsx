@@ -4,6 +4,7 @@ import {
   useState,
   useEffect,
 } from 'react'
+import { loginUser } from '../services/authService'
 
 const AuthContext = createContext()
 
@@ -73,36 +74,44 @@ export const AuthProvider = ({
     email,
     password
   ) => {
-    const users =
-      JSON.parse(
-        localStorage.getItem(
-          'users'
-        )
-      ) || []
-
-    const matchedUser =
-      users.find(
-        user =>
-          user.email === email &&
-          user.password === password
+    try {
+      console.log('AuthContext.login() called with:', { email, password })
+      
+      const response = await loginUser(
+        email,
+        password
       )
 
-    if (!matchedUser) {
+      console.log('loginUser response:', response)
+
+      if (!response?.success || !response?.data?.user) {
+        console.error('Login failed: invalid response structure', { response })
+        return null
+      }
+
+      const loggedInUser = normalizeUser(
+        response.data.user
+      )
+
+      console.log('Normalized user:', loggedInUser)
+
+      localStorage.setItem(
+        'currentUser',
+        JSON.stringify(loggedInUser)
+      )
+
+      setCurrentUser(loggedInUser)
+      return loggedInUser
+    } catch (error) {
+      console.error('Auth login error:', {
+        message: error?.message,
+        code: error?.code,
+        response: error?.response?.data,
+        status: error?.response?.status,
+        fullError: error
+      })
       return null
     }
-
-    const loggedInUser = normalizeUser({
-      ...matchedUser,
-      role: matchedUser.role || 'user',
-    })
-
-    localStorage.setItem(
-      'currentUser',
-      JSON.stringify(loggedInUser)
-    )
-
-    setCurrentUser(loggedInUser)
-    return loggedInUser
   }
 
   /* =========================

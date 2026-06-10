@@ -92,6 +92,17 @@ export const signupWithInvite = async (
     { timeout: 8000 }
   )
 
+  // Auto-store the newly created user in localStorage for seamless login
+  if (response.data?.success && response.data?.data) {
+    const newUser = {
+      ...response.data.data,
+      companyId: response.data.data.company_id,
+      is_active: true,
+      isActive: true,
+    }
+    localStorage.setItem('currentUser', JSON.stringify(newUser))
+  }
+
   return response.data
 }
 

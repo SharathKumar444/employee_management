@@ -29,10 +29,11 @@ def get_db():
 def submit_request(
     user_id: int = Body(...),
     company_id: str = Body(...),
+    reason: Optional[str] = Body(None),
     db: Session = Depends(get_db)
 ):
     try:
-        return create_request(db, user_id, company_id)
+        return create_request(db, user_id, company_id, reason)
     except Exception as exc:
         raise HTTPException(status_code=500, detail=str(exc))
 
@@ -51,26 +52,44 @@ def fetch_requests(
 @router.put("/{request_id}/approve")
 def approve(
     request_id: int,
-    admin_email: Optional[str] = Query(None),
+    admin_name: Optional[str] = Query(None),
+    comment: Optional[str] = Body(None),
     db: Session = Depends(get_db)
 ):
-    result = approve_request(db, request_id, admin_email)
+    try:
+        if not admin_name:
+            raise HTTPException(status_code=400, detail="admin_name is required")
+        
+        result = approve_request(db, request_id, admin_name, comment)
 
-    if not result:
-        raise HTTPException(status_code=404, detail="Request not found")
+        if not result:
+            raise HTTPException(status_code=404, detail="Request not found")
 
-    return result
+        return result
+    except HTTPException:
+        raise
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=str(exc))
 
 
 @router.put("/{request_id}/reject")
 def reject(
     request_id: int,
-    admin_email: Optional[str] = Query(None),
+    admin_name: Optional[str] = Query(None),
+    comment: Optional[str] = Body(None),
     db: Session = Depends(get_db)
 ):
-    result = reject_request(db, request_id, admin_email)
+    try:
+        if not admin_name:
+            raise HTTPException(status_code=400, detail="admin_name is required")
+        
+        result = reject_request(db, request_id, admin_name, comment)
 
-    if not result:
-        raise HTTPException(status_code=404, detail="Request not found")
+        if not result:
+            raise HTTPException(status_code=404, detail="Request not found")
 
-    return result
+        return result
+    except HTTPException:
+        raise
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=str(exc))

@@ -19,80 +19,63 @@ const AdminReactivationRequests = () => {
     currentUser?.companyId ||
     currentUser?.company_id
 
-  // ================= LOAD REQUESTS =================
-
   useEffect(() => {
-    if (companyId) {
-      loadRequests()
-    }
+    if (companyId) loadRequests()
   }, [companyId])
 
   const loadRequests = async () => {
     try {
       setLoading(true)
-      const response = await getReactivationRequests(companyId)
-
-      if (response?.success && response?.data) {
-        setRequests(response.data)
-      }
-    } catch (error) {
-      console.error('Load requests error:', error)
+      const res = await getReactivationRequests(companyId)
+      if (res?.success) setRequests(res.data)
+    } catch (err) {
+      console.error('Load requests error', err)
     } finally {
       setLoading(false)
     }
   }
 
-  // ================= APPROVE REQUEST =================
-
   const handleApprove = async requestId => {
+    const comment = window.prompt('Optional comment for this approval:')
     try {
       setActionLoading(requestId)
-      const response = await approveRequest(requestId, currentUser?.email)
-
-      if (response?.success) {
+      const res = await approveRequest(requestId, currentUser?.email, comment)
+      if (res?.success) {
         setSuccessMessage('✅ Reactivation approved successfully')
         await loadRequests()
         setTimeout(() => setSuccessMessage(''), 3000)
       }
-    } catch (error) {
-      console.error('Approve error:', error)
+    } catch (err) {
+      console.error('Approve error', err)
       alert('Failed to approve request')
     } finally {
       setActionLoading(null)
     }
   }
 
-  // ================= REJECT REQUEST =================
-
   const handleReject = async requestId => {
+    const comment = window.prompt('Optional comment for this rejection:')
     try {
       setActionLoading(requestId)
-      const response = await rejectRequest(requestId, currentUser?.email)
-
-      if (response?.success) {
+      const res = await rejectRequest(requestId, currentUser?.email, comment)
+      if (res?.success) {
         setSuccessMessage('❌ Reactivation request rejected')
         await loadRequests()
         setTimeout(() => setSuccessMessage(''), 3000)
       }
-    } catch (error) {
-      console.error('Reject error:', error)
+    } catch (err) {
+      console.error('Reject error', err)
       alert('Failed to reject request')
     } finally {
       setActionLoading(null)
     }
   }
 
-  // ================= FILTER REQUESTS =================
-
   const filteredRequests = requests.filter(
-    req => filterStatus === 'All' || req.status === filterStatus
+    r => filterStatus === 'All' || r.status === filterStatus
   )
 
-  // ================= GET USER INFO =================
-
-  const getUserInfo = (request) => {
-    return request.user_email || `User #${request.user_id}`
-  }
+  const getUserInfo = request => request.user_email || `User #${request.user_id}`
 
   return (
     <div className="admin-reactivation-page">
@@ -102,20 +85,11 @@ const AdminReactivationRequests = () => {
         <strong>{currentUser?.companyName || currentUser?.company || 'your company'}</strong>
       </p>
 
-      {/* ================= SUCCESS MESSAGE ================= */}
-      {successMessage && (
-        <div className="success-banner">
-          {successMessage}
-        </div>
-      )}
+      {successMessage && <div className="success-banner">{successMessage}</div>}
 
-      {/* ================= FILTER SECTION ================= */}
       <div className="filter-section">
         <label>Filter by Status:</label>
-        <select
-          value={filterStatus}
-          onChange={e => setFilterStatus(e.target.value)}
-        >
+        <select value={filterStatus} onChange={e => setFilterStatus(e.target.value)}>
           <option value="All">All</option>
           <option value="Pending">Pending</option>
           <option value="Approved">Approved</option>
@@ -123,9 +97,79 @@ const AdminReactivationRequests = () => {
         </select>
       </div>
 
-      {/* ================= REQUESTS TABLE ================= */}
       {loading ? (
-        <p>Loading reactivation requests...</p>\n      ) : filteredRequests.length === 0 ? (\n        <div className=\"empty-state\">\n          <p>\n            {filterStatus === 'All'\n              ? 'No reactivation requests found.'\n              : `No ${filterStatus.toLowerCase()} requests found.`}\n          </p>\n        </div>\n      ) : (\n        <div className=\"table-wrap\">\n          <table className=\"requests-table\">\n            <thead>\n              <tr>\n                <th>Request ID</th>\n                <th>User</th>\n                <th>Submitted Date</th>\n                <th>Status</th>\n                <th>Action</th>\n              </tr>\n            </thead>\n            <tbody>\n              {filteredRequests.map(request => (\n                <tr key={request.id}>\n                  <td>#{request.id}</td>\n                  <td>{getUserInfo(request.user_id)}</td>\n                  <td>{new Date(request.created_at).toLocaleDateString()}</td>\n                  <td>\n                    <span\n                      className={`status-badge ${\n                        request.status === 'Approved'\n                          ? 'approved'\n                          : request.status === 'Rejected'\n                            ? 'rejected'\n                            : 'pending'\n                      }`}\n                    >\n                      {request.status}\n                    </span>\n                  </td>\n                  <td className=\"action-cell\">\n                    {request.status === 'Pending' ? (\n                      <>\n                        <button\n                          className=\"approve-btn\"\n                          onClick={() => handleApprove(request.id)}\n                          disabled={actionLoading === request.id}\n                        >\n                          {actionLoading === request.id ? 'Processing...' : 'Approve'}\n                        </button>\n                        <button\n                          className=\"reject-btn\"\n                          onClick={() => handleReject(request.id)}\n                          disabled={actionLoading === request.id}\n                        >\n                          {actionLoading === request.id ? 'Processing...' : 'Reject'}\n                        </button>\n                      </>\n                    ) : (\n                      <span className=\"completed\">{request.status}</span>\n                    )}\n                  </td>\n                </tr>\n              ))}\n            </tbody>\n          </table>\n        </div>\n      )}\n\n      {/* ================= STATS ================= */}\n      <div className=\"stats-section\">\n        <div className=\"stat-card\">\n          <h3>Pending</h3>\n          <p className=\"stat-number\">\n            {requests.filter(r => r.status === 'Pending').length}\n          </p>\n        </div>\n        <div className=\"stat-card\">\n          <h3>Approved</h3>\n          <p className=\"stat-number\">\n            {requests.filter(r => r.status === 'Approved').length}\n          </p>\n        </div>\n        <div className=\"stat-card\">\n          <h3>Rejected</h3>\n          <p className=\"stat-number\">\n            {requests.filter(r => r.status === 'Rejected').length}\n          </p>\n        </div>\n      </div>\n    </div>\n  )
+        <p>Loading reactivation requests...</p>
+      ) : filteredRequests.length === 0 ? (
+        <div className="empty-state">
+          <p>
+            {filterStatus === 'All'
+              ? 'No reactivation requests found.'
+              : `No ${filterStatus.toLowerCase()} requests found.`}
+          </p>
+        </div>
+      ) : (
+        <div className="table-wrap">
+          <table className="requests-table">
+            <thead>
+              <tr>
+                <th>Request ID</th>
+                <th>User</th>
+                <th>Reason</th>
+                <th>Submitted Date</th>
+                <th>Status</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredRequests.map(request => (
+                <tr key={request.id}>
+                  <td>#{request.id}</td>
+                  <td>{getUserInfo(request)}</td>
+                  <td className="reason-cell">{request.reason || '-'}</td>
+                  <td>{new Date(request.created_at).toLocaleDateString()}</td>
+                  <td>
+                    <span
+                      className={`status-badge ${
+                        request.status === 'Approved'
+                          ? 'approved'
+                          : request.status === 'Rejected'
+                          ? 'rejected'
+                          : 'pending'
+                      }`}
+                    >
+                      {request.status}
+                    </span>
+                  </td>
+                  <td className="action-cell">
+                    {request.status === 'Pending' ? (
+                      <>
+                        <button
+                          className="approve-btn"
+                          onClick={() => handleApprove(request.id)}
+                          disabled={actionLoading === request.id}
+                        >
+                          {actionLoading === request.id ? 'Processing...' : 'Approve'}
+                        </button>
+                        <button
+                          className="reject-btn"
+                          onClick={() => handleReject(request.id)}
+                          disabled={actionLoading === request.id}
+                        >
+                          {actionLoading === request.id ? 'Processing...' : 'Reject'}
+                        </button>
+                      </>
+                    ) : (
+                      <span className="small-muted">Reviewed</span>
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
+  )
 }
 
 export default AdminReactivationRequests
