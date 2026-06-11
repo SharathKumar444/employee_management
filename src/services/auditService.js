@@ -13,11 +13,20 @@ const api = axios.create({
 // =========================
 // FETCH ALL AUDIT LOGS
 // =========================
-export const fetchAuditLogs = async () => {
+export const fetchAuditLogs = async (companyId) => {
   try {
-    console.log("📡 Fetching audit logs...")
+    if (!companyId) {
+      console.warn("⚠️ fetchAuditLogs missing companyId")
+      return []
+    }
 
-    const response = await api.get("/audit-logs")
+    console.log("📡 Fetching audit logs for companyId", companyId)
+
+    const response = await api.get("/audit-logs", {
+      params: {
+        company_id: companyId,
+      },
+    })
 
     console.log("✅ Audit Logs Response:", response.data)
 
@@ -61,9 +70,11 @@ export const fetchCompanyAuditLogs = async (companyId) => {
       return []
     }
 
-    const response = await api.get(
-      `/audit-logs/${companyId}`
-    )
+    const response = await api.get("/audit-logs", {
+      params: {
+        company_id: companyId,
+      },
+    })
 
     if (
       response.data?.success &&

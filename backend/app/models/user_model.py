@@ -13,4 +13,5 @@ class User(Base):
     role = Column(String, default="user")
     company_id = Column(String, nullable=False)
     is_active = Column(Boolean, default=True)
+    attendance_access = Column(Boolean, default=False)
     deactivated_by = Column(String, nullable=True)

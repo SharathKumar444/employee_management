@@ -5,6 +5,11 @@ import {
   approveRequest,
   rejectRequest,
 } from '../../services/reactivationService'
+import {
+  getCompanyLeaveRequests,
+  approveLeaveRequest,
+  rejectLeaveRequest,
+} from '../../services/leaveService'
 
 import './Settings.css'
 
@@ -15,6 +20,7 @@ import {
   FaMoon,
   FaSun,
   FaUserShield,
+  FaCalendarAlt,
 } from 'react-icons/fa'
 
 const Settings = () => {
@@ -36,6 +42,9 @@ const Settings = () => {
     useState([])
 
   const [pendingReactivationRequests, setPendingReactivationRequests] =
+    useState([])
+
+  const [pendingLeaveRequests, setPendingLeaveRequests] =
     useState([])
 
   const [loadingReactivation, setLoadingReactivation] =
@@ -73,6 +82,11 @@ const Settings = () => {
       // eslint-disable-next-line react-hooks/immutability
       loadReactivationRequests()
     }
+
+    if (currentUser?.role === 'admin' && companyId) {
+      // eslint-disable-next-line react-hooks/immutability
+      loadPendingLeaveRequests()
+    }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentUser, companyId])
 
@@ -91,6 +105,19 @@ const Settings = () => {
     }
   }
 
+  const loadPendingLeaveRequests = async () => {
+    try {
+      const res = await getCompanyLeaveRequests(companyId, 'pending')
+      if (res?.success && Array.isArray(res.data)) {
+        setPendingLeaveRequests(res.data)
+      } else {
+        setPendingLeaveRequests([])
+      }
+    } catch (err) {
+      console.error('Load pending leave requests error:', err)
+      setPendingLeaveRequests([])
+    }
+  }
 
   const loadPendingRequests = () => {
     const requests =
@@ -109,6 +136,40 @@ const Settings = () => {
       )
 
     setPendingRequests(filtered)
+  }
+
+  const handleApproveLeaveRequest = async (leaveId) => {
+    try {
+      const res = await approveLeaveRequest(
+        leaveId,
+        currentUser.email,
+        companyId
+      )
+      if (res?.success) {
+        await loadPendingLeaveRequests()
+      } else {
+        console.error('Approve leave request failed', res)
+      }
+    } catch (err) {
+      console.error('Approve leave request error:', err)
+    }
+  }
+
+  const handleRejectLeaveRequest = async (leaveId) => {
+    try {
+      const res = await rejectLeaveRequest(
+        leaveId,
+        currentUser.email,
+        companyId
+      )
+      if (res?.success) {
+        await loadPendingLeaveRequests()
+      } else {
+        console.error('Reject leave request failed', res)
+      }
+    } catch (err) {
+      console.error('Reject leave request error:', err)
+    }
   }
 
   const toggleTheme = () => {
@@ -350,11 +411,13 @@ const Settings = () => {
   }
 
   const handleApproveReactivation = async (requestId) => {
-    if (!currentUser?.name) {
-      setReactivationMessage('❌ Unable to determine admin name')
+    const adminIdentifier = currentUser?.email || currentUser?.name
+
+    if (!adminIdentifier) {
+      setReactivationMessage('❌ Unable to determine admin identifier')
       return
     }
-    
+
     const comment = window.prompt('Optional comment for this approval:')
     if (comment === null) return // User cancelled
     
@@ -362,8 +425,8 @@ const Settings = () => {
       setProcessingReactivationId(requestId)
       setReactivationMessage('')
       
-      console.log('Approving request:', { requestId, adminName: currentUser?.name, comment })
-      const res = await approveRequest(requestId, currentUser?.name, comment)
+      console.log('Approving request:', { requestId, adminIdentifier, comment })
+      const res = await approveRequest(requestId, adminIdentifier, comment)
       console.log('Approve response:', res)
       
       if (res?.success) {
@@ -386,11 +449,13 @@ const Settings = () => {
   }
 
   const handleRejectReactivation = async (requestId) => {
-    if (!currentUser?.name) {
-      setReactivationMessage('❌ Unable to determine admin name')
+    const adminIdentifier = currentUser?.email || currentUser?.name
+
+    if (!adminIdentifier) {
+      setReactivationMessage('❌ Unable to determine admin identifier')
       return
     }
-    
+
     const comment = window.prompt('Optional comment for this rejection:')
     if (comment === null) return // User cancelled
     
@@ -398,8 +463,8 @@ const Settings = () => {
       setProcessingReactivationId(requestId)
       setReactivationMessage('')
       
-      console.log('Rejecting request:', { requestId, adminName: currentUser?.name, comment })
-      const res = await rejectRequest(requestId, currentUser?.name, comment)
+      console.log('Rejecting request:', { requestId, adminIdentifier, comment })
+      const res = await rejectRequest(requestId, adminIdentifier, comment)
       console.log('Reject response:', res)
       
       if (res?.success) {
@@ -708,6 +773,58 @@ const Settings = () => {
                   </div>
                 )
               )
+            )}
+          </div>
+
+          <div className="settings-card pending-leave-requests">
+            <div className="card-title">
+              <FaCalendarAlt />
+              <h3>
+                Pending Leave
+                Requests
+              </h3>
+            </div>
+
+            {pendingLeaveRequests.length === 0 ? (
+              <p>
+                No pending leave requests.
+              </p>
+            ) : (
+              pendingLeaveRequests.map(request => (
+                <div
+                  key={request.id}
+                  className="request-item leave-request"
+                >
+                  <h4>
+                    {request.user_name || request.user_email || 'Leave Request'}
+                  </h4>
+
+                  <p className="request-email">
+                    {request.leave_type?.charAt(0).toUpperCase() + request.leave_type?.slice(1)} leave • {new Date(request.start_date).toLocaleDateString()} - {new Date(request.end_date).toLocaleDateString()}
+                  </p>
+
+                  {request.reason && (
+                    <p className="request-message">
+                      📝 {request.reason}
+                    </p>
+                  )}
+
+                  <div className="request-actions">
+                    <button
+                      className="approve-btn"
+                      onClick={() => handleApproveLeaveRequest(request.id)}
+                    >
+                      Approve
+                    </button>
+                    <button
+                      className="reject-btn"
+                      onClick={() => handleRejectLeaveRequest(request.id)}
+                    >
+                      Reject
+                    </button>
+                  </div>
+                </div>
+              ))
             )}
           </div>
           </>

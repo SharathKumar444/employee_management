@@ -110,10 +110,12 @@ const Signup = () => {
             companyId: response.data.company_id,
             is_active: true,
             isActive: true,
+            attendance_access: response.data.attendance_access ?? false,
+            attendanceAccess: response.data.attendanceAccess ?? response.data.attendance_access ?? false,
           }
           updateCurrentUser(newUser)
         }
-        
+
         navigate('/dashboard')
       } else {
         setError(

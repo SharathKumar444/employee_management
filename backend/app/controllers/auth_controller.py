@@ -32,6 +32,8 @@ def login_user(
                 "companyId": user.company_id,
                 "is_active": user.is_active,
                 "isActive": user.is_active,
+                "attendance_access": user.attendance_access,
+                "attendanceAccess": user.attendance_access,
             },
             "token": f"token_{user.id}_{user.email}"
         }

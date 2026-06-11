@@ -8,14 +8,21 @@ def log_action(
     user_name: str,
     action: str,
     related_user: str = None,
-    role: str = None
+    role: str = None,
+    company_id: str = None
 ):
+    """
+    Create an audit log entry.
+
+    Backwards-compatible: accepts `role` param but stores it in `company_id`
+    if `company_id` is not provided.
+    """
     try:
         log = AuditLog(
-            user_name=user_name,
+            performed_by=user_name,
             action=action,
-            related_user=related_user,
-            role=role,
+            target_user=related_user,
+            company_id=company_id or role,
             timestamp=datetime.utcnow()
         )
 

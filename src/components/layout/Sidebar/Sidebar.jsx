@@ -97,6 +97,11 @@ const Sidebar = () => {
     <span>Dashboard</span>
   </NavLink>
 
+  <NavLink to="/attendance" className={linkClass}>
+    <FaClipboardCheck />
+    <span>Attendance</span>
+  </NavLink>
+
   {/* ADMIN ONLY */}
   {role === "admin" && (
     <>
@@ -105,7 +110,7 @@ const Sidebar = () => {
         <span>Employees</span>
       </NavLink>
 
-          <NavLink to="/members" className={linkClass}>
+      <NavLink to="/members" className={linkClass}>
         <FaUsers />
         <span>Members</span>
       </NavLink>
@@ -123,11 +128,6 @@ const Sidebar = () => {
       <NavLink to="/departments" className={linkClass}>
         <FaBuilding />
         <span>Departments</span>
-      </NavLink>
-
-      <NavLink to="/attendance" className={linkClass}>
-        <FaClipboardCheck />
-        <span>Attendance</span>
       </NavLink>
 
       <NavLink to="/audit-logs" className={linkClass}>

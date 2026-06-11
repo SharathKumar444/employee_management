@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 
 import {
   FaBell,
@@ -18,8 +18,20 @@ import { useNavigate } from 'react-router-dom'
 
 import { useAuth } from '../../../context/AuthContext'
 
+import { getMembers } from '../../../services/memberService'
+
 import './Navbar.css'
-import { getNotifications, markAllNotificationsRead } from '../../../services/notificationService'
+import { getNotifications, markAllNotificationsRead, markNotificationRead } from '../../../services/notificationService'
+import {
+  approveAttendanceRequest,
+  rejectAttendanceRequest,
+  approveAttendanceRequestBackend,
+  rejectAttendanceRequestBackend,
+} from '../../../services/attendanceService'
+import {
+  approveLeaveRequest,
+  rejectLeaveRequest,
+} from '../../../services/leaveService'
 
 const Navbar = ({ toggleSidebar }) => {
 
@@ -49,8 +61,105 @@ const Navbar = ({ toggleSidebar }) => {
     setShowNotifications,
   ] = useState(false)
 
+  const visibleNotifications = notifications.filter(notification => !notification.is_read)
+
+  const getCompanyId = user =>
+    user?.companyId ||
+    user?.company_id ||
+    user?.company?.companyId ||
+    user?.company?.company_id ||
+    null
+
+  const resolveLeaveRequestId = notification => {
+    if (!notification) return null
+    if (notification.requestId) return notification.requestId
+    if (notification.parsed?.request_id) return notification.parsed?.request_id
+    if (notification.parsed?.id) return notification.parsed?.id
+
+    const rawPayload = notification.payload || notification.message || ''
+    if (typeof rawPayload !== 'string' || !rawPayload) {
+      return null
+    }
+
+    try {
+      const parsed = JSON.parse(rawPayload)
+      if (parsed?.request_id) return parsed.request_id
+      if (parsed?.id) return parsed.id
+    } catch {
+      // Not JSON payload
+    }
+
+    const requestMatch = rawPayload.match(/#(\d+)/) ||
+      rawPayload.match(/"request_id"\s*:\s*"?(\d+)"?/) ||
+      rawPayload.match(/request_id\s*:\s*"?(\d+)"?/) ||
+      rawPayload.match(/"id"\s*:\s*"?(\d+)"?/) ||
+      rawPayload.match(/id\s*:\s*"?(\d+)"?/) ||
+      rawPayload.match(/leave request\s*#(\d+)/i)
+
+    return requestMatch?.[1] || null
+  }
+
+  const resolveAttendanceRequestUserId = async (
+    notification,
+    companyId
+  ) => {
+    if (!notification || !companyId) return null
+
+    if (notification.requestUserId || notification.requestUserId === 0) {
+      return notification.requestUserId
+    }
+
+    if (notification.userId || notification.user_id) {
+      return notification.userId || notification.user_id
+    }
+
+    const rawPayload = notification.payload || notification.message || ''
+    if (typeof rawPayload === 'string' && rawPayload) {
+      try {
+        const parsed = JSON.parse(rawPayload)
+        if (parsed?.user_id) return parsed.user_id
+        if (parsed?.userId) return parsed.userId
+        if (parsed?.user_email) {
+          const membersRes = await getMembers(companyId)
+          if (membersRes?.success && Array.isArray(membersRes.members)) {
+            const member = membersRes.members.find(
+              m => m.email === parsed.user_email
+            )
+            return member?.id || null
+          }
+        }
+      } catch {
+        const emailMatch = rawPayload.match(/\(([^)]+)\)/)
+        if (emailMatch) {
+          const userEmail = emailMatch[1]
+          const membersRes = await getMembers(companyId)
+          if (membersRes?.success && Array.isArray(membersRes.members)) {
+            const member = membersRes.members.find(
+              m => m.email === userEmail
+            )
+            return member?.id || null
+          }
+        }
+      }
+    }
+
+    if (notification.userEmail || notification.user_email) {
+      const userEmail = notification.userEmail || notification.user_email
+      const membersRes = await getMembers(companyId)
+      if (membersRes?.success && Array.isArray(membersRes.members)) {
+        const member = membersRes.members.find(
+          m => m.email === userEmail
+        )
+        return member?.id || null
+      }
+    }
+
+    return null
+  }
+
   /* =========================
      LOAD THEME
+  =========================
   ========================= */
 
   useEffect(() => {
@@ -72,31 +181,190 @@ const Navbar = ({ toggleSidebar }) => {
      LOAD NOTIFICATIONS
   ========================= */
 
-  useEffect(() => {
-    const load = async () => {
-      if (!currentUser?.id) return
-      try {
-        const res = await getNotifications(currentUser.id)
-        if (res?.success) {
-          const mapped = res.data.map(n => ({
-            id: n.id,
-            message: n.payload,
-            time: new Date(n.created_at).toLocaleString(),
-            is_read: n.is_read,
-          }))
-          setNotifications(mapped)
-          localStorage.setItem('notifications', JSON.stringify(mapped))
-        }
-      } catch (err) {
-        // fallback to localStorage
-        const saved = JSON.parse(localStorage.getItem('notifications')) || []
-        setNotifications(saved)
+  const loadNotifications = useCallback(async () => {
+    if (!currentUser?.id && !currentUser?.email) return
+
+    try {
+      const res = await getNotifications(
+        currentUser.id,
+        currentUser.email
+      )
+      if (res?.success) {
+        const mapped = res.data.map(n => ({
+          ...n,
+          time: new Date(n.created_at).toLocaleString(),
+        }))
+        setNotifications(mapped)
       }
+    } catch {
+      const saved = JSON.parse(localStorage.getItem('notifications')) || []
+      const userNotifications = saved.filter(
+        note =>
+          note.recipient_user_id === currentUser?.id ||
+          note.recipient_email === currentUser?.email
+      )
+      setNotifications(userNotifications)
+    }
+  }, [currentUser])
+
+  useEffect(() => {
+    const fetchNotifications = async () => {
+      await loadNotifications()
     }
 
-    load()
+    fetchNotifications()
 
-  }, [])
+    const handleNotificationUpdate = () => {
+      fetchNotifications()
+    }
+
+    window.addEventListener(
+      'notification-update',
+      handleNotificationUpdate
+    )
+
+    window.addEventListener('storage', handleNotificationUpdate)
+
+    return () => {
+      window.removeEventListener(
+        'notification-update',
+        handleNotificationUpdate
+      )
+      window.removeEventListener(
+        'storage',
+        handleNotificationUpdate
+      )
+    }
+  }, [loadNotifications])
+
+  const handleAttendanceNotificationAction = async (
+    notification,
+    action
+  ) => {
+    if (!currentUser) return
+
+    try {
+      const companyId = getCompanyId(currentUser)
+      const leaveRequestId = notification.type === 'leave_request' ? resolveLeaveRequestId(notification) : null
+
+      if (notification.type === 'leave_request') {
+        if (!leaveRequestId) {
+          console.error('Cannot approve/reject leave request: request id missing', notification)
+          return
+        }
+
+        let res = null
+        if (action === 'approve') {
+          res = await approveLeaveRequest(leaveRequestId, currentUser.email, companyId)
+          if (!res?.success) console.error('Leave approve failed', res)
+        } else {
+          res = await rejectLeaveRequest(leaveRequestId, currentUser.email, companyId)
+          if (!res?.success) console.error('Leave reject failed', res)
+        }
+
+        if (res?.success && notification.id) {
+          await markNotificationRead(notification.id)
+        }
+      } else if (notification.type === 'attendance-request') {
+        const requestId = notification.requestId
+        let res = null
+
+        if (requestId) {
+          if (action === 'approve') {
+            res = await approveAttendanceRequest(requestId, currentUser)
+          } else {
+            res = await rejectAttendanceRequest(requestId, currentUser)
+          }
+        }
+
+        if (!res) {
+          const resolvedUserId = await resolveAttendanceRequestUserId(
+            notification,
+            companyId
+          )
+
+          if (!resolvedUserId) {
+            console.error('Cannot resolve attendance request user id for notification', notification)
+            return
+          }
+
+          if (action === 'approve') {
+            res = await approveAttendanceRequestBackend(resolvedUserId, currentUser.email, companyId)
+          } else {
+            res = await rejectAttendanceRequestBackend(resolvedUserId, currentUser.email, companyId)
+          }
+        }
+
+        if (!res?.success) {
+          console.error('Attendance request action failed', res)
+        }
+      } else {
+        // Server-side notification (payload), resolve target user from structured or legacy payload
+        const rawPayload = notification.payload || notification.message || ''
+        let parsedPayload = null
+        let targetEmail = null
+        let targetUserIdFromPayload = null
+
+        try {
+          parsedPayload = rawPayload ? JSON.parse(rawPayload) : null
+        } catch {
+          parsedPayload = null
+        }
+
+        if (parsedPayload) {
+          targetEmail = parsedPayload.user_email || parsedPayload.userEmail || null
+          targetUserIdFromPayload = parsedPayload.user_id || parsedPayload.userId || null
+        }
+
+        if (!targetEmail) {
+          const emailMatch = rawPayload.match(/\(([^)]+)\)/)
+          targetEmail = emailMatch ? emailMatch[1] : null
+        }
+
+        if (!targetEmail) {
+          console.error('Cannot parse target email from notification payload', rawPayload)
+          return
+        }
+
+        const targetUserId = notification.requestUserId || notification.requestUserId === 0 ? notification.requestUserId : targetUserIdFromPayload
+        const targetUserEmail = notification.requestUserEmail || notification.requestUserEmail === '' ? notification.requestUserEmail : targetEmail
+
+        let resolvedUserId = targetUserId
+
+        if (!resolvedUserId) {
+          try {
+            const membersRes = await getMembers(companyId)
+            if (membersRes?.success && Array.isArray(membersRes.members)) {
+              const targetMember = membersRes.members.find(m => m.email === targetUserEmail)
+              resolvedUserId = targetMember?.id
+            }
+          } catch (err) {
+            console.error('Failed to resolve member by email', err)
+          }
+        }
+
+        if (!resolvedUserId) {
+          console.error('Target user id not found for notification', notification)
+          return
+        }
+
+        if (action === 'approve') {
+          const res = await approveAttendanceRequestBackend(resolvedUserId, currentUser.email, companyId)
+          if (!res?.success) console.error('Backend approve failed', res)
+        } else {
+          const res = await rejectAttendanceRequestBackend(resolvedUserId, currentUser.email, companyId)
+          if (!res?.success) console.error('Backend reject failed', res)
+        }
+      }
+
+      // Reload notifications and dispatch events
+      await loadNotifications()
+      window.dispatchEvent(new Event('attendance-access-updated'))
+      window.dispatchEvent(new Event('notification-update'))
+    } catch (err) {
+      console.error('Failed to update attendance request', err)
+    }
+  }
 
   /* =========================
      TOGGLE THEME
@@ -139,8 +407,11 @@ const Navbar = ({ toggleSidebar }) => {
   const clearNotifications =
     () => {
 
-      if (currentUser?.id) {
-        markAllNotificationsRead(currentUser.id).catch(() => {})
+      if (currentUser?.id || currentUser?.email) {
+        markAllNotificationsRead(
+          currentUser.id,
+          currentUser.email
+        ).catch(() => {})
       }
 
       localStorage.removeItem('notifications')
@@ -257,11 +528,11 @@ const Navbar = ({ toggleSidebar }) => {
 
               <FaBell />
 
-              {notifications.length >
+              {visibleNotifications.length >
                 0 && (
                 <span className="notification-badge">
                   {
-                    notifications.length
+                    visibleNotifications.length
                   }
                 </span>
               )}
@@ -280,7 +551,7 @@ const Navbar = ({ toggleSidebar }) => {
                     Notifications
                   </h4>
 
-                  {notifications.length >
+                  {visibleNotifications.length >
                     0 && (
                     <button
                       className="clear-btn"
@@ -294,7 +565,7 @@ const Navbar = ({ toggleSidebar }) => {
 
                 </div>
 
-                {notifications.length ===
+                {visibleNotifications.length ===
                 0 ? (
 
                   <div className="empty-notification">
@@ -303,17 +574,18 @@ const Navbar = ({ toggleSidebar }) => {
 
                 ) : (
 
-                  notifications
-                    .slice()
-                    .reverse()
-                    .map(notification => (
+                  <div className="notification-body">
+                    {visibleNotifications
+                      .slice()
+                      .reverse()
+                      .map(notification => (
 
-                      <div
-                        key={
-                          notification.id
-                        }
-                        className="notification-item"
-                      >
+                        <div
+                          key={
+                            notification.id
+                          }
+                          className="notification-item"
+                        >
 
                         <div className="notification-dot" />
 
@@ -331,11 +603,48 @@ const Navbar = ({ toggleSidebar }) => {
                             }
                           </span>
 
+                          {(currentUser?.role === 'admin') && (
+                            ((notification.type === 'attendance-request' && notification.status === 'pending') || notification.type === 'attendance_access_request' || (notification.type === 'leave_request' && notification.status === 'pending')) && (
+                              <div className="notification-actions">
+                                <button
+                                  className="approve-btn"
+                                  onClick={() =>
+                                    handleAttendanceNotificationAction(
+                                      notification,
+                                      'approve'
+                                    )
+                                  }
+                                >
+                                  Approve
+                                </button>
+                                <button
+                                  className="reject-btn"
+                                  onClick={() =>
+                                    handleAttendanceNotificationAction(
+                                      notification,
+                                      'reject'
+                                    )
+                                  }
+                                >
+                                  Reject
+                                </button>
+                              </div>
+                            )
+                          )}
+
                         </div>
 
                       </div>
-                    ))
-                )}
+                      ))}
+                    </div>
+
+                  )}
+
+                  <div className="notification-footer">
+                    <button onClick={() => { setShowNotifications(false); window.dispatchEvent(new Event('storage')); navigate('/notifications') }}>
+                      View all
+                    </button>
+                  </div>
 
               </div>
             )}

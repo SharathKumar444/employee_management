@@ -21,6 +21,7 @@ import Invitations from '../pages/Invitations/Invitations'
 import AdminReactivationRequests from '../pages/AdminReactivationRequests/AdminReactivationRequests'
 import AccountDeactivated from '../pages/AccountDeactivated/AccountDeactivated'
 import Reactivation from '../pages/Reactivation/Reactivation'
+import Notifications from '../pages/Notifications/Notifications'
 
 // LAYOUT
 import DashboardLayout from '../components/layout/DashboardLayout/DashboardLayout'
@@ -71,6 +72,7 @@ const AppRoutes = () => {
         <Route path="departments" element={<Departments />} />
         <Route path="attendance" element={<Attendance />} />
         <Route path="settings" element={<Settings />} />
+        <Route path="notifications" element={<Notifications />} />
         <Route path="companies" element={<Companies />} />
         <Route
           path="admin-role-requests"

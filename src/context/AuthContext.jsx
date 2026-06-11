@@ -5,6 +5,7 @@ import {
   useEffect,
 } from 'react'
 import { loginUser } from '../services/authService'
+import { getNotifications } from '../services/notificationService'
 
 const AuthContext = createContext()
 
@@ -27,6 +28,13 @@ const normalizeUser = user => {
         ? user.isActive
         : true
 
+  const attendanceAccess =
+    user.attendance_access !== undefined
+      ? user.attendance_access
+      : user.attendanceAccess !== undefined
+        ? user.attendanceAccess
+        : false
+
   return {
     ...user,
     role: user.role || user.role_name || 'user',
@@ -34,6 +42,8 @@ const normalizeUser = user => {
     company_id: companyId,
     is_active: isActive,
     isActive,
+    attendance_access: attendanceAccess,
+    attendanceAccess,
   }
 }
 
@@ -61,9 +71,47 @@ export const AuthProvider = ({
     if (savedUser) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setCurrentUser(normalizeUser(savedUser))
+      syncCurrentUserAttendanceAccess()
     }
 
+    const handleAttendanceUpdate = () => {
+      refreshCurrentUser()
+      syncCurrentUserAttendanceAccess()
+    }
+
+    const handleNotificationUpdate = () => {
+      syncCurrentUserAttendanceAccess()
+    }
+
+    window.addEventListener(
+      'attendance-access-updated',
+      handleAttendanceUpdate
+    )
+    window.addEventListener(
+      'notification-update',
+      handleNotificationUpdate
+    )
+    window.addEventListener(
+      'storage',
+      handleNotificationUpdate
+    )
+
     setLoadingUser(false)
+
+    return () => {
+      window.removeEventListener(
+        'attendance-access-updated',
+        handleAttendanceUpdate
+      )
+      window.removeEventListener(
+        'notification-update',
+        handleNotificationUpdate
+      )
+      window.removeEventListener(
+        'storage',
+        handleNotificationUpdate
+      )
+    }
   }, [])
 
   /* =========================
@@ -129,19 +177,68 @@ export const AuthProvider = ({
       JSON.stringify(normalized)
     )
   }
+  const syncCurrentUserAttendanceAccess = async () => {
+    const savedUser = JSON.parse(
+      localStorage.getItem('currentUser')
+    )
 
+    if (!savedUser || !savedUser.id || !savedUser.email) {
+      return
+    }
+
+    const currentAccess =
+      savedUser.attendance_access !== undefined
+        ? savedUser.attendance_access
+        : savedUser.attendanceAccess !== undefined
+          ? savedUser.attendanceAccess
+          : false
+
+    if (currentAccess) {
+      return
+    }
+
+    try {
+      const response = await getNotifications(
+        savedUser.id,
+        savedUser.email
+      )
+
+      if (!response?.success || !Array.isArray(response.data)) {
+        return
+      }
+
+      const approvedNotification = response.data.some(
+        note =>
+          note.type === 'attendance_access_approved' ||
+          (note.type === 'attendance-update' && note.status === 'approved')
+      )
+
+      if (approvedNotification) {
+        const updatedUser = {
+          ...savedUser,
+          attendance_access: true,
+          attendanceAccess: true,
+        }
+
+        const normalized = normalizeUser(updatedUser)
+        setCurrentUser(normalized)
+        localStorage.setItem(
+          'currentUser',
+          JSON.stringify(normalized)
+        )
+      }
+    } catch (error) {
+      console.error(
+        'Failed to sync attendance access from notifications:',
+        error
+      )
+    }
+  }
   /* =========================
      REFRESH USER DATA
   ========================= */
 
-  const refreshCurrentUser = () => {
-    const users =
-      JSON.parse(
-        localStorage.getItem(
-          'users'
-        )
-      ) || []
-
+  function refreshCurrentUser() {
     const savedUser =
       JSON.parse(
         localStorage.getItem(
@@ -153,6 +250,22 @@ export const AuthProvider = ({
       return
     }
 
+    // First check if current user updated in localStorage
+    const normalized = normalizeUser(savedUser)
+    setCurrentUser(normalized)
+    localStorage.setItem(
+      'currentUser',
+      JSON.stringify(normalized)
+    )
+
+    // Also check users array for updates
+    const users =
+      JSON.parse(
+        localStorage.getItem(
+          'users'
+        )
+      ) || []
+
     const latestUser =
       users.find(
         user =>
@@ -160,11 +273,11 @@ export const AuthProvider = ({
       )
 
     if (latestUser) {
-      const normalized = normalizeUser(latestUser)
-      setCurrentUser(normalized)
+      const normalizedLatest = normalizeUser(latestUser)
+      setCurrentUser(normalizedLatest)
       localStorage.setItem(
         'currentUser',
-        JSON.stringify(normalized)
+        JSON.stringify(normalizedLatest)
       )
     }
   }

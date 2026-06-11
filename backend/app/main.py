@@ -11,6 +11,7 @@ from app.models.role_request_model import RoleRequest
 from app.models.audit_log_model import AuditLog
 from app.models.user_model import User
 from app.models.invitation_model import Invitation
+from app.models.attendance_model import Attendance, Leave
 
 from app.routes.employee_routes import router as employee_router
 from app.routes.role_request_routes import router as role_request_router
@@ -21,6 +22,9 @@ from app.routes.invitation_routes import router as invitation_router
 from app.routes.member_routes import router as member_router
 from app.routes.reactivation_routes import router as reactivation_router
 from app.routes.notification_routes import router as notification_router
+from app.routes.attendance_routes import router as attendance_router
+from app.routes.attendance_access_routes import router as attendance_access_router
+from app.routes.leave_routes import router as leave_router
 
 
 def ensure_invitation_schema():
@@ -116,6 +120,9 @@ app.include_router(invitation_router)
 app.include_router(member_router)
 app.include_router(reactivation_router)
 app.include_router(notification_router)
+app.include_router(attendance_router)
+app.include_router(attendance_access_router)
+app.include_router(leave_router)
 
 # =========================
 # DATABASE SESSION

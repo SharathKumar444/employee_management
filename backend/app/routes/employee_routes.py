@@ -66,8 +66,13 @@ def add_employee(employee: EmployeeSchema, db: Session = Depends(get_db)):
 
 
 @router.put("/employees/{employee_id}")
-def edit_employee(employee_id: int, employee: EmployeeSchema, db: Session = Depends(get_db)):
-    updated = update_employee(db, employee_id, employee)
+def edit_employee(
+    employee_id: int,
+    employee: EmployeeSchema,
+    db: Session = Depends(get_db),
+    performed_by: str = Query("SYSTEM")
+):
+    updated = update_employee(db, employee_id, employee, user_name=performed_by)
 
     if not updated:
         raise HTTPException(status_code=404, detail="Employee not found")

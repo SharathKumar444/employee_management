@@ -80,7 +80,8 @@ def create_user_from_invitation(
             password=password,
             role=role,
             company_id=company_id,
-            is_active=True
+            is_active=True,
+            attendance_access=(role == 'admin')
         )
 
         db.add(new_user)
@@ -96,6 +97,8 @@ def create_user_from_invitation(
                 "email": new_user.email,
                 "role": new_user.role,
                 "company_id": new_user.company_id,
+                "attendance_access": new_user.attendance_access,
+                "attendanceAccess": new_user.attendance_access,
             }
         }
     except Exception as e:

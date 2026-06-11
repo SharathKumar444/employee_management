@@ -307,3 +307,190 @@
     font-size: 13px;
   }
 }
+
+/* =========================
+   USER ATTENDANCE SECTION
+========================= */
+
+.user-attendance-section {
+  margin-bottom: 40px;
+}
+
+.user-attendance-card {
+  background: white;
+  border-radius: 16px;
+  padding: 28px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.user-attendance-card h2 {
+  font-size: 24px;
+  font-weight: 700;
+  color: #1e293b;
+  margin-bottom: 24px;
+}
+
+.check-in-out-buttons {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.check-in-btn,
+.check-out-btn,
+.leave-request-btn {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.3s ease;
+  font-size: 14px;
+}
+
+.check-in-btn {
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: white;
+}
+
+.check-in-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.check-out-btn {
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  color: white;
+}
+
+.check-out-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+}
+
+.leave-request-btn {
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  color: white;
+}
+
+.leave-request-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.leave-form {
+  background: #f8fafc;
+  padding: 20px;
+  border-radius: 12px;
+  margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.leave-form h3 {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1e293b;
+  margin-bottom: 12px;
+}
+
+.leave-form select,
+.leave-form input,
+.leave-form textarea {
+  padding: 10px 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: 'Poppins', sans-serif;
+}
+
+.leave-form select:focus,
+.leave-form input:focus,
+.leave-form textarea:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.submit-btn,
+.cancel-btn {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.today-attendance-summary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(120px, 1fr));
+  gap: 16px;
+  background: #f1f5f9;
+  padding: 18px;
+  border-radius: 14px;
+  margin-top: 20px;
+}
+
+.today-attendance-summary p {
+  margin: 0;
+  color: #334155;
+  font-size: 14px;
+}
+
+.today-attendance-summary strong {
+  color: #0f172a;
+}
+
+.recent-attendance-card {
+  background: white;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 2px 12px rgba(15, 23, 42, 0.08);
+  margin-bottom: 30px;
+}
+
+.recent-attendance-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.recent-attendance-table th,
+.recent-attendance-table td {
+  padding: 14px;
+  text-align: left;
+  border-bottom: 1px solid #e2e8f0;
+  color: #334155;
+  font-size: 14px;
+}
+
+.recent-attendance-table thead {
+  background: #eef2ff;
+}
+
+.recent-attendance-table tbody tr:hover {
+  background: #f8fafc;
+}
+
+.submit-btn {
+  background: #3b82f6;
+  color: white;
+}
+
+.submit-btn:hover {
+  background: #2563eb;
+}
+
+.cancel-btn {
+  background: #e5e7eb;
+  color: #64748b;
+}
+
+.cancel-btn:hover {
+  background: #d1d5db;
+}

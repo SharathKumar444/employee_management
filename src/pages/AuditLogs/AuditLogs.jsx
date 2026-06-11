@@ -1,30 +1,42 @@
 import { useEffect, useState } from 'react'
+import { useAuth } from '../../context/AuthContext'
 import { fetchAuditLogs } from '../../services/auditService'
 import './AuditLogs.css'
 
 const AuditLogs = () => {
+  const { currentUser } = useAuth()
   const [logs, setLogs] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/immutability
-    loadLogs()
-  }, [])
-
-  const loadLogs = async () => {
-    try {
-      setLoading(true)
-
-      const data = await fetchAuditLogs()
-      setLogs(data)
-    } catch (err) {
-      console.error(err)
-      setError('Failed to load audit logs')
-    } finally {
-      setLoading(false)
+    if (!currentUser) {
+      return
     }
-  }
+
+    const loadLogs = async () => {
+      try {
+        setLoading(true)
+        setError('')
+
+        const companyId = currentUser?.companyId || currentUser?.company_id
+        if (!companyId) {
+          setError('Unable to load audit logs: missing company context')
+          return
+        }
+
+        const data = await fetchAuditLogs(companyId)
+        setLogs(data)
+      } catch (err) {
+        console.error(err)
+        setError('Failed to load audit logs')
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    loadLogs()
+  }, [currentUser])
 
   if (loading) {
     return (
@@ -62,10 +74,10 @@ const AuditLogs = () => {
             {logs.length > 0 ? (
               logs.map((log) => (
                 <tr key={log.id}>
-                  <td>{log.userName}</td>
+                  <td>{log.performed_by || log.userName || 'Unknown'}</td>
                   <td>{log.action}</td>
-                  <td>{log.relatedUser || '-'}</td>
-                  <td>{log.role || '-'}</td>
+                  <td>{log.target_user || log.relatedUser || '-'}</td>
+                  <td>{log.company_id || log.role || '-'}</td>
                   <td>
                     {new Date(log.timestamp).toLocaleString()}
                   </td>
