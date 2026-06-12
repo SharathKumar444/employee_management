@@ -405,88 +405,102 @@ const Attendance = () => {
       {/* USER FEATURES */}
 
       {currentUser?.role !== 'admin' && (
-        <div className="user-attendance-section">
-          <div className="user-attendance-card">
-            <h2>My Attendance</h2>
-            
+        <div className="user-attendance-section top-grid">
+
+          {/* LEFT: Today's Attendance */}
+          <div className="today-attendance-card">
+            <h2>Today's Attendance</h2>
+
+            <div className="status-bar">
+              <span className="status-indicator">
+                {todayAttendance?.status?.replace('_', ' ') || 'Not checked in'}
+              </span>
+            </div>
+
             <div className="check-in-out-buttons">
-              <button 
+              <button
                 className="check-in-btn"
                 onClick={handleCheckIn}
                 disabled={todayAttendance?.check_in_time}
               >
                 <FaClock /> Check In
               </button>
-              <button 
+              <button
                 className="check-out-btn"
                 onClick={handleCheckOut}
                 disabled={!todayAttendance?.check_in_time || todayAttendance?.check_out_time}
               >
                 <FaClock /> Check Out
               </button>
-              <button 
-                className="leave-request-btn"
-                onClick={() => setShowLeaveForm(!showLeaveForm)}
-              >
-                <FaCalendarAlt /> Leave Request
-              </button>
             </div>
 
-            {todayAttendance && (
-              <div className="today-attendance-summary">
-                <p>
-                  <strong>Today:</strong>{' '}
-                  {todayAttendance.status?.replace('_', ' ') || 'Not Started'}
-                </p>
-                <p>
-                  <strong>Check In:</strong>{' '}
-                  {todayAttendance.check_in_time
-                    ? new Date(todayAttendance.check_in_time).toLocaleTimeString()
-                    : '--'}
-                </p>
-                <p>
-                  <strong>Check Out:</strong>{' '}
-                  {todayAttendance.check_out_time
-                    ? new Date(todayAttendance.check_out_time).toLocaleTimeString()
-                    : '--'}
-                </p>
-              </div>
-            )}
+            <div className="today-attendance-summary">
+              <p>
+                <strong>Check In:</strong>{' '}
+                {todayAttendance?.check_in_time
+                  ? new Date(todayAttendance.check_in_time).toLocaleTimeString()
+                  : '--'}
+              </p>
+              <p>
+                <strong>Check Out:</strong>{' '}
+                {todayAttendance?.check_out_time
+                  ? new Date(todayAttendance.check_out_time).toLocaleTimeString()
+                  : '--'}
+              </p>
+            </div>
+          </div>
 
-            {showLeaveForm && (
-              <div className="leave-form">
-                <h3>Request Leave</h3>
+          {/* RIGHT: Request Leave */}
+          <div className="request-leave-card">
+            <h2>Request Leave</h2>
+
+            <div className="leave-form">
+              <label>
+                Leave type
                 <select value={leaveType} onChange={(e) => setLeaveType(e.target.value)}>
                   <option value="casual">Casual</option>
                   <option value="sick">Sick</option>
                   <option value="personal">Personal</option>
                   <option value="unpaid">Unpaid</option>
                 </select>
-                <input 
-                  type="date" 
-                  value={leaveStartDate}
-                  onChange={(e) => setLeaveStartDate(e.target.value)}
-                  placeholder="Start Date"
-                />
-                <input 
-                  type="date" 
-                  value={leaveEndDate}
-                  onChange={(e) => setLeaveEndDate(e.target.value)}
-                  placeholder="End Date"
-                />
-                <textarea 
+              </label>
+
+              <div className="leave-dates">
+                <label>
+                  Start date
+                  <input
+                    type="date"
+                    value={leaveStartDate}
+                    onChange={(e) => setLeaveStartDate(e.target.value)}
+                  />
+                </label>
+
+                <label>
+                  End date
+                  <input
+                    type="date"
+                    value={leaveEndDate}
+                    onChange={(e) => setLeaveEndDate(e.target.value)}
+                  />
+                </label>
+              </div>
+
+              <label>
+                Reason (optional)
+                <textarea
                   value={leaveReason}
                   onChange={(e) => setLeaveReason(e.target.value)}
-                  placeholder="Reason (optional)"
                   rows="3"
+                  placeholder="Brief reason for your leave request"
                 />
-                <div style={{ display: 'flex', gap: '10px' }}>
-                  <button className="submit-btn" onClick={handleLeaveRequest}>Submit</button>
-                  <button className="cancel-btn" onClick={() => setShowLeaveForm(false)}>Cancel</button>
-                </div>
-              </div>
-            )}
+              </label>
+
+              <button className="submit-btn main-submit" onClick={handleLeaveRequest}>
+                Submit Leave Request
+              </button>
+            </div>
           </div>
+
         </div>
       )}
 
@@ -542,195 +556,200 @@ const Attendance = () => {
         </div>
       )}
 
-      {/* HEADER */}
+      {/* Admin-only Attendance Dashboard (hidden for regular users) */}
+      {currentUser?.role === 'admin' && (
+        <>
+          {/* HEADER */}
 
-      <div className="attendance-header">
+          <div className="attendance-header">
 
-        <div>
+            <div>
 
-          <h1>
-            Attendance Dashboard
-          </h1>
+              <h1>
+                Attendance Dashboard
+              </h1>
 
-          <p>
-            Track employee
-            attendance records
-          </p>
+              <p>
+                Track employee
+                attendance records
+              </p>
 
-        </div>
+            </div>
 
-        {/* ADMIN ONLY DOWNLOAD */}
+            {/* ADMIN ONLY DOWNLOAD */}
 
-        {currentUser?.role ===
-          'admin' && (
-          <button
-            className="download-btn"
-            onClick={downloadCSV}
-          >
-            <FaDownload />
-            Download Report
-          </button>
-        )}
-
-      </div>
-
-      {/* STATS */}
-
-      <div className="attendance-stats">
-
-        <div className="attendance-stat-card">
-
-          <FaUserCheck className="attendance-icon active-icon" />
-
-          <div>
-            <h3>
-              {
-                attendance.filter(
-                  item =>
-                    item.status ===
-                    'Active'
-                ).length
-              }
-            </h3>
-
-            <p>
-              Present Employees
-            </p>
-          </div>
-
-        </div>
-
-        <div className="attendance-stat-card">
-
-          <FaUserClock className="attendance-icon leave-icon" />
-
-          <div>
-            <h3>
-              {
-                attendance.filter(
-                  item =>
-                    item.status ===
-                    'On Leave'
-                ).length
-              }
-            </h3>
-
-            <p>
-              On Leave
-            </p>
-          </div>
-
-        </div>
-
-        <div className="attendance-stat-card">
-
-          <FaUserTimes className="attendance-icon inactive-icon" />
-
-          <div>
-            <h3>
-              {
-                attendance.filter(
-                  item =>
-                    item.status ===
-                    'Inactive'
-                ).length
-              }
-            </h3>
-
-            <p>
-              Inactive Employees
-            </p>
-          </div>
-
-        </div>
-
-      </div>
-
-      {/* SEARCH */}
-
-      <div className="attendance-search">
-
-        <input
-          type="text"
-          placeholder="Search employee..."
-          value={searchInput}
-          onChange={e =>
-            setSearchInput(
-              e.target.value
-            )
-          }
-        />
-
-      </div>
-
-      {/* TABLE */}
-
-      <div className="attendance-card">
-
-        <table className="attendance-table">
-
-          <thead>
-
-            <tr>
-              <th>
-                Employee
-              </th>
-
-              <th>
-                Department
-              </th>
-
-              <th>Date</th>
-
-              <th>Status</th>
-            </tr>
-
-          </thead>
-
-          <tbody>
-
-            {filteredAttendance.map(
-              item => (
-                <tr key={item.id}>
-
-                  <td>
-                    {item.name}
-                  </td>
-
-                  <td>
-                    {
-                      item.department
-                    }
-                  </td>
-
-                  <td>
-                    {item.date}
-                  </td>
-
-                  <td>
-
-                    <span
-                      className={`status ${item.status
-                        .toLowerCase()
-                        .replace(
-                          ' ',
-                          '-'
-                        )}`}
-                    >
-                      {item.status}
-                    </span>
-
-                  </td>
-
-                </tr>
-              )
+            {currentUser?.role ===
+              'admin' && (
+              <button
+                className="download-btn"
+                onClick={downloadCSV}
+              >
+                <FaDownload />
+                Download Report
+              </button>
             )}
 
-          </tbody>
+          </div>
 
-        </table>
+          {/* STATS */}
 
-      </div>
+          <div className="attendance-stats">
+
+            <div className="attendance-stat-card">
+
+              <FaUserCheck className="attendance-icon active-icon" />
+
+              <div>
+                <h3>
+                  {
+                    attendance.filter(
+                      item =>
+                        item.status ===
+                        'Active'
+                    ).length
+                  }
+                </h3>
+
+                <p>
+                  Present Employees
+                </p>
+              </div>
+
+            </div>
+
+            <div className="attendance-stat-card">
+
+              <FaUserClock className="attendance-icon leave-icon" />
+
+              <div>
+                <h3>
+                  {
+                    attendance.filter(
+                      item =>
+                        item.status ===
+                        'On Leave'
+                    ).length
+                  }
+                </h3>
+
+                <p>
+                  On Leave
+                </p>
+              </div>
+
+            </div>
+
+            <div className="attendance-stat-card">
+
+              <FaUserTimes className="attendance-icon inactive-icon" />
+
+              <div>
+                <h3>
+                  {
+                    attendance.filter(
+                      item =>
+                        item.status ===
+                        'Inactive'
+                    ).length
+                  }
+                </h3>
+
+                <p>
+                  Inactive Employees
+                </p>
+              </div>
+
+            </div>
+
+          </div>
+
+          {/* SEARCH */}
+
+          <div className="attendance-search">
+
+            <input
+              type="text"
+              placeholder="Search employee..."
+              value={searchInput}
+              onChange={e =>
+                setSearchInput(
+                  e.target.value
+                )
+              }
+            />
+
+          </div>
+
+          {/* TABLE */}
+
+          <div className="attendance-card">
+
+            <table className="attendance-table">
+
+              <thead>
+
+                <tr>
+                  <th>
+                    Employee
+                  </th>
+
+                  <th>
+                    Department
+                  </th>
+
+                  <th>Date</th>
+
+                  <th>Status</th>
+                </tr>
+
+              </thead>
+
+              <tbody>
+
+                {filteredAttendance.map(
+                  item => (
+                    <tr key={item.id}>
+
+                      <td>
+                        {item.name}
+                      </td>
+
+                      <td>
+                        {
+                          item.department
+                        }
+                      </td>
+
+                      <td>
+                        {item.date}
+                      </td>
+
+                      <td>
+
+                        <span
+                          className={`status ${item.status
+                            .toLowerCase()
+                            .replace(
+                              ' ',
+                              '-'
+                            )}`}
+                        >
+                          {item.status}
+                        </span>
+
+                      </td>
+
+                    </tr>
+                  )
+                )}
+
+              </tbody>
+
+            </table>
+
+          </div>
+        </>
+      )}
 
     </div>
   )

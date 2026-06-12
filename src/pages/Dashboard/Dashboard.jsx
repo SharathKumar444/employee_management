@@ -17,6 +17,7 @@ import DepartmentChart from '../../components/analytics/DepartmentChart'
 import RoleChart from '../../components/analytics/RoleChart'
 import StatusChart from '../../components/analytics/StatusChart'
 
+import AttendanceBarChart from '../../components/analytics/AttendanceBarChart'
 import { fetchEmployees } from '../../services/employeeService'
 
 import './Dashboard.css'
@@ -97,6 +98,7 @@ const Dashboard = () => {
     ),
   ].length
 
+  // eslint-disable-next-line no-unused-vars
   const attendancePercentage =
     totalEmployees > 0
       ? Math.round(
@@ -236,29 +238,18 @@ const Dashboard = () => {
 
       {/* ATTENDANCE */}
 
-      <div className="attendance-card">
+     <div className="attendance-card">
 
-        <h3>
-          Attendance Overview
-        </h3>
+  <h3>
+    Attendance Overview
+  </h3>
 
-        <div className="progress-bar">
+  <AttendanceBarChart
+    totalEmployees={totalEmployees}
+    activeEmployees={activeEmployees}
+  />
 
-          <div
-            className="progress-fill"
-            style={{
-              width: `${attendancePercentage}%`,
-            }}
-          />
-
-        </div>
-
-        <p>
-          {attendancePercentage}%
-          Employees Active
-        </p>
-
-      </div>
+</div>
 
       {/* RECENT EMPLOYEES */}
 

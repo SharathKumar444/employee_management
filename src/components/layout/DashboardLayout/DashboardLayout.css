@@ -45,6 +45,11 @@
 .sidebar-wrapper{
   transition:all 0.3s ease;
   overflow:hidden;
+  position: fixed;
+  left: 0;
+  top: 0;
+  height: 100vh;
+  z-index: 999;
 }
 
 .sidebar-wrapper.open{
@@ -53,6 +58,17 @@
 
 .sidebar-wrapper.closed{
   width:0;
+}
+
+/* Offset main content when sidebar wrapper is open/closed */
+.sidebar-wrapper.open + .dashboard-content{
+  margin-left: 260px;
+  transition: margin-left 0.25s ease;
+}
+
+.sidebar-wrapper.closed + .dashboard-content{
+  margin-left: 0;
+  transition: margin-left 0.25s ease;
 }
 
 .dashboard-content{
