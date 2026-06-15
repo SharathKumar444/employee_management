@@ -1,6 +1,10 @@
+import json
+from datetime import datetime
 from sqlalchemy.orm import Session
 from app.models.employee_model import Employee
+from app.models.user_model import User
 from app.services.audit_service import log_action
+from app.utils.notification_utils import create_notification
 
 def get_all_employees(db: Session):
     return db.query(Employee).all()
@@ -30,10 +34,16 @@ def create_employee(db: Session, employee_data, user_name="SYSTEM"):
         db,
         user_name=user_name,
         action="Employee Created",
-        related_user=employee.name
+        related_user=employee.name,
+        company_id=employee.company_id
     )
 
     return employee
+
+
+def requires_attendance_access(department: str) -> bool:
+    """Determine whether a department should have attendance access granted."""
+    return department in {"Finance", "Operations"}
 
 
 def update_employee(db: Session, employee_id: int, employee_data, user_name="SYSTEM"):
@@ -42,6 +52,9 @@ def update_employee(db: Session, employee_id: int, employee_data, user_name="SYS
 
     if not employee:
         return None
+
+    original_department = employee.department
+    original_email = employee.email
 
     employee.name = employee_data.name
     employee.department = employee_data.department
@@ -53,13 +66,54 @@ def update_employee(db: Session, employee_id: int, employee_data, user_name="SYS
     db.commit()
     db.refresh(employee)
 
+    department_changed = (
+        original_department != employee_data.department
+    )
+
+    action = (
+        f"Employee Transferred ({original_department} → {employee.department})"
+        if department_changed
+        else "Employee Updated"
+    )
+
     # AUDIT LOG
     log_action(
         db,
         user_name=user_name,
-        action="Employee Updated",
-        related_user=employee.name
+        action=action,
+        related_user=employee.name,
+        company_id=employee.company_id
     )
+
+    if department_changed:
+        user = db.query(User).filter(
+            User.email == original_email,
+            User.company_id == employee.company_id
+        ).first()
+
+        if user:
+            required_access = requires_attendance_access(employee.department)
+            if user.attendance_access != required_access:
+                user.attendance_access = required_access
+                db.commit()
+                db.refresh(user)
+
+            transfer_payload_obj = {
+                "employee_name": employee.name,
+                "from_department": original_department,
+                "to_department": employee.department,
+                "transferred_at": datetime.now().isoformat(),
+            }
+
+            create_notification(
+                db=db,
+                recipient_user_id=user.id,
+                type="employee_transferred",
+                payload=json.dumps(transfer_payload_obj),
+            )
+            print(f"✅ Notification created for user {user.id}: {employee.name} transferred from {original_department} to {employee.department}")
+        else:
+            print(f"⚠️  No user found for email {original_email} in company {employee.company_id}")
 
     return employee
 
@@ -79,7 +133,8 @@ def delete_employee(db: Session, employee_id: int, user_name="SYSTEM"):
         db,
         user_name=user_name,
         action="Employee Deleted",
-        related_user=employee.name
+        related_user=employee.name,
+        company_id=employee.company_id
     )
 
     return employee

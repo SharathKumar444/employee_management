@@ -1,0 +1,533 @@
+/* ========================================
+   TRANSFER CENTER PAGE
+   ======================================== */
+
+.transfer-center-page {
+  padding: 2rem;
+  max-width: 1400px;
+  margin: 0 auto;
+  font-family: 'Segoe UI', Tahoma,
+    Geneva, Verdana, sans-serif;
+}
+
+/* Header */
+.transfer-header {
+  margin-bottom: 2.5rem;
+  text-align: center;
+}
+
+.transfer-header h1 {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 0.5rem;
+}
+
+.transfer-header p {
+  font-size: 1rem;
+  color: #666;
+  margin: 0;
+}
+
+/* Grid Layout */
+.transfer-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  margin-top: 2rem;
+}
+
+@media (max-width: 1024px) {
+  .transfer-grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+}
+
+/* ========================================
+   LEFT SECTION (Form + Notifications)
+   ======================================== */
+
+.transfer-left {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+/* Transfer Form Section */
+.transfer-form-section {
+  background: white;
+  border: 2px solid #e0e0e0;
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: 0 2px 8px
+    rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
+}
+
+.transfer-form-section:hover {
+  box-shadow: 0 4px 12px
+    rgba(0, 0, 0, 0.12);
+  border-color: #5b7dff;
+}
+
+.transfer-form-section h2 {
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Form Groups */
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+.form-group label {
+  display: block;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 0.5rem;
+}
+
+.form-select,
+.form-textarea {
+  width: 100%;
+  padding: 0.75rem;
+  font-size: 0.95rem;
+  border: 1px solid #d0d0d0;
+  border-radius: 6px;
+  font-family: inherit;
+  transition: all 0.3s ease;
+  background-color: #f9f9f9;
+}
+
+.form-select:focus,
+.form-textarea:focus {
+  outline: none;
+  border-color: #5b7dff;
+  background-color: white;
+  box-shadow: 0 0 0 3px
+    rgba(91, 125, 255, 0.1);
+}
+
+.form-textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+/* Current Department Display */
+.current-dept {
+  padding: 0.75rem;
+  background-color: #f3f4f9;
+  border: 1px solid #d0d0d0;
+  border-radius: 6px;
+  font-weight: 500;
+  color: #555;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Button */
+.btn-transfer {
+  width: 100%;
+  padding: 0.9rem 1.5rem;
+  background: linear-gradient(
+    135deg,
+    #5b7dff 0%,
+    #4a65e8 100%
+  );
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.btn-transfer:hover:not(:disabled) {
+  background: linear-gradient(
+    135deg,
+    #4a65e8 0%,
+    #3d52d5 100%
+  );
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px
+    rgba(91, 125, 255, 0.3);
+}
+
+.btn-transfer:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* Notifications */
+.transfer-notifications {
+  background: white;
+  border: 2px solid #e0e0e0;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 8px
+    rgba(0, 0, 0, 0.08);
+}
+
+.transfer-notifications h3 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.notif-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.notif-item {
+  display: flex;
+  gap: 1rem;
+  padding: 1rem;
+  background-color: #f9f9f9;
+  border-left: 4px solid #5b7dff;
+  border-radius: 6px;
+  transition: all 0.3s ease;
+}
+
+.notif-item:hover {
+  background-color: #f0f2ff;
+  box-shadow: 0 2px 8px
+    rgba(91, 125, 255, 0.1);
+}
+
+.notif-icon {
+  font-size: 1.5rem;
+  min-width: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.notif-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.notif-card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.notif-type {
+  font-weight: 700;
+  color: #1f2937;
+  font-size: 0.95rem;
+}
+
+.notif-badge {
+  font-size: 0.8rem;
+  color: #64748b;
+  background: #f3f4f6;
+  padding: 0.15rem 0.5rem;
+  border-radius: 999px;
+}
+
+.notif-message {
+  margin: 0;
+  font-size: 0.95rem;
+  color: #334155;
+}
+
+.notif-departments {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.notif-dept {
+  font-size: 0.9rem;
+  font-weight: 600;
+  padding: 0.35rem 0.65rem;
+  border-radius: 999px;
+}
+
+.notif-dept.from {
+  background: #eef2ff;
+  color: #3730a3;
+}
+
+.notif-dept.to {
+  background: #e0f2ff;
+  color: #0c4a6e;
+}
+
+.notif-arrow {
+  font-size: 0.95rem;
+  color: #475569;
+}
+
+/* ========================================
+   RIGHT SECTION (Recent Transfers + Audit)
+   ======================================== */
+
+.transfer-right {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+/* Recent Transfers Section */
+.recent-transfers-section {
+  background: white;
+  border: 2px solid #e0e0e0;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 8px
+    rgba(0, 0, 0, 0.08);
+}
+
+.recent-transfers-section h2 {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Table */
+.transfers-table-container {
+  overflow-x: auto;
+}
+
+.transfers-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.transfers-table thead {
+  background-color: #f5f5f5;
+  border-bottom: 2px solid #ddd;
+}
+
+.transfers-table th {
+  padding: 1rem;
+  text-align: left;
+  font-weight: 600;
+  color: #333;
+}
+
+.transfers-table td {
+  padding: 1rem;
+  border-bottom: 1px solid #eee;
+  color: #666;
+}
+
+.transfers-table tbody tr:hover {
+  background-color: #f9f9f9;
+  transition: background-color 0.2s ease;
+}
+
+.transfers-table .emp-name {
+  font-weight: 500;
+  color: #333;
+}
+
+.transfers-table .date {
+  font-size: 0.85rem;
+  color: #888;
+}
+
+.transfers-table .status {
+  text-align: center;
+}
+
+.status-done {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.4rem 0.8rem;
+  background-color: #e8f5e9;
+  color: #2e7d32;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.status-wait {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.4rem 0.8rem;
+  background-color: #fff3e0;
+  color: #f57c00;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+/* Audit Log Section */
+.audit-log-section {
+  background: white;
+  border: 2px solid #e0e0e0;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 8px
+    rgba(0, 0, 0, 0.08);
+}
+
+.audit-log-section h2 {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.audit-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.audit-item {
+  padding: 1rem;
+  background-color: #f9f9f9;
+  border-left: 4px solid #ffc107;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
+
+.audit-item hr {
+  margin: 1rem 0;
+  border: none;
+  border-top: 1px solid #ddd;
+}
+
+.audit-item:last-child hr {
+  display: none;
+}
+
+.audit-label {
+  font-weight: 600;
+  color: #555;
+  margin: 0.25rem 0;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.audit-value {
+  color: #333;
+  margin: 0.25rem 0 0.75rem 0;
+  font-weight: 500;
+}
+
+/* ========================================
+   EMPTY STATE
+   ======================================== */
+
+.status-container {
+  padding: 3rem 2rem;
+  text-align: center;
+  background: white;
+  border-radius: 12px;
+  margin: 2rem;
+}
+
+.status-container h2 {
+  color: #666;
+  font-size: 1.2rem;
+}
+
+/* ========================================
+   RESPONSIVE DESIGN
+   ======================================== */
+
+@media (max-width: 768px) {
+  .transfer-center-page {
+    padding: 1rem;
+  }
+
+  .transfer-header h1 {
+    font-size: 1.5rem;
+  }
+
+  .transfer-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .transfer-form-section {
+    padding: 1.5rem;
+  }
+
+  .transfers-table {
+    font-size: 0.8rem;
+  }
+
+  .transfers-table th,
+  .transfers-table td {
+    padding: 0.75rem;
+  }
+
+  .btn-transfer {
+    font-size: 0.9rem;
+    padding: 0.75rem 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .transfer-center-page {
+    padding: 0.5rem;
+  }
+
+  .transfer-header h1 {
+    font-size: 1.2rem;
+  }
+
+  .transfer-form-section,
+  .transfer-notifications,
+  .recent-transfers-section,
+  .audit-log-section {
+    padding: 1rem;
+  }
+
+  .transfers-table {
+    font-size: 0.75rem;
+  }
+
+  .transfers-table th,
+  .transfers-table td {
+    padding: 0.5rem;
+  }
+
+  .notif-item,
+  .audit-item {
+    padding: 0.75rem;
+  }
+}

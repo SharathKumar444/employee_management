@@ -182,12 +182,22 @@ const Navbar = ({ toggleSidebar }) => {
   ========================= */
 
   const loadNotifications = useCallback(async () => {
-    if (!currentUser?.id && !currentUser?.email) return
+    const userId =
+      currentUser?.id ||
+      currentUser?._id ||
+      currentUser?.user_id ||
+      null
+    const userEmail =
+      currentUser?.email ||
+      currentUser?.user_email ||
+      null
+
+    if (!userId && !userEmail) return
 
     try {
       const res = await getNotifications(
-        currentUser.id,
-        currentUser.email
+        userId,
+        userEmail
       )
       if (res?.success) {
         const mapped = res.data.map(n => ({
@@ -197,12 +207,37 @@ const Navbar = ({ toggleSidebar }) => {
         setNotifications(mapped)
       }
     } catch {
+      const userId =
+        currentUser?.id ||
+        currentUser?._id ||
+        currentUser?.user_id ||
+        null
+      const userEmail =
+        currentUser?.email ||
+        currentUser?.user_email ||
+        null
+
+      const normalizedUserId =
+        userId !== undefined && userId !== null
+          ? String(userId)
+          : null
+      const normalizedUserEmail =
+        userEmail || null
+
       const saved = JSON.parse(localStorage.getItem('notifications')) || []
-      const userNotifications = saved.filter(
-        note =>
-          note.recipient_user_id === currentUser?.id ||
-          note.recipient_email === currentUser?.email
-      )
+      const userNotifications = saved.filter(note => {
+        const recipientId =
+          note.recipient_user_id !== undefined &&
+          note.recipient_user_id !== null
+            ? String(note.recipient_user_id)
+            : null
+        const recipientEmail = note.recipient_email || null
+
+        return (
+          (normalizedUserId && recipientId === normalizedUserId) ||
+          (normalizedUserEmail && recipientEmail === normalizedUserEmail)
+        )
+      })
       setNotifications(userNotifications)
     }
   }, [currentUser])

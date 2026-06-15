@@ -8,7 +8,16 @@ const Notifications = () => {
 
   const load = async () => {
     if (!currentUser) return
-    const res = await getNotifications(currentUser.id, currentUser.email)
+    const userId =
+      currentUser.id ||
+      currentUser._id ||
+      currentUser.user_id ||
+      null
+    const userEmail =
+      currentUser.email ||
+      currentUser.user_email ||
+      null
+    const res = await getNotifications(userId, userEmail)
     if (res?.success) setNotifications(res.data)
   }
 

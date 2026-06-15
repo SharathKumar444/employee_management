@@ -149,7 +149,7 @@
 
   padding: 0 16px;
 
-  background: #ffffff;
+  background: #fbf9f9;
 
   border: 1px solid #e5e7eb;
   border-radius: 14px;
@@ -160,7 +160,7 @@
 }
 
 .profile-section:hover {
-  background: #f8fafc;
+  background: #ffffff;
 }
 
 .profile-avatar {

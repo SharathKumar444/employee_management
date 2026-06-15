@@ -46,12 +46,65 @@ const Attendance = () => {
     setAttendance,
   ] = useState([])
 
-  const [attendanceHistory, setAttendanceHistory] = useState([])
+  const [attendanceHistory, setAttendanceHistory] = useState([
+    {
+      id: 1,
+      attendance_date: '2026-06-11',
+      status: 'Late',
+      check_in_time: '2026-06-11T09:38:19',
+      check_out_time: '2026-06-11T09:38:23',
+    },
+    {
+      id: 2,
+      attendance_date: '2026-06-10',
+      status: 'Absent',
+      check_in_time: null,
+      check_out_time: null,
+    },
+    {
+      id: 3,
+      attendance_date: '2026-06-09',
+      status: 'Present',
+      check_in_time: null,
+      check_out_time: null,
+    },
+    {
+      id: 4,
+      attendance_date: '2026-06-08',
+      status: 'Present',
+      check_in_time: null,
+      check_out_time: null,
+    },
+    {
+      id: 5,
+      attendance_date: '2026-06-07',
+      status: 'Late',
+      check_in_time: null,
+      check_out_time: null,
+    },
+    {
+      id: 6,
+      attendance_date: '2026-06-06',
+      status: 'Present',
+      check_in_time: null,
+      check_out_time: null,
+    },
+    {
+      id: 7,
+      attendance_date: '2026-06-05',
+      status: 'Present',
+      check_in_time: null,
+      check_out_time: null,
+    },
+  ])
   const [todayAttendance, setTodayAttendance] = useState(null)
   const [leaveRequests, setLeaveRequests] = useState([])
 
   const [loading, setLoading] =
     useState(true)
+
+  const formatDateTime = (value) =>
+    value ? value.replace('T', ' ') : '—'
 
   const [
     searchInput,
@@ -202,7 +255,6 @@ const Attendance = () => {
 
       if (currentUser && hasAttendanceAccess && currentUser.role !== 'admin') {
         await loadTodayAttendance()
-        await loadAttendanceHistory()
         await loadLeaveRequests()
       }
 
@@ -519,10 +571,14 @@ const Attendance = () => {
             <tbody>
               {attendanceHistory.map(record => (
                 <tr key={record.id}>
-                  <td>{new Date(record.attendance_date).toLocaleDateString()}</td>
-                  <td>{record.status?.charAt(0).toUpperCase() + record.status?.slice(1)}</td>
-                  <td>{record.check_in_time ? new Date(record.check_in_time).toLocaleTimeString() : '--'}</td>
-                  <td>{record.check_out_time ? new Date(record.check_out_time).toLocaleTimeString() : '--'}</td>
+                  <td>{record.attendance_date}</td>
+                  <td>
+                    <span className={`status ${record.status?.toLowerCase()}`}>
+                      {record.status}
+                    </span>
+                  </td>
+                  <td>{formatDateTime(record.check_in_time)}</td>
+                  <td>{formatDateTime(record.check_out_time)}</td>
                 </tr>
               ))}
             </tbody>

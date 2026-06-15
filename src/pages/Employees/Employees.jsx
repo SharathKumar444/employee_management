@@ -206,7 +206,8 @@ useEffect(() => {
   {
     ...employeeData,
     company_id: userCompanyId,
-  }
+  },
+  currentUser.email
 )
 
         const oldNotifications =
@@ -399,7 +400,8 @@ useEffect(() => {
 
         await updateEmployee(
           employeeId,
-          updatedEmployee
+          updatedEmployee,
+          currentUser.email
         )
 
         const oldNotifications =

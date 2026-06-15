@@ -94,11 +94,16 @@ export const addEmployee = async (
 // =========================
 export const updateEmployee = async (
   employeeId,
-  employeeData
+  employeeData,
+  performedBy
 ) => {
   try {
     const payload =
       normalizeEmployee(employeeData)
+
+    const query = performedBy
+      ? `?performed_by=${encodeURIComponent(performedBy)}`
+      : ''
 
     console.log(
       '✏️ Update Payload:',
@@ -106,7 +111,7 @@ export const updateEmployee = async (
     )
 
     const response = await axios.put(
-      `${API_URL}/employees/${employeeId}`,
+      `${API_URL}/employees/${employeeId}${query}`,
       payload
     )
 

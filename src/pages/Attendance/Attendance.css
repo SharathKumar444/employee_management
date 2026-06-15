@@ -250,6 +250,24 @@
   );
 }
 
+.status.present {
+  background: #d1fae5;
+  color: #065f46;
+  box-shadow: inset 0 0 0 1px rgba(6, 95, 70, 0.1);
+}
+
+.status.late {
+  background: #fef3c7;
+  color: #92400e;
+  box-shadow: inset 0 0 0 1px rgba(146, 64, 14, 0.1);
+}
+
+.status.absent {
+  background: #fee2e2;
+  color: #991b1b;
+  box-shadow: inset 0 0 0 1px rgba(153, 27, 27, 0.1);
+}
+
 /* =========================
    LOADING
 ========================= */

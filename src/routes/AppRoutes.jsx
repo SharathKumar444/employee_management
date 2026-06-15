@@ -22,6 +22,7 @@ import AdminReactivationRequests from '../pages/AdminReactivationRequests/AdminR
 import AccountDeactivated from '../pages/AccountDeactivated/AccountDeactivated'
 import Reactivation from '../pages/Reactivation/Reactivation'
 import Notifications from '../pages/Notifications/Notifications'
+import EmployeeTransfer from '../pages/EmployeeTransfer/EmployeeTransfer'
 
 // LAYOUT
 import DashboardLayout from '../components/layout/DashboardLayout/DashboardLayout'
@@ -69,6 +70,7 @@ const AppRoutes = () => {
       >
         <Route path="dashboard" element={<Dashboard />} />
         <Route path="employees" element={<Employees />} />
+        <Route path="transfer" element={<EmployeeTransfer />} />
         <Route path="departments" element={<Departments />} />
         <Route path="attendance" element={<Attendance />} />
         <Route path="settings" element={<Settings />} />

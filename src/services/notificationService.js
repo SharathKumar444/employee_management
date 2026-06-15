@@ -15,12 +15,29 @@ const saveLocalNotifications = notifications =>
 const filterUserLocalNotifications = (
   userId,
   userEmail
-) =>
-  getLocalNotifications().filter(
-    note =>
-      note.recipient_user_id === userId ||
-      note.recipient_email === userEmail
-  )
+) => {
+  const normalizedId =
+    userId !== undefined && userId !== null
+      ? String(userId)
+      : null
+  const normalizedEmail =
+    userEmail || null
+
+  return getLocalNotifications().filter(note => {
+    const recipientId =
+      note.recipient_user_id !== undefined &&
+      note.recipient_user_id !== null
+        ? String(note.recipient_user_id)
+        : null
+    const recipientEmail =
+      note.recipient_email || null
+
+    return (
+      (normalizedId && recipientId === normalizedId) ||
+      (normalizedEmail && recipientEmail === normalizedEmail)
+    )
+  })
+}
 
 export const getNotifications = async (
   userId,
@@ -174,18 +191,41 @@ export const markAllNotificationsRead = async (
   }
 
   const notifications = getLocalNotifications()
-  const updated = notifications.map(note =>
-    note.recipient_user_id === userId ||
-    note.recipient_email === userEmail
+  const normalizedUserId =
+    userId !== undefined && userId !== null
+      ? String(userId)
+      : null
+  const normalizedUserEmail =
+    userEmail || null
+
+  const updated = notifications.map(note => {
+    const recipientId =
+      note.recipient_user_id !== undefined &&
+      note.recipient_user_id !== null
+        ? String(note.recipient_user_id)
+        : null
+    const recipientEmail =
+      note.recipient_email || null
+
+    return (
+      (normalizedUserId && recipientId === normalizedUserId) ||
+      (normalizedUserEmail && recipientEmail === normalizedUserEmail)
+    )
       ? { ...note, is_read: true }
       : note
-  )
+  })
 
   saveLocalNotifications(updated)
+
   return {
     success: true,
-    marked: updated.filter(
-      note => note.recipient_user_id === userId
-    ).length,
+    marked: updated.filter(note => {
+      const recipientId =
+        note.recipient_user_id !== undefined &&
+        note.recipient_user_id !== null
+          ? String(note.recipient_user_id)
+          : null
+      return recipientId === normalizedUserId
+    }).length,
   }
 }

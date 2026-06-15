@@ -37,6 +37,8 @@ const normalizeUser = user => {
 
   return {
     ...user,
+    id: user.id || user._id || user.user_id || undefined,
+    email: user.email || user.user_email || undefined,
     role: user.role || user.role_name || 'user',
     companyId,
     company_id: companyId,
