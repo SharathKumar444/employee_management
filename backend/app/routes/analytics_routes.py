@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 
 from app.config.database import get_db
@@ -11,6 +11,7 @@ router = APIRouter(
 
 @router.get("/dashboard")
 def dashboard_analytics(
+    company_id: str = Query(...),
     db: Session = Depends(get_db)
 ):
-    return get_dashboard_analytics(db)
+    return get_dashboard_analytics(db, company_id)

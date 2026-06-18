@@ -5,19 +5,22 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 
-from app.config.database import Base, engine, SessionLocal
+from app.config.database import Base, engine, SessionLocal, DATABASE_PATH
 from app.models.employee_model import Employee
 from app.models.role_request_model import RoleRequest
 from app.models.audit_log_model import AuditLog
 from app.models.user_model import User
+from app.models.user_activity_model import UserActivity
 from app.models.invitation_model import Invitation
 from app.models.attendance_model import Attendance, Leave
+from app.models.export_model import ExportHistory
 
 from app.routes.employee_routes import router as employee_router
 from app.routes.role_request_routes import router as role_request_router
 from app.routes.audit_routes import router as audit_router
 from app.routes.analytics_routes import router as analytics_router
 from app.routes.auth_routes import router as auth_router
+from app.routes.activity_routes import router as activity_router
 from app.routes.invitation_routes import router as invitation_router
 from app.routes.member_routes import router as member_router
 from app.routes.reactivation_routes import router as reactivation_router
@@ -25,15 +28,11 @@ from app.routes.notification_routes import router as notification_router
 from app.routes.attendance_routes import router as attendance_router
 from app.routes.attendance_access_routes import router as attendance_access_router
 from app.routes.leave_routes import router as leave_router
+from app.routes.export_routes import router as export_router
 
 
 def ensure_invitation_schema():
-    db_path = os.path.join(
-        os.path.dirname(__file__),
-        '..',
-        'employee.db'
-    )
-    db_path = os.path.normpath(db_path)
+    db_path = DATABASE_PATH
 
     if not os.path.exists(db_path):
         return
@@ -62,12 +61,7 @@ def ensure_invitation_schema():
 
 
 def ensure_user_schema():
-    db_path = os.path.join(
-        os.path.dirname(__file__),
-        '..',
-        'employee.db'
-    )
-    db_path = os.path.normpath(db_path)
+    db_path = DATABASE_PATH
 
     if not os.path.exists(db_path):
         return
@@ -82,12 +76,52 @@ def ensure_user_schema():
                 "ALTER TABLE users ADD COLUMN password TEXT DEFAULT 'default_password'"
             )
 
+        if 'last_login' not in columns:
+            cursor.execute(
+                "ALTER TABLE users ADD COLUMN last_login DATETIME"
+            )
+
+        if 'last_logout' not in columns:
+            cursor.execute(
+                "ALTER TABLE users ADD COLUMN last_logout DATETIME"
+            )
+
+        if 'browser_info' not in columns:
+            cursor.execute(
+                "ALTER TABLE users ADD COLUMN browser_info TEXT"
+            )
+
+        if 'ip_address' not in columns:
+            cursor.execute(
+                "ALTER TABLE users ADD COLUMN ip_address TEXT"
+            )
+
+        conn.commit()
+
+
+def ensure_audit_schema():
+    db_path = DATABASE_PATH
+
+    if not os.path.exists(db_path):
+        return
+
+    with sqlite3.connect(db_path) as conn:
+        cursor = conn.cursor()
+        cursor.execute("PRAGMA table_info(audit_logs)")
+        columns = [row[1] for row in cursor.fetchall()]
+
+        if 'details' not in columns:
+            cursor.execute(
+                "ALTER TABLE audit_logs ADD COLUMN details TEXT"
+            )
+
         conn.commit()
 
 
 Base.metadata.create_all(bind=engine)
 ensure_invitation_schema()
 ensure_user_schema()
+ensure_audit_schema()
 
 app = FastAPI(
     title="Enterprise Employee Management System",
@@ -116,6 +150,7 @@ app.include_router(role_request_router)
 app.include_router(audit_router)
 app.include_router(analytics_router)
 app.include_router(auth_router)
+app.include_router(activity_router)
 app.include_router(invitation_router)
 app.include_router(member_router)
 app.include_router(reactivation_router)
@@ -123,6 +158,7 @@ app.include_router(notification_router)
 app.include_router(attendance_router)
 app.include_router(attendance_access_router)
 app.include_router(leave_router)
+app.include_router(export_router)
 
 # =========================
 # DATABASE SESSION
@@ -265,6 +301,26 @@ if existing_employees < 1:
     db.add_all(employees)
     db.commit()
 
+# Seed a default admin user if no users exist (helps local development)
+from app.models.user_model import User
+try:
+    existing_users = db.query(User).count()
+except Exception as e:
+    print("Skipping admin seed due to DB schema/state issue:", e)
+    existing_users = None
+
+if existing_users is not None and existing_users < 1:
+    admin_user = User(
+        name="Admin User",
+        email="admin@example.com",
+        password="admin",
+        role="admin",
+        company_id="COMP001",
+        is_active=True
+    )
+    db.add(admin_user)
+    db.commit()
+    print("Seeded default admin: admin@example.com / password: admin")
 
 db.close()
 

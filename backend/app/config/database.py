@@ -1,11 +1,13 @@
+import os
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
 
 # =========================
 # DATABASE CONFIGURATION
 # =========================
-
-DATABASE_URL = "sqlite:///./employee.db"
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+DATABASE_PATH = os.path.normpath(os.path.join(BASE_DIR, 'employee.db'))
+DATABASE_URL = f"sqlite:///{DATABASE_PATH}"
 
 # =========================
 # ENGINE

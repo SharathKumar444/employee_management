@@ -16,6 +16,7 @@ import Settings from '../pages/Settings/Settings'
 import Companies from '../pages/Companies/Companies'
 import AdminRoleRequests from '../pages/AdminRoleRequests/AdminRoleRequests'
 import AuditLogs from '../pages/AuditLogs/AuditLogs'
+import ActivityTracking from '../pages/ActivityTracking/ActivityTracking'
 import Members from '../pages/Members/Members'
 import Invitations from '../pages/Invitations/Invitations'
 import AdminReactivationRequests from '../pages/AdminReactivationRequests/AdminReactivationRequests'
@@ -23,6 +24,7 @@ import AccountDeactivated from '../pages/AccountDeactivated/AccountDeactivated'
 import Reactivation from '../pages/Reactivation/Reactivation'
 import Notifications from '../pages/Notifications/Notifications'
 import EmployeeTransfer from '../pages/EmployeeTransfer/EmployeeTransfer'
+import DataExportCenter from '../pages/DataExportCenter/DataExportCenter'
 
 // LAYOUT
 import DashboardLayout from '../components/layout/DashboardLayout/DashboardLayout'
@@ -85,6 +87,14 @@ const AppRoutes = () => {
           }
         />
         <Route
+          path="activity-tracking"
+          element={
+            <ProtectedRoute allowedRoles={["admin"]}>
+              <ActivityTracking />
+            </ProtectedRoute>
+          }
+        />
+        <Route
           path="audit-logs"
           element={
             <ProtectedRoute allowedRoles={["admin"]}>
@@ -113,6 +123,14 @@ const AppRoutes = () => {
           element={
             <ProtectedRoute allowedRoles={["admin"]}>
               <AdminReactivationRequests />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="data-export-center"
+          element={
+            <ProtectedRoute allowedRoles={["admin"]}>
+              <DataExportCenter />
             </ProtectedRoute>
           }
         />

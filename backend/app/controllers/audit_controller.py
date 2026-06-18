@@ -6,13 +6,15 @@ def create_audit_log(
     performed_by: str,
     action: str,
     target_user: str = None,
-    company_id: str = None
+    company_id: str = None,
+    details: str = None,
 ):
     log = AuditLog(
         performed_by=performed_by,
         action=action,
         target_user=target_user,
-        company_id=company_id
+        company_id=company_id,
+        details=details,
     )
 
     db.add(log)

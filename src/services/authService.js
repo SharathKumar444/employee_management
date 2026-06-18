@@ -10,3 +10,12 @@ export const loginUser = async (email, password) => {
 
   return response.data
 }
+
+export const logoutUser = async (user_id) => {
+  const response = await axios.post(
+    `${API_URL}/auth/logout`,
+    { user_id }
+  )
+
+  return response.data
+}

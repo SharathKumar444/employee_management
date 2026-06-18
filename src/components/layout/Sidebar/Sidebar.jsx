@@ -9,7 +9,11 @@ import {
   FaCog,
   FaSignOutAlt,
   FaCity,
-  FaHistory,  FaArrowRight,} from 'react-icons/fa'
+  FaHistory,
+  FaChartBar,
+  FaArrowRight,
+  FaDownload,
+} from 'react-icons/fa'
 
 import { useAuth } from '../../../context/AuthContext'
 
@@ -134,9 +138,19 @@ const Sidebar = () => {
         <span>Departments</span>
       </NavLink>
 
+      <NavLink to="/activity-tracking" className={linkClass}>
+        <FaChartBar />
+        <span>Activity Tracking</span>
+      </NavLink>
+
       <NavLink to="/audit-logs" className={linkClass}>
         <FaHistory />
         <span>Audit Logs</span>
+      </NavLink>
+
+      <NavLink to="/data-export-center" className={linkClass}>
+        <FaDownload />
+        <span>Data Export</span>
       </NavLink>
     </>
   )}

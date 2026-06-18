@@ -22,7 +22,11 @@ def get_members(db: Session, company_id: str):
                 "email": member.email,
                 "role": member.role,
                 "companyId": member.company_id,
-                "is_active": member.is_active
+                "is_active": member.is_active,
+                "last_login": member.last_login,
+                "last_logout": member.last_logout,
+                "browser_info": member.browser_info,
+                "ip_address": member.ip_address,
             }
             for member in members
         ]

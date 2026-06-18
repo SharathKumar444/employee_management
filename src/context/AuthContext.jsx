@@ -4,7 +4,7 @@ import {
   useState,
   useEffect,
 } from 'react'
-import { loginUser } from '../services/authService'
+import { loginUser, logoutUser } from '../services/authService'
 import { getNotifications } from '../services/notificationService'
 
 const AuthContext = createContext()
@@ -288,7 +288,15 @@ export const AuthProvider = ({
      LOGOUT
   ========================= */
 
-  const logout = () => {
+  const logout = async () => {
+    try {
+      if (currentUser?.id) {
+        await logoutUser(currentUser.id)
+      }
+    } catch (error) {
+      console.warn('Logout tracking failed:', error)
+    }
+
     localStorage.removeItem('currentUser')
     localStorage.removeItem('user')
     setCurrentUser(null)

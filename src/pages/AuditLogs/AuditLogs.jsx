@@ -54,6 +54,10 @@ const AuditLogs = () => {
     )
   }
 
+  const isHighlightEvent = action =>
+    action?.includes('New Device Detected') ||
+    action?.includes('New IP Address Detected')
+
   return (
     <div className="audit-page">
       <h1>Audit Logs</h1>
@@ -64,8 +68,9 @@ const AuditLogs = () => {
             <tr>
               <th>User Name</th>
               <th>Action</th>
+              <th>Details</th>
               <th>Related User</th>
-              <th>Role</th>
+              <th>Company</th>
               <th>Timestamp</th>
             </tr>
           </thead>
@@ -73,9 +78,13 @@ const AuditLogs = () => {
           <tbody>
             {logs.length > 0 ? (
               logs.map((log) => (
-                <tr key={log.id}>
+                <tr
+                  key={log.id}
+                  className={isHighlightEvent(log.action) ? 'highlight-row' : ''}
+                >
                   <td>{log.performed_by || log.userName || 'Unknown'}</td>
                   <td>{log.action}</td>
+                  <td>{log.details || '-'}</td>
                   <td>{log.target_user || log.relatedUser || '-'}</td>
                   <td>{log.company_id || log.role || '-'}</td>
                   <td>
@@ -85,7 +94,7 @@ const AuditLogs = () => {
               ))
             ) : (
               <tr>
-                <td colSpan="5" style={{ textAlign: 'center' }}>
+                <td colSpan="6" style={{ textAlign: 'center' }}>
                   No audit logs found
                 </td>
               </tr>

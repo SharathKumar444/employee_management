@@ -129,6 +129,10 @@ const Members = () => {
               <tr>
                 <th>Name</th>
                 <th>Email</th>
+                <th>Last Login</th>
+                <th>Last Logout</th>
+                <th>Browser</th>
+                <th>IP Address</th>
                 <th>Role</th>
                 <th>Status</th>
                 <th>Action</th>
@@ -139,6 +143,10 @@ const Members = () => {
                 <tr key={member.id || member.email}>
                   <td>{member.name}</td>
                   <td>{member.email}</td>
+                  <td>{member.last_login ? new Date(member.last_login).toLocaleString() : '-'}</td>
+                  <td>{member.last_logout ? new Date(member.last_logout).toLocaleString() : '-'}</td>
+                  <td>{member.browser_info || '-'}</td>
+                  <td>{member.ip_address || '-'}</td>
                   <td>{member.role || 'User'}</td>
                   <td className="status active">Active</td>
                   <td>
@@ -167,6 +175,10 @@ const Members = () => {
               <tr>
                 <th>Name</th>
                 <th>Email</th>
+                <th>Last Login</th>
+                <th>Last Logout</th>
+                <th>Browser</th>
+                <th>IP Address</th>
                 <th>Role</th>
                 <th>Status</th>
                 <th>Action</th>
@@ -177,6 +189,10 @@ const Members = () => {
                 <tr key={member.id || member.email}>
                   <td>{member.name}</td>
                   <td>{member.email}</td>
+                  <td>{member.last_login ? new Date(member.last_login).toLocaleString() : '-'}</td>
+                  <td>{member.last_logout ? new Date(member.last_logout).toLocaleString() : '-'}</td>
+                  <td>{member.browser_info || '-'}</td>
+                  <td>{member.ip_address || '-'}</td>
                   <td>{member.role || 'User'}</td>
                   <td className="status inactive">Inactive</td>
                   <td>

@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Boolean
+from sqlalchemy import Column, Integer, String, Boolean, DateTime, Text
 
 from app.config.database import Base
 
@@ -15,3 +15,7 @@ class User(Base):
     is_active = Column(Boolean, default=True)
     attendance_access = Column(Boolean, default=False)
     deactivated_by = Column(String, nullable=True)
+    last_login = Column(DateTime, nullable=True)
+    last_logout = Column(DateTime, nullable=True)
+    browser_info = Column(Text, nullable=True)
+    ip_address = Column(String, nullable=True)

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useAuth } from '../../context/AuthContext'
 
 import {
   FaUsers,
@@ -19,6 +20,7 @@ import StatusChart from '../../components/analytics/StatusChart'
 
 import AttendanceBarChart from '../../components/analytics/AttendanceBarChart'
 import { fetchEmployees } from '../../services/employeeService'
+import { fetchDashboardAnalytics } from '../../services/analyticsService'
 
 import './Dashboard.css'
 
@@ -32,6 +34,14 @@ const Dashboard = () => {
 
   const [pendingRequests, setPendingRequests] =
     useState(0)
+  const [dashboardMetrics, setDashboardMetrics] = useState({
+    activeSessions: 0,
+    newDevicesToday: 0,
+  })
+
+  const { currentUser } = useAuth()
+  const companyId =
+    currentUser?.companyId || currentUser?.company_id
 
   const loadDashboardData = async () => {
     try {
@@ -45,6 +55,25 @@ const Dashboard = () => {
           ? employeeData
           : []
       )
+
+      if (companyId) {
+        try {
+          const analytics = await fetchDashboardAnalytics(
+            companyId
+          )
+          setDashboardMetrics({
+            activeSessions:
+              analytics?.activeSessions || 0,
+            newDevicesToday:
+              analytics?.newDevicesToday || 0,
+          })
+        } catch (analyticsError) {
+          console.error(
+            'Dashboard analytics load failed:',
+            analyticsError
+          )
+        }
+      }
 
       // temporary until API created
       setPendingRequests(5)
@@ -64,6 +93,7 @@ const Dashboard = () => {
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     loadDashboardData()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   if (loading) {
@@ -195,6 +225,18 @@ const Dashboard = () => {
           title="Pending Requests"
           value={pendingRequests}
           icon={<FaClipboardCheck />}
+        />
+
+        <StatisticsCard
+          title="Active Sessions"
+          value={dashboardMetrics.activeSessions}
+          icon={<FaUserCheck />}
+        />
+
+        <StatisticsCard
+          title="New Devices Today"
+          value={dashboardMetrics.newDevicesToday}
+          icon={<FaUsers />}
         />
 
       </div>
