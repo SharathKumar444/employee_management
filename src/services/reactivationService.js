@@ -32,9 +32,9 @@ export const getReactivationRequests = async company_id => {
   return response.data
 }
 
-export const approveRequest = async (requestId, admin_name, comment = null) => {
+export const approveRequest = async (requestId, admin_email, comment = null) => {
   try {
-    console.log('API Call - Approve:', { requestId, admin_name, comment })
+    console.log('API Call - Approve:', { requestId, admin_email, comment })
     // FastAPI expects the body to be a raw string for `comment`, not an object.
     const body = comment !== null && comment !== undefined ? comment : null
     const response = await axios.put(
@@ -42,7 +42,7 @@ export const approveRequest = async (requestId, admin_name, comment = null) => {
       body,
       {
         params: {
-          admin_name,
+          admin_email,
         },
         headers: {
           'Content-Type': 'application/json',
@@ -58,9 +58,9 @@ export const approveRequest = async (requestId, admin_name, comment = null) => {
   }
 }
 
-export const rejectRequest = async (requestId, admin_name, comment = null) => {
+export const rejectRequest = async (requestId, admin_email, comment = null) => {
   try {
-    console.log('API Call - Reject:', { requestId, admin_name, comment })
+    console.log('API Call - Reject:', { requestId, admin_email, comment })
     // FastAPI expects the body to be a raw string for `comment`, not an object.
     const body = comment !== null && comment !== undefined ? comment : null
     const response = await axios.put(
@@ -68,7 +68,7 @@ export const rejectRequest = async (requestId, admin_name, comment = null) => {
       body,
       {
         params: {
-          admin_name,
+          admin_email,
         },
         headers: {
           'Content-Type': 'application/json',

@@ -48,6 +48,29 @@
   line-height: 1.5;
 }
 
+.deactivation-reason-group {
+  text-align: left;
+  margin-bottom: 20px;
+}
+
+.deactivation-reason-group label {
+  display: block;
+  margin-bottom: 8px;
+  color: #334155;
+  font-weight: 600;
+}
+
+.deactivation-reason-group textarea {
+  width: 100%;
+  min-height: 100px;
+  border-radius: 10px;
+  border: 1px solid #d1d5db;
+  padding: 0.85rem;
+  resize: vertical;
+  font-family: inherit;
+  font-size: 0.95rem;
+}
+
 .confirm-modal-buttons {
   display: flex;
   justify-content: center;
@@ -73,7 +96,6 @@
 
 .confirm-btn {
   background: #ef4444;
-
   color: white;
 }
 
@@ -81,9 +103,24 @@
   background: #dc2626;
 }
 
+.confirm-btn.suspend-confirm {
+  background: #ef4444;
+}
+
+.confirm-btn.suspend-confirm:hover {
+  background: #dc2626;
+}
+
+.confirm-btn.reactivate-confirm {
+  background: #10b981;
+}
+
+.confirm-btn.reactivate-confirm:hover {
+  background: #059669;
+}
+
 .cancel-btn {
   background: #e2e8f0;
-
   color: #1e293b;
 }
 

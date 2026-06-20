@@ -35,6 +35,27 @@ const normalizeUser = user => {
         ? user.attendanceAccess
         : false
 
+  const deactivatedBy =
+    user.deactivated_by !== undefined
+      ? user.deactivated_by
+      : user.deactivatedBy !== undefined
+        ? user.deactivatedBy
+        : null
+
+  const deactivationReason =
+    user.deactivation_reason !== undefined
+      ? user.deactivation_reason
+      : user.deactivationReason !== undefined
+        ? user.deactivationReason
+        : null
+
+  const deactivatedAt =
+    user.deactivated_at !== undefined
+      ? user.deactivated_at
+      : user.deactivatedAt !== undefined
+        ? user.deactivatedAt
+        : null
+
   return {
     ...user,
     id: user.id || user._id || user.user_id || undefined,
@@ -46,6 +67,12 @@ const normalizeUser = user => {
     isActive,
     attendance_access: attendanceAccess,
     attendanceAccess,
+    deactivated_by: deactivatedBy,
+    deactivatedBy,
+    deactivation_reason: deactivationReason,
+    deactivationReason,
+    deactivated_at: deactivatedAt,
+    deactivatedAt,
   }
 }
 

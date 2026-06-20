@@ -50,12 +50,24 @@
   font-weight: 700;
 }
 
-.status.active {
-  color: #2f8e44;
+..status-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem 0.85rem;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 0.85rem;
 }
 
-.status.inactive {
-  color: #d32f2f;
+.status-badge.active {
+  color: #166534;
+  background: #dcfce7;
+}
+
+.status-badge.suspended {
+  color: #991b1b;
+  background: #fee2e2;
 }
 
 button {
@@ -67,6 +79,19 @@ button {
   cursor: pointer;
 }
 
+button.action-btn {
+  min-width: 110px;
+}
+
+button.primary-btn {
+  background: #10b981;
+}
+
 button.danger-btn {
-  background: #eb5757;
+  background: #ef4444;
+}
+
+button.danger-btn:hover,
+button.primary-btn:hover {
+  opacity: 0.95;
 }

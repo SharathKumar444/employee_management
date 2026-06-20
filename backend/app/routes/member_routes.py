@@ -9,6 +9,7 @@ from app.controllers.member_controller import (
     deactivate_member,
     reactivate_member,
 )
+from app.utils.user_status import ensure_user_active_admin_by_email
 
 router = APIRouter(
     prefix="/members",
@@ -37,9 +38,12 @@ def deactivate(
     member_id: int,
     admin_email: Optional[str] = Query(None),
     company_id: Optional[str] = Query(None),
+    reason: Optional[str] = Query(None),
     db: Session = Depends(get_db)
 ):
-    result = deactivate_member(db, member_id, admin_email, company_id)
+    if admin_email and company_id:
+        ensure_user_active_admin_by_email(db, admin_email, company_id)
+    result = deactivate_member(db, member_id, admin_email, company_id, reason)
 
     if not result.get("success"):
         raise HTTPException(status_code=404, detail=result.get("message"))
@@ -54,12 +58,9 @@ def reactivate(
     company_id: Optional[str] = Query(None),
     db: Session = Depends(get_db)
 ):
+    if admin_email and company_id:
+        ensure_user_active_admin_by_email(db, admin_email, company_id)
     result = reactivate_member(db, member_id, admin_email, company_id)
-
-    if not result.get("success"):
-        raise HTTPException(status_code=404, detail=result.get("message"))
-
-    return result
 
     if not result.get("success"):
         raise HTTPException(status_code=404, detail=result.get("message"))

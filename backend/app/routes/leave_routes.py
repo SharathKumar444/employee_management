@@ -9,6 +9,7 @@ from app.controllers.leave_controller import (
     approve_leave_request,
     reject_leave_request
 )
+from app.utils.user_status import ensure_user_active_by_id, ensure_user_active_by_email
 
 router = APIRouter(
     prefix="/leaves",
@@ -28,6 +29,7 @@ def submit_leave_request(
     db: Session = Depends(get_db)
 ):
     """Submit a new leave request"""
+    ensure_user_active_by_id(db, user_id, company_id)
     return create_leave_request(
         db, user_id, user_email, company_id, leave_type, start_date, end_date, reason
     )
@@ -41,6 +43,7 @@ def my_leave_requests(
     db: Session = Depends(get_db)
 ):
     """Get user's leave requests"""
+    ensure_user_active_by_id(db, user_id, company_id)
     return get_user_leave_requests(db, user_id, company_id, status)
 
 
@@ -62,6 +65,7 @@ def approve_request(
     db: Session = Depends(get_db)
 ):
     """Approve a leave request"""
+    ensure_user_active_by_email(db, admin_email, company_id)
     return approve_leave_request(db, leave_id, admin_email, company_id)
 
 
@@ -74,4 +78,5 @@ def reject_request(
     db: Session = Depends(get_db)
 ):
     """Reject a leave request"""
+    ensure_user_active_by_email(db, admin_email, company_id)
     return reject_leave_request(db, leave_id, admin_email, company_id, rejection_reason)

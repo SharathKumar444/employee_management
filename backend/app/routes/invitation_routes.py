@@ -13,6 +13,7 @@ from app.controllers.invitation_controller import (
     validate_invitation,
     create_user_from_invitation,
 )
+from app.utils.user_status import ensure_user_active_by_email
 
 
 class SignupPayload(BaseModel):
@@ -90,6 +91,7 @@ def create(
     db: Session = Depends(get_db)
 ):
     try:
+        ensure_user_active_by_email(db, payload.admin_email, payload.company_id)
         return create_invitation(
             db,
             payload.email,
@@ -121,6 +123,8 @@ def revoke(
     db: Session = Depends(get_db)
 ):
     try:
+        if admin_email and company_id:
+            ensure_user_active_by_email(db, admin_email, company_id)
         result = revoke_invitation(
             db,
             invite_id,

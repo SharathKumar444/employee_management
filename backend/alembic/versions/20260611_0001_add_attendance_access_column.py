@@ -1,6 +1,6 @@
 """add attendance access to users
 Revision ID: 20260611_0001
-Revises: 20260610_0001
+Revises: 20260610_0002
 Create Date: 2026-06-11 00:00:00.000000
 """
 from alembic import op

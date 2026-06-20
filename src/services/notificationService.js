@@ -109,6 +109,48 @@ export const getNotifications = async (
           }
         }
 
+        if (n.type === 'reactivation_request_submitted') {
+          return {
+            id: n.id,
+            recipient_user_id: n.recipient_user_id,
+            type: n.type,
+            message: n.payload || 'A reinstatement request was submitted.',
+            status: 'pending',
+            is_read: n.is_read,
+            created_at: n.created_at,
+            payload: n.payload,
+            parsed,
+          }
+        }
+
+        if (n.type === 'reactivation_approved') {
+          return {
+            id: n.id,
+            recipient_user_id: n.recipient_user_id,
+            type: n.type,
+            message: n.payload || 'Your reinstatement request was approved.',
+            status: 'server',
+            is_read: n.is_read,
+            created_at: n.created_at,
+            payload: n.payload,
+            parsed,
+          }
+        }
+
+        if (n.type === 'reactivation_rejected') {
+          return {
+            id: n.id,
+            recipient_user_id: n.recipient_user_id,
+            type: n.type,
+            message: n.payload || 'Your reinstatement request was rejected.',
+            status: 'server',
+            is_read: n.is_read,
+            created_at: n.created_at,
+            payload: n.payload,
+            parsed,
+          }
+        }
+
         // Other notifications: attempt to surface structured fields when available
         if (parsed) {
           return {

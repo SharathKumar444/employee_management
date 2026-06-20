@@ -12,6 +12,19 @@ from app.utils.notification_utils import create_notification
 # =========================
 def create_request(db: Session, user_id: int, company_id: str, reason: str = None):
 
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user:
+        return {
+            "success": False,
+            "message": "User not found"
+        }
+
+    if user.is_active:
+        return {
+            "success": False,
+            "message": "Account is already active"
+        }
+
     existing = db.query(ReactivationRequest).filter(
         ReactivationRequest.user_id == user_id,
         ReactivationRequest.status == "Pending"
@@ -38,10 +51,11 @@ def create_request(db: Session, user_id: int, company_id: str, reason: str = Non
     # 🔥 AUDIT LOG
     create_audit_log(
         db=db,
-        performed_by=f"user_{user_id}",
+        performed_by=user.email,
         action="Reactivation Request Submitted",
-        target_user=str(user_id),
-        company_id=company_id
+        target_user=user.email,
+        company_id=company_id,
+        details=reason or "User submitted account reactivation request"
     )
 
     # Notify company admins about the new request
@@ -110,7 +124,7 @@ def get_requests(db: Session, company_id: str):
 # =========================
 # APPROVE REQUEST
 # =========================
-def approve_request(db: Session, request_id: int, admin_name: str = "admin", comment: str = None):
+def approve_request(db: Session, request_id: int, admin_email: str = "admin", comment: str = None):
 
     req = db.query(ReactivationRequest).filter(
         ReactivationRequest.id == request_id
@@ -119,8 +133,14 @@ def approve_request(db: Session, request_id: int, admin_name: str = "admin", com
     if not req:
         return None
 
+    if req.status != "Pending":
+        return {
+            "success": False,
+            "message": "Request has already been reviewed"
+        }
+
     req.status = "Approved"
-    req.admin_reviewer = admin_name
+    req.admin_reviewer = admin_email
     req.review_comment = comment
     req.reviewed_at = datetime.utcnow()
 
@@ -128,23 +148,26 @@ def approve_request(db: Session, request_id: int, admin_name: str = "admin", com
 
     if user:
         user.is_active = True
+        user.deactivated_by = None
+        user.deactivated_at = None
+        user.deactivation_reason = None
 
-        # Ensure the user regains their role-based access after approval.
         if user.role not in ["admin", "user"]:
             user.role = "user"
 
         # 🔥 AUDIT LOGS
         create_audit_log(
             db=db,
-            performed_by=admin_name,
+            performed_by=admin_email,
             action="Reactivation Approved",
             target_user=user.email,
-            company_id=req.company_id
+            company_id=req.company_id,
+            details=comment or "Reactivation request approved"
         )
         create_audit_log(
             db=db,
-            performed_by=admin_name,
-            action="User Activated",
+            performed_by=admin_email,
+            action="User Reactivated",
             target_user=user.email,
             company_id=req.company_id
         )
@@ -155,7 +178,7 @@ def approve_request(db: Session, request_id: int, admin_name: str = "admin", com
                 db=db,
                 recipient_user_id=user.id,
                 type="reactivation_approved",
-                payload=f"Your reactivation request #{req.id} was approved by {admin_name}"
+                payload=f"Your reactivation request #{req.id} was approved by {admin_email}"
             )
         except Exception:
             pass
@@ -176,7 +199,7 @@ def approve_request(db: Session, request_id: int, admin_name: str = "admin", com
 # =========================
 # REJECT REQUEST
 # =========================
-def reject_request(db: Session, request_id: int, admin_name: str = "admin", comment: str = None):
+def reject_request(db: Session, request_id: int, admin_email: str = "admin", comment: str = None):
 
     req = db.query(ReactivationRequest).filter(
         ReactivationRequest.id == request_id
@@ -185,8 +208,14 @@ def reject_request(db: Session, request_id: int, admin_name: str = "admin", comm
     if not req:
         return None
 
+    if req.status != "Pending":
+        return {
+            "success": False,
+            "message": "Request has already been reviewed"
+        }
+
     req.status = "Rejected"
-    req.admin_reviewer = admin_name
+    req.admin_reviewer = admin_email
     req.review_comment = comment
     req.reviewed_at = datetime.utcnow()
 
@@ -195,10 +224,11 @@ def reject_request(db: Session, request_id: int, admin_name: str = "admin", comm
     if user:
         create_audit_log(
             db=db,
-            performed_by=admin_name,
+            performed_by=admin_email,
             action="Reactivation Rejected",
             target_user=user.email,
-            company_id=req.company_id
+            company_id=req.company_id,
+            details=comment or "Reactivation request rejected"
         )
         # Notify the user that their request was rejected
         try:
@@ -206,7 +236,7 @@ def reject_request(db: Session, request_id: int, admin_name: str = "admin", comm
                 db=db,
                 recipient_user_id=user.id,
                 type="reactivation_rejected",
-                payload=f"Your reactivation request #{req.id} was rejected by {admin_name}"
+                payload=f"Your reactivation request #{req.id} was rejected by {admin_email}"
             )
         except Exception:
             pass

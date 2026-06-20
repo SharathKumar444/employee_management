@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session
 from app.controllers.export_controller import ExportController, EXPORT_TYPES
 from app.models.user_model import User
 from app.config.database import get_db
+from app.utils.user_status import ensure_user_active_by_id
 import logging
 import io
 
@@ -43,6 +44,8 @@ async def export_data(
     """
     try:
         # Get current user (select only required fields to support legacy DB schemas)
+        ensure_user_active_by_id(db, user_id)
+
         current_user_row = db.execute(
             select(User.id, User.email, User.role).where(User.id == user_id)
         ).first()
@@ -107,6 +110,8 @@ async def get_export_history(
     """Get export history for the current company"""
     try:
         # Get current user (select only required fields to support legacy DB schemas)
+        ensure_user_active_by_id(db, user_id)
+
         current_user_row = db.execute(
             select(User.id, User.email, User.role).where(User.id == user_id)
         ).first()
@@ -148,6 +153,8 @@ async def get_available_types(
     """Get list of available export types"""
     try:
         # Get current user (select only required fields to support legacy DB schemas)
+        ensure_user_active_by_id(db, user_id)
+
         current_user_row = db.execute(
             select(User.id, User.email, User.role).where(User.id == user_id)
         ).first()

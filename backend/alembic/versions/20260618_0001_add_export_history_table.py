@@ -1,7 +1,7 @@
 """Add export history table for audit tracking
 
-Revision ID: 20260618_0001_add_export_history_table
-Revises: 20260611_0003_add_attendance_and_leave_tables
+Revision ID: 20260618_0001
+Revises: 20260611_0003
 Create Date: 2026-06-18 00:00:00.000000
 
 """
@@ -10,8 +10,8 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '20260618_0001_add_export_history_table'
-down_revision = '20260611_0003_add_attendance_and_leave_tables'
+revision = '20260618_0001'
+down_revision = '20260611_0003'
 branch_labels = None
 depends_on = None
 

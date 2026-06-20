@@ -1,3 +1,4 @@
+from datetime import datetime
 from sqlalchemy.orm import Session
 
 from app.models.user_model import User
@@ -27,6 +28,9 @@ def get_members(db: Session, company_id: str):
                 "last_logout": member.last_logout,
                 "browser_info": member.browser_info,
                 "ip_address": member.ip_address,
+                "deactivated_by": member.deactivated_by,
+                "deactivated_at": member.deactivated_at,
+                "deactivation_reason": member.deactivation_reason,
             }
             for member in members
         ]
@@ -40,7 +44,8 @@ def deactivate_member(
     db: Session,
     member_id: int,
     admin_email: str,
-    company_id: str = None
+    company_id: str = None,
+    deactivation_reason: str = None
 ):
 
     query = db.query(User).filter(
@@ -66,6 +71,9 @@ def deactivate_member(
         }
 
     user.is_active = False
+    user.deactivated_by = admin_email
+    user.deactivated_at = datetime.utcnow()
+    user.deactivation_reason = deactivation_reason
 
     db.commit()
     db.refresh(user)
@@ -73,21 +81,37 @@ def deactivate_member(
     # ==========================
     # AUDIT LOG
     # ==========================
-    create_audit_log(
-        db=db,
-        performed_by=admin_email,
-        action="User Deactivated",
-        target_user=user.email,
-        company_id=user.company_id
-    )
+    if deactivation_reason:
+        create_audit_log(
+            db=db,
+            performed_by=admin_email,
+            action="User Suspended",
+            target_user=user.email,
+            company_id=user.company_id,
+            details=deactivation_reason or "Account suspended by administrator"
+        )
+        response_message = "Account suspended successfully"
+    else:
+        create_audit_log(
+            db=db,
+            performed_by=admin_email,
+            action="User Deactivated",
+            target_user=user.email,
+            company_id=user.company_id,
+            details="Account disabled by administrator"
+        )
+        response_message = "Account deactivated successfully"
 
     return {
         "success": True,
-        "message": "Account deactivated successfully",
+        "message": response_message,
         "data": {
             "id": user.id,
             "email": user.email,
-            "is_active": user.is_active
+            "is_active": user.is_active,
+            "deactivated_by": user.deactivated_by,
+            "deactivated_at": user.deactivated_at,
+            "deactivation_reason": user.deactivation_reason,
         }
     }
 
@@ -128,11 +152,12 @@ def reactivate_member(
     # BUSINESS RULE
     # ==========================
     user.is_active = True
+    user.deactivated_by = None
+    user.deactivated_at = None
+    user.deactivation_reason = None
 
     # Restore role access
-    if user.role == "admin":
-        user.role = "admin"
-    elif user.role == "user":
+    if user.role not in ["admin", "user"]:
         user.role = "user"
 
     db.commit()
@@ -144,7 +169,7 @@ def reactivate_member(
     create_audit_log(
         db=db,
         performed_by=admin_email,
-        action="User Activated",
+        action="User Reactivated",
         target_user=user.email,
         company_id=user.company_id
     )

@@ -6,6 +6,8 @@ from app.controllers.activity_controller import (
     fetch_activity_detail,
     fetch_activity_list,
 )
+from app.utils.user_status import ensure_user_active_by_id
+from app.utils.user_status import ensure_user_active_by_id
 
 router = APIRouter(
     prefix="/activity-tracking",
@@ -35,6 +37,7 @@ def activity_detail(
     company_id: str = Query(...),
     db: Session = Depends(get_db),
 ):
+    ensure_user_active_by_id(db, user_id, company_id)
     result = fetch_activity_detail(db, company_id, user_id)
 
     if not result.get("success"):

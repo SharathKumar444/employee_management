@@ -9,6 +9,7 @@ from app.controllers.notification_controller import (
     mark_notification_read,
     mark_all_read,
 )
+from app.utils.user_status import ensure_user_active_by_id
 
 router = APIRouter(
     prefix="/notifications",
@@ -29,6 +30,8 @@ def fetch_notifications(user_id: Optional[int] = Query(None), db: Session = Depe
     if not user_id:
         raise HTTPException(status_code=400, detail="user_id is required")
 
+    ensure_user_active_by_id(db, user_id)
+
     try:
         data = get_notifications(db, user_id)
         return {"success": True, "data": data}
@@ -37,7 +40,14 @@ def fetch_notifications(user_id: Optional[int] = Query(None), db: Session = Depe
 
 
 @router.put("/{notification_id}/mark_read")
-def mark_read(notification_id: int, db: Session = Depends(get_db)):
+def mark_read(
+    notification_id: int,
+    user_id: Optional[int] = Query(None),
+    db: Session = Depends(get_db)
+):
+    if user_id is not None:
+        ensure_user_active_by_id(db, user_id)
+
     res = mark_notification_read(db, notification_id)
     if not res:
         raise HTTPException(status_code=404, detail="Notification not found")
@@ -48,4 +58,6 @@ def mark_read(notification_id: int, db: Session = Depends(get_db)):
 def mark_all(user_id: Optional[int] = Query(None), db: Session = Depends(get_db)):
     if not user_id:
         raise HTTPException(status_code=400, detail="user_id is required")
+
+    ensure_user_active_by_id(db, user_id)
     return mark_all_read(db, user_id)

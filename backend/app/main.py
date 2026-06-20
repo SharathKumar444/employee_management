@@ -1,8 +1,10 @@
 import os
 import sqlite3
 
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException, Request
+from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 
 from app.config.database import Base, engine, SessionLocal, DATABASE_PATH
@@ -14,6 +16,7 @@ from app.models.user_activity_model import UserActivity
 from app.models.invitation_model import Invitation
 from app.models.attendance_model import Attendance, Leave
 from app.models.export_model import ExportHistory
+from app.models.reinstatement_model import ReinstallmentRequest
 
 from app.routes.employee_routes import router as employee_router
 from app.routes.role_request_routes import router as role_request_router
@@ -29,6 +32,7 @@ from app.routes.attendance_routes import router as attendance_router
 from app.routes.attendance_access_routes import router as attendance_access_router
 from app.routes.leave_routes import router as leave_router
 from app.routes.export_routes import router as export_router
+from app.routes.suspension_routes import router as suspension_router
 
 
 def ensure_invitation_schema():
@@ -96,6 +100,16 @@ def ensure_user_schema():
                 "ALTER TABLE users ADD COLUMN ip_address TEXT"
             )
 
+        if 'deactivated_at' not in columns:
+            cursor.execute(
+                "ALTER TABLE users ADD COLUMN deactivated_at DATETIME"
+            )
+
+        if 'deactivation_reason' not in columns:
+            cursor.execute(
+                "ALTER TABLE users ADD COLUMN deactivation_reason TEXT"
+            )
+
         conn.commit()
 
 
@@ -142,6 +156,42 @@ app.add_middleware(
 )
 
 
+@app.exception_handler(HTTPException)
+def http_exception_handler(request: Request, exc: HTTPException):
+    code = None
+    if exc.headers and exc.headers.get("X-Error-Code"):
+        code = exc.headers.get("X-Error-Code")
+    elif exc.status_code == 403 and str(exc.detail).lower() == "account suspended":
+        code = "ACCOUNT_SUSPENDED"
+    elif exc.status_code == 403 and str(exc.detail).lower() == "admin access required":
+        code = "ADMIN_ACCESS_REQUIRED"
+    else:
+        code = f"HTTP_{exc.status_code}"
+
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={
+            "success": False,
+            "message": str(exc.detail),
+            "detail": str(exc.detail),
+            "code": code,
+        },
+    )
+
+
+@app.exception_handler(RequestValidationError)
+def validation_exception_handler(request: Request, exc: RequestValidationError):
+    return JSONResponse(
+        status_code=422,
+        content={
+            "success": False,
+            "message": "Validation error",
+            "detail": exc.errors(),
+            "code": "VALIDATION_ERROR",
+        },
+    )
+
+
 # =========================
 # ROUTES
 # =========================
@@ -159,6 +209,7 @@ app.include_router(attendance_router)
 app.include_router(attendance_access_router)
 app.include_router(leave_router)
 app.include_router(export_router)
+app.include_router(suspension_router)
 
 # =========================
 # DATABASE SESSION

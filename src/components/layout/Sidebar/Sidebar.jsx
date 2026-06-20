@@ -123,9 +123,19 @@ const Sidebar = () => {
         <span>Members</span>
       </NavLink>
 
+      <NavLink to="/reinstatement-requests" className={linkClass}>
+        <FaHistory />
+        <span>Suspension Reinstatement</span>
+      </NavLink>
+
       <NavLink to="/user-invitations" className={linkClass}>
         <FaEnvelope />
         <span>Invitations</span>
+      </NavLink>
+
+      <NavLink to="/reactivation-requests" className={linkClass}>
+        <FaHistory />
+        <span>Reinstatement Requests</span>
       </NavLink>
 
       <NavLink to="/companies" className={linkClass}>

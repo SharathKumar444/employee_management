@@ -20,6 +20,7 @@ import ActivityTracking from '../pages/ActivityTracking/ActivityTracking'
 import Members from '../pages/Members/Members'
 import Invitations from '../pages/Invitations/Invitations'
 import AdminReactivationRequests from '../pages/AdminReactivationRequests/AdminReactivationRequests'
+import AdminReinstallmentRequests from '../pages/AdminReinstallmentRequests/AdminReinstallmentRequests'
 import AccountDeactivated from '../pages/AccountDeactivated/AccountDeactivated'
 import Reactivation from '../pages/Reactivation/Reactivation'
 import Notifications from '../pages/Notifications/Notifications'
@@ -123,6 +124,14 @@ const AppRoutes = () => {
           element={
             <ProtectedRoute allowedRoles={["admin"]}>
               <AdminReactivationRequests />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="reinstatement-requests"
+          element={
+            <ProtectedRoute allowedRoles={["admin"]}>
+              <AdminReinstallmentRequests />
             </ProtectedRoute>
           }
         />

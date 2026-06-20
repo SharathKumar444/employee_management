@@ -10,6 +10,8 @@ from app.controllers.attendance_controller import (
     get_company_attendance,
     get_working_hours_summary
 )
+from app.utils.user_status import ensure_user_active_by_id
+from app.utils.user_status import ensure_user_active_by_id
 
 router = APIRouter(
     prefix="/attendance",
@@ -25,6 +27,7 @@ def user_check_in(
     db: Session = Depends(get_db)
 ):
     """Check in for the day"""
+    ensure_user_active_by_id(db, user_id, company_id)
     return check_in(db, user_id, user_email, company_id)
 
 
@@ -36,6 +39,7 @@ def user_check_out(
     db: Session = Depends(get_db)
 ):
     """Check out for the day"""
+    ensure_user_active_by_id(db, user_id, company_id)
     return check_out(db, user_id, user_email, company_id)
 
 
@@ -46,6 +50,7 @@ def today_status(
     db: Session = Depends(get_db)
 ):
     """Get today's attendance status"""
+    ensure_user_active_by_id(db, user_id, company_id)
     return get_today_status(db, user_id, company_id)
 
 
@@ -57,6 +62,7 @@ def attendance_history(
     db: Session = Depends(get_db)
 ):
     """Get user's attendance history"""
+    ensure_user_active_by_id(db, user_id, company_id)
     return get_attendance_history(db, user_id, company_id, days)
 
 
@@ -77,4 +83,5 @@ def working_hours_summary(
     db: Session = Depends(get_db)
 ):
     """Get working hours summary"""
+    ensure_user_active_by_id(db, user_id)
     return get_working_hours_summary(db, user_id, days)

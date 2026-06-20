@@ -5,6 +5,10 @@ const ConfirmModal = ({
   message,
   onConfirm,
   onCancel,
+  children,
+  confirmText = 'Confirm',
+  cancelText = 'Cancel',
+  confirmClassName = '',
 }) => {
   return (
     <div className="confirm-modal-overlay">
@@ -13,19 +17,21 @@ const ConfirmModal = ({
 
         <p>{message}</p>
 
+        {children}
+
         <div className="confirm-modal-buttons">
           <button
-            className="confirm-btn"
+            className={`confirm-btn ${confirmClassName}`}
             onClick={onConfirm}
           >
-            Confirm
+            {confirmText}
           </button>
 
           <button
             className="cancel-btn"
             onClick={onCancel}
           >
-            Cancel
+            {cancelText}
           </button>
         </div>
       </div>

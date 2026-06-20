@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { toast } from 'react-toastify'
 import { useAuth } from '../../context/AuthContext'
 import {
   getMembers,
@@ -6,6 +7,7 @@ import {
   reactivateMember,
 } from '../../services/memberService'
 
+import ConfirmModal from '../../components/employee/ConfirmModal/ConfirmModal'
 import './Members.css'
 
 const Members = () => {
@@ -17,6 +19,10 @@ const Members = () => {
   const [members, setMembers] = useState([])
   const [search, setSearch] = useState('')
   const [loading, setLoading] = useState(false)
+  const [showSuspendModal, setShowSuspendModal] = useState(false)
+  const [showReactivateModal, setShowReactivateModal] = useState(false)
+  const [pendingMember, setPendingMember] = useState(null)
+  const [deactivationReason, setDeactivationReason] = useState('')
 
   const loadMembers = async () => {
     if (!companyId) {
@@ -45,37 +51,117 @@ const Members = () => {
   }
 
   useEffect(() => {
-    if (companyId) {
-      loadMembers()
+    if (!companyId) {
+      return
     }
+
+    const load = async () => {
+      await loadMembers()
+    }
+
+    load()
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [companyId])
 
-  const handleDeactivate = async memberId => {
+  const handleSuspend = member => {
+    setPendingMember(member)
+    setDeactivationReason('')
+    setShowSuspendModal(true)
+  }
+
+  const handleDeactivate = async member => {
+    const memberId =
+      member.id ||
+      member.member_id ||
+      member.user_id
+
     try {
       await deactivateMember(
         memberId,
         currentUser?.email,
         companyId
       )
+      toast.success(
+        `${member.name} has been deactivated.`
+      )
       await loadMembers()
     } catch (error) {
       console.error('Deactivate member error:', error)
-      alert('Unable to deactivate member')
+      toast.error(
+        error?.response?.data?.detail ||
+        'Unable to deactivate member'
+      )
     }
   }
 
-  const handleReactivate = async memberId => {
+  const confirmSuspend = async () => {
+    if (!pendingMember) {
+      return
+    }
+
+    const memberId =
+      pendingMember.id ||
+      pendingMember.member_id ||
+      pendingMember.user_id
+
+    try {
+      await deactivateMember(
+        memberId,
+        currentUser?.email,
+        companyId,
+        deactivationReason
+      )
+      toast.success(
+        `${pendingMember.name} has been suspended.`
+      )
+      await loadMembers()
+    } catch (error) {
+      console.error('Suspend member error:', error)
+      toast.error(
+        error?.response?.data?.detail ||
+        'Unable to suspend member'
+      )
+    } finally {
+      setShowSuspendModal(false)
+      setPendingMember(null)
+      setDeactivationReason('')
+    }
+  }
+
+  const handleReactivate = member => {
+    setPendingMember(member)
+    setShowReactivateModal(true)
+  }
+
+  const confirmReactivate = async () => {
+    if (!pendingMember) {
+      return
+    }
+
+    const memberId =
+      pendingMember.id ||
+      pendingMember.member_id ||
+      pendingMember.user_id
+
     try {
       await reactivateMember(
         memberId,
         currentUser?.email,
         companyId
       )
+      toast.success(
+        `${pendingMember.name} has been reactivated.`
+      )
       await loadMembers()
     } catch (error) {
       console.error('Reactivate member error:', error)
-      alert('Unable to reactivate member')
+      toast.error(
+        error?.response?.data?.detail ||
+        'Unable to reactivate member'
+      )
+    } finally {
+      setShowReactivateModal(false)
+      setPendingMember(null)
     }
   }
 
@@ -148,13 +234,21 @@ const Members = () => {
                   <td>{member.browser_info || '-'}</td>
                   <td>{member.ip_address || '-'}</td>
                   <td>{member.role || 'User'}</td>
-                  <td className="status active">Active</td>
+                  <td>
+                    <span className="status-badge active">Active</span>
+                  </td>
                   <td>
                     <button
-                      className="danger-btn"
-                      onClick={() => handleDeactivate(member.id)}
+                      className="danger-btn action-btn"
+                      onClick={() => handleDeactivate(member)}
                     >
                       Deactivate
+                    </button>
+                    <button
+                      className="secondary-btn action-btn"
+                      onClick={() => handleSuspend(member)}
+                    >
+                      Suspend
                     </button>
                   </td>
                 </tr>
@@ -165,10 +259,10 @@ const Members = () => {
       </section>
 
       <section className="members-block">
-        <h2>Inactive Members</h2>
+        <h2>Suspended Members</h2>
 
         {inactiveMembers.length === 0 ? (
-          <p>No inactive members found.</p>
+          <p>No suspended members found.</p>
         ) : (
           <table className="members-table">
             <thead>
@@ -194,10 +288,13 @@ const Members = () => {
                   <td>{member.browser_info || '-'}</td>
                   <td>{member.ip_address || '-'}</td>
                   <td>{member.role || 'User'}</td>
-                  <td className="status inactive">Inactive</td>
+                  <td>
+                    <span className="status-badge suspended">Suspended</span>
+                  </td>
                   <td>
                     <button
-                      onClick={() => handleReactivate(member.id)}
+                      className="primary-btn action-btn"
+                      onClick={() => handleReactivate(member)}
                     >
                       Reactivate
                     </button>
@@ -208,6 +305,46 @@ const Members = () => {
           </table>
         )}
       </section>
+
+      {showSuspendModal && (
+        <ConfirmModal
+          title={`Suspend ${pendingMember?.name}`}
+          message={`Suspend this user and block access to company modules until reactivation.`}
+          onConfirm={confirmSuspend}
+          onCancel={() => {
+            setShowSuspendModal(false)
+            setPendingMember(null)
+            setDeactivationReason('')
+          }}
+          confirmText="Suspend"
+          confirmClassName="suspend-confirm"
+        >
+          <div className="deactivation-reason-group">
+            <label htmlFor="deactivationReason">Reason for suspension (optional)</label>
+            <textarea
+              id="deactivationReason"
+              value={deactivationReason}
+              onChange={e => setDeactivationReason(e.target.value)}
+              rows={4}
+              placeholder="Add an optional reason to help the employee and administrators understand this suspension."
+            />
+          </div>
+        </ConfirmModal>
+      )}
+
+      {showReactivateModal && (
+        <ConfirmModal
+          title={`Reactivate ${pendingMember?.name}`}
+          message={`Reactivate this user and restore system access.`}
+          onConfirm={confirmReactivate}
+          onCancel={() => {
+            setShowReactivateModal(false)
+            setPendingMember(null)
+          }}
+          confirmText="Reactivate"
+          confirmClassName="reactivate-confirm"
+        />
+      )}
     </div>
   )
 }

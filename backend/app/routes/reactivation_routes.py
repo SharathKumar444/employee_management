@@ -10,6 +10,7 @@ from app.controllers.reactivation_controller import (
     approve_request,
     reject_request,
 )
+from app.utils.user_status import ensure_user_active_admin_by_email
 
 router = APIRouter(
     prefix="/reactivation",
@@ -52,18 +53,22 @@ def fetch_requests(
 @router.put("/{request_id}/approve")
 def approve(
     request_id: int,
-    admin_name: Optional[str] = Query(None),
+    admin_email: Optional[str] = Query(None),
+    company_id: Optional[str] = Query(None),
     comment: Optional[str] = Body(None),
     db: Session = Depends(get_db)
 ):
     try:
-        if not admin_name:
-            raise HTTPException(status_code=400, detail="admin_name is required")
-        
-        result = approve_request(db, request_id, admin_name, comment)
+        if not admin_email:
+            raise HTTPException(status_code=400, detail="admin_email is required")
+
+        ensure_user_active_admin_by_email(db, admin_email, company_id)
+        result = approve_request(db, request_id, admin_email, comment)
 
         if not result:
             raise HTTPException(status_code=404, detail="Request not found")
+        if not result.get("success"):
+            raise HTTPException(status_code=400, detail=result.get("message"))
 
         return result
     except HTTPException:
@@ -75,18 +80,22 @@ def approve(
 @router.put("/{request_id}/reject")
 def reject(
     request_id: int,
-    admin_name: Optional[str] = Query(None),
+    admin_email: Optional[str] = Query(None),
+    company_id: Optional[str] = Query(None),
     comment: Optional[str] = Body(None),
     db: Session = Depends(get_db)
 ):
     try:
-        if not admin_name:
-            raise HTTPException(status_code=400, detail="admin_name is required")
-        
-        result = reject_request(db, request_id, admin_name, comment)
+        if not admin_email:
+            raise HTTPException(status_code=400, detail="admin_email is required")
+
+        ensure_user_active_admin_by_email(db, admin_email, company_id)
+        result = reject_request(db, request_id, admin_email, comment)
 
         if not result:
             raise HTTPException(status_code=404, detail="Request not found")
+        if not result.get("success"):
+            raise HTTPException(status_code=400, detail=result.get("message"))
 
         return result
     except HTTPException:

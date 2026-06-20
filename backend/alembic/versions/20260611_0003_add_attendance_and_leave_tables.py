@@ -1,7 +1,7 @@
 """Add Attendance and Leave tables
 
 Revision ID: 20260611_0003
-Revises: 20260610_0002
+Revises: 20260611_0001
 Create Date: 2026-06-11 10:00:00.000000
 
 """
@@ -11,7 +11,7 @@ import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision = '20260611_0003'
-down_revision = '20260610_0002'
+down_revision = '20260611_0001'
 branch_labels = None
 depends_on = None
 
