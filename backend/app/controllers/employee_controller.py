@@ -21,6 +21,11 @@ def create_employee(db: Session, employee_data, user_name="SYSTEM"):
         department=employee_data.department,
         designation=employee_data.designation,
         email=employee_data.email,
+        phone=employee_data.phone,
+        address=employee_data.address,
+        date_of_joining=employee_data.date_of_joining,
+        profile_picture=employee_data.profile_picture,
+        employee_id=employee_data.employee_id,
         status=employee_data.status,
         company_id=employee_data.company_id
     )
@@ -60,6 +65,11 @@ def update_employee(db: Session, employee_id: int, employee_data, user_name="SYS
     employee.department = employee_data.department
     employee.designation = employee_data.designation
     employee.email = employee_data.email
+    employee.phone = employee_data.phone
+    employee.address = employee_data.address
+    employee.date_of_joining = employee_data.date_of_joining
+    employee.profile_picture = employee_data.profile_picture
+    employee.employee_id = employee_data.employee_id
     employee.status = employee_data.status
     employee.company_id = employee_data.company_id
 

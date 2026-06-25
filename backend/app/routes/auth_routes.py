@@ -13,6 +13,7 @@ class LoginPayload(BaseModel):
 
 class LogoutPayload(BaseModel):
     user_id: int
+    session_token: str = None
 
 
 router = APIRouter(
@@ -71,7 +72,8 @@ def logout(
             db,
             payload.user_id,
             browser_info=browser_info,
-            ip_address=ip_address
+            ip_address=ip_address,
+            session_token=payload.session_token
         )
 
         if not result.get("success"):

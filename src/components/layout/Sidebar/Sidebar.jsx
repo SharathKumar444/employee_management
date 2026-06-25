@@ -106,7 +106,7 @@ const Sidebar = () => {
   </NavLink>
 
   {/* ADMIN ONLY */}
-  {role === "admin" && (
+      {role === "admin" && (
     <>
       <NavLink to="/employees" className={linkClass}>
         <FaUsers />
@@ -118,24 +118,9 @@ const Sidebar = () => {
         <span>Transfer</span>
       </NavLink>
 
-      <NavLink to="/members" className={linkClass}>
-        <FaUsers />
-        <span>Members</span>
-      </NavLink>
-
-      <NavLink to="/reinstatement-requests" className={linkClass}>
-        <FaHistory />
-        <span>Suspension Reinstatement</span>
-      </NavLink>
-
       <NavLink to="/user-invitations" className={linkClass}>
         <FaEnvelope />
         <span>Invitations</span>
-      </NavLink>
-
-      <NavLink to="/reactivation-requests" className={linkClass}>
-        <FaHistory />
-        <span>Reinstatement Requests</span>
       </NavLink>
 
       <NavLink to="/companies" className={linkClass}>

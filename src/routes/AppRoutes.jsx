@@ -17,10 +17,8 @@ import Companies from '../pages/Companies/Companies'
 import AdminRoleRequests from '../pages/AdminRoleRequests/AdminRoleRequests'
 import AuditLogs from '../pages/AuditLogs/AuditLogs'
 import ActivityTracking from '../pages/ActivityTracking/ActivityTracking'
-import Members from '../pages/Members/Members'
+// Members page intentionally routed to Invitations to keep members UI within Invitations
 import Invitations from '../pages/Invitations/Invitations'
-import AdminReactivationRequests from '../pages/AdminReactivationRequests/AdminReactivationRequests'
-import AdminReinstallmentRequests from '../pages/AdminReinstallmentRequests/AdminReinstallmentRequests'
 import AccountDeactivated from '../pages/AccountDeactivated/AccountDeactivated'
 import Reactivation from '../pages/Reactivation/Reactivation'
 import Notifications from '../pages/Notifications/Notifications'
@@ -107,7 +105,7 @@ const AppRoutes = () => {
           path="members"
           element={
             <ProtectedRoute allowedRoles={["admin"]}>
-              <Members />
+              <Invitations />
             </ProtectedRoute>
           }
         />
@@ -123,7 +121,7 @@ const AppRoutes = () => {
           path="reactivation-requests"
           element={
             <ProtectedRoute allowedRoles={["admin"]}>
-              <AdminReactivationRequests />
+              <Settings />
             </ProtectedRoute>
           }
         />
@@ -131,7 +129,7 @@ const AppRoutes = () => {
           path="reinstatement-requests"
           element={
             <ProtectedRoute allowedRoles={["admin"]}>
-              <AdminReinstallmentRequests />
+              <Settings />
             </ProtectedRoute>
           }
         />

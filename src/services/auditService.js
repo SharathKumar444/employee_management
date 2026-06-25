@@ -1,6 +1,38 @@
 import axios from "axios"
 
 const API_URL = "http://127.0.0.1:8000"
+const LOCAL_AUDIT_KEY = 'auditLogs'
+
+const getLocalAuditLogs = () =>
+  JSON.parse(localStorage.getItem(LOCAL_AUDIT_KEY)) || []
+
+const saveLocalAuditLogs = logs =>
+  localStorage.setItem(LOCAL_AUDIT_KEY, JSON.stringify(logs))
+
+export const logLocalAuditEvent = event => {
+  if (!event) return null
+
+  const localLogs = getLocalAuditLogs()
+  const duplicate = localLogs.some(
+    log =>
+      log.type === event.type &&
+      log.userEmail === event.userEmail &&
+      log.details === event.details
+  )
+
+  if (duplicate) {
+    return null
+  }
+
+  const entry = {
+    id: `local-${Date.now()}`,
+    timestamp: new Date().toISOString(),
+    ...event,
+  }
+
+  saveLocalAuditLogs([entry, ...localLogs])
+  return entry
+}
 
 // =========================
 // AXIOS INSTANCE
@@ -35,10 +67,21 @@ export const fetchAuditLogs = async (companyId) => {
       response.data.success &&
       Array.isArray(response.data.data)
     ) {
-      return response.data.data
+      const remoteLogs = response.data.data
+      const localLogs = getLocalAuditLogs()
+
+      return [
+        ...remoteLogs,
+        ...localLogs.filter(
+          localLog =>
+            !remoteLogs.some(
+              remoteLog => remoteLog.id === localLog.id
+            )
+        ),
+      ]
     }
 
-    return []
+    return getLocalAuditLogs()
   } catch (error) {
     console.error("❌ fetchAuditLogs error:", error)
 

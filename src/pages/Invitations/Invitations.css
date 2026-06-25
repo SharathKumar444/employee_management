@@ -109,3 +109,31 @@ tbody td {
 button.danger-btn {
   background: #eb5757;
 }
+
+.secondary-btn {
+  background: #f8fafc;
+  color: #0f172a;
+  border: 1px solid #cbd5e1;
+  padding: 0.65rem 0.9rem;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.deactivation-reason-group {
+  margin-top: 1rem;
+}
+
+.deactivation-reason-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+}
+
+.deactivation-reason-group textarea {
+  width: 100%;
+  min-height: 100px;
+  padding: 0.75rem;
+  border: 1px solid #dcdcdc;
+  border-radius: 8px;
+}
+

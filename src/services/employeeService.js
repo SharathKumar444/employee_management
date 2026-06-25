@@ -10,6 +10,11 @@ const normalizeEmployee = employee => ({
   department: employee.department,
   designation: employee.designation,
   email: employee.email,
+  phone: employee.phone,
+  address: employee.address,
+  date_of_joining: employee.date_of_joining,
+  profile_picture: employee.profile_picture,
+  employee_id: employee.employee_id,
   status: employee.status,
   company_id:
     employee.company_id ||

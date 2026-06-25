@@ -432,6 +432,27 @@ body.dark-theme .icon-btn {
 }
 
 /* =========================
+   SESSION MONITORING CARD
+========================= */
+
+.session-monitoring-card {
+  grid-column: 1 / -1;
+  padding: 0;
+  border-radius: 18px;
+  overflow: hidden;
+}
+
+.session-monitoring-card .session-monitoring {
+  padding: 0;
+  width: 100%;
+}
+
+body.dark-theme .session-monitoring-card {
+  background: transparent;
+  box-shadow: none;
+}
+
+/* =========================
    RESPONSIVE
 ========================= */
 

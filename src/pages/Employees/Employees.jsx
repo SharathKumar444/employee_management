@@ -5,6 +5,7 @@ import {
   FaUserCheck,
   FaBuilding,
   FaClipboardCheck,
+  FaExclamationTriangle,
   FaPlus,
 } from 'react-icons/fa'
 
@@ -20,6 +21,10 @@ import {
   updateEmployee,
   deleteEmployee,
 } from '../../services/employeeService'
+import { logLocalAuditEvent } from '../../services/auditService'
+import {
+  getProfileCompletionScore,
+} from '../../utils/profileCompletion'
 
 import './Employees.css'
 
@@ -54,7 +59,9 @@ const Employees = () => {
     departmentFilter,
     setDepartmentFilter,
   ] = useState('All')
-
+  const [completionFilter,
+    setCompletionFilter,
+  ] = useState('All')
   const [showForm, setShowForm] =
     useState(false)
 
@@ -67,16 +74,6 @@ const Employees = () => {
     showDeleteModal,
     setShowDeleteModal,
   ] = useState(false)
-
-  /* =========================
-     CLEAR OLD NOTIFICATIONS
-  ========================= */
-
-  useEffect(() => {
-    localStorage.removeItem(
-      'notifications'
-    )
-  }, [])
 
   /* =========================
      LOAD EMPLOYEES
@@ -140,6 +137,8 @@ useEffect(() => {
   company_id: userCompanyId,
 })
 
+        const newScore = getProfileCompletionScore(employeeData)
+
         const oldNotifications =
           JSON.parse(
             localStorage.getItem(
@@ -149,12 +148,14 @@ useEffect(() => {
 
         const newNotification = {
           id: Date.now(),
-          type: 'add',
-          message: `${employeeData.name} was added successfully`,
+          recipient_email: employeeData.email,
+          type: 'profile-completion',
+          message: `${employeeData.name} profile created with ${newScore}% completion`,
           time: 'Just now',
+          is_read: false,
         }
 
-        localStorage.setItem(
+          localStorage.setItem(
           'notifications',
           JSON.stringify([
             newNotification,
@@ -167,6 +168,16 @@ useEffect(() => {
             'notification-update'
           )
         )
+
+        logLocalAuditEvent({
+          type: 'profile_created',
+          userEmail: employeeData.email,
+          userName: employeeData.name,
+          action: 'Employee profile created',
+          details: `Completion ${newScore}%`,
+          performedBy: currentUser.email,
+          company_id: userCompanyId,
+        })
 
         await loadEmployees()
 
@@ -217,11 +228,19 @@ useEffect(() => {
             )
           ) || []
 
+        const updatedScore = getProfileCompletionScore(employeeData)
+        const notificationMessage =
+          updatedScore === 100
+            ? `${employeeData.name}'s profile is now complete`
+            : `${employeeData.name}'s profile is ${updatedScore}% complete`
+
         const newNotification = {
           id: Date.now(),
-          type: 'edit',
-          message: `${employeeData.name} profile updated`,
+          recipient_email: employeeData.email,
+          type: 'profile-completion',
+          message: notificationMessage,
           time: 'Just now',
+          is_read: false,
         }
 
         localStorage.setItem(
@@ -237,6 +256,16 @@ useEffect(() => {
             'notification-update'
           )
         )
+
+        logLocalAuditEvent({
+          type: 'profile_updated',
+          userEmail: employeeData.email,
+          userName: employeeData.name,
+          action: 'Employee profile updated',
+          details: `Completion ${updatedScore}%`,
+          performedBy: currentUser.email,
+          company_id: userCompanyId,
+        })
 
         await loadEmployees()
 
@@ -436,6 +465,7 @@ useEffect(() => {
           type: 'status',
           message: statusMessage,
           time: 'Just now',
+          is_read: false,
         }
 
         localStorage.setItem(
@@ -489,6 +519,62 @@ useEffect(() => {
       matchesDepartment
     )
   })
+  .filter(employee => {
+    if (completionFilter === 'All') {
+      return true
+    }
+
+    const score = getProfileCompletionScore(employee)
+
+    if (completionFilter === 'Complete') {
+      return score === 100
+    }
+
+    if (completionFilter === 'Incomplete') {
+      return score < 100
+    }
+
+    if (completionFilter === 'NeedsAttention') {
+      return score < 80
+    }
+
+    return true
+  })
+
+  const averageProfileCompletion =
+    filteredEmployees.length > 0
+      ? Math.round(
+          filteredEmployees
+            .map(getProfileCompletionScore)
+            .reduce((sum, score) => sum + score, 0) /
+          filteredEmployees.length
+        )
+      : 0
+
+  const incompleteProfileCount =
+    filteredEmployees.filter(
+      employee =>
+        getProfileCompletionScore(employee) <
+        100
+    ).length
+
+  const needsAttentionCount =
+    filteredEmployees.filter(
+      employee =>
+        getProfileCompletionScore(employee) <
+        80
+    ).length
+
+  const lowCompletionEmployees = filteredEmployees
+    .filter(employee =>
+      getProfileCompletionScore(employee) < 80
+    )
+    .sort(
+      (a, b) =>
+        getProfileCompletionScore(a) -
+        getProfileCompletionScore(b)
+    )
+    .slice(0, 3)
 
   /* =========================
      LOADING
@@ -595,7 +681,52 @@ useEffect(() => {
     icon={<FaClipboardCheck />}
   />
 
+  <StatisticsCard
+    title="Profile Completion"
+    value={`${averageProfileCompletion}%`}
+    icon={<FaClipboardCheck />}
+  />
+
+  <StatisticsCard
+    title="At-Risk Profiles"
+    value={needsAttentionCount}
+    icon={<FaExclamationTriangle />}
+  />
+
+  <StatisticsCard
+    title="Incomplete Profiles"
+    value={incompleteProfileCount}
+    icon={<FaUsers />}
+  />
+
 </div>
+
+      {/* THRESHOLD ALERT */}
+      {needsAttentionCount > 0 && (
+        <div className="threshold-alert">
+          <div>
+            <h3>Profile Completion Alert</h3>
+            <p>
+              {needsAttentionCount} employee(s) have less than 80% profile completion.
+            </p>
+            <p>
+              {lowCompletionEmployees.length > 0
+                ? `Top low-completion employees: ${lowCompletionEmployees
+                    .map(emp => emp.name || emp.email)
+                    .join(', ')}`
+                : 'Review the employee list to identify additional profile gaps.'}
+            </p>
+          </div>
+          <button
+            className="highlight-filter-btn"
+            onClick={() =>
+              setCompletionFilter('NeedsAttention')
+            }
+          >
+            Filter low completion
+          </button>
+        </div>
+      )}
 
       {/* FILTERS */}
 
@@ -611,6 +742,12 @@ useEffect(() => {
         }
         setDepartmentFilter={
           setDepartmentFilter
+        }
+        completionFilter={
+          completionFilter
+        }
+        setCompletionFilter={
+          setCompletionFilter
         }
       />
 

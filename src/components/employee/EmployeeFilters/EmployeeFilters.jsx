@@ -7,6 +7,8 @@ const EmployeeFilters = ({
   setSearchInput,
   departmentFilter,
   setDepartmentFilter,
+  completionFilter,
+  setCompletionFilter,
 }) => {
   return (
     <div className="employee-filters">
@@ -42,6 +44,18 @@ const EmployeeFilters = ({
         <option value="Finance">
           Finance
         </option>
+      </select>
+
+      <select
+        value={completionFilter}
+        onChange={event =>
+          setCompletionFilter(event.target.value)
+        }
+      >
+        <option value="All">All Profiles</option>
+        <option value="Complete">Complete (100%)</option>
+        <option value="Incomplete">Incomplete (&lt;100%)</option>
+        <option value="NeedsAttention">Needs Attention (&lt;80%)</option>
       </select>
     </div>
   )

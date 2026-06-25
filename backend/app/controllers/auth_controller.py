@@ -6,6 +6,7 @@ from app.controllers.activity_controller import (
     complete_activity_record,
     create_activity_record,
 )
+from app.controllers.session_controller import create_session, logout_session
 from app.models.user_model import User
 
 
@@ -119,6 +120,17 @@ def login_user(
             )
         )
 
+    # Create session record
+    session_result = create_session(
+        db,
+        user.id,
+        user.email,
+        user.company_id,
+        browser_info,
+        ip_address
+    )
+    session_token = session_result.get("data", {}).get("session_token")
+
     return {
         "success": True,
         "message": "Login successful",
@@ -146,7 +158,8 @@ def login_user(
                 "browser_info": user.browser_info,
                 "ip_address": user.ip_address,
             },
-            "token": f"token_{user.id}_{user.email}"
+            "token": f"token_{user.id}_{user.email}",
+            "session_token": session_token
         }
     }
 
@@ -155,7 +168,8 @@ def logout_user(
     db: Session,
     user_id: int,
     browser_info: str = None,
-    ip_address: str = None
+    ip_address: str = None,
+    session_token: str = None
 ):
     user = db.query(User).filter(User.id == user_id).first()
 
@@ -186,6 +200,10 @@ def logout_user(
         company_id=user.company_id,
         details=f"User logged out from {browser_info or 'unknown browser'} at {ip_address or 'unknown IP'}"
     )
+
+    # Log out session if session token is provided
+    if session_token:
+        logout_session(db, session_token)
 
     return {
         "success": True,

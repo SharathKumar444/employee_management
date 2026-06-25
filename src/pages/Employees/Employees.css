@@ -94,6 +94,45 @@
 
 /* Controls */
 
+.threshold-alert {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  background: #fff7ed;
+  border: 1px solid #fcd34d;
+  padding: 18px 22px;
+  border-radius: 16px;
+  margin-bottom: 22px;
+  box-shadow: 0 8px 20px rgba(251, 191, 36, 0.12);
+}
+
+.threshold-alert h3 {
+  margin: 0 0 6px;
+  font-size: 18px;
+  color: #92400e;
+}
+
+.threshold-alert p {
+  margin: 4px 0;
+  color: #92400e;
+  line-height: 1.5;
+}
+
+.highlight-filter-btn {
+  border: none;
+  border-radius: 12px;
+  background: #d97706;
+  color: white;
+  padding: 12px 18px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.highlight-filter-btn:hover {
+  background: #b45309;
+}
+
 .employees-controls {
   display: flex;
   justify-content: space-between;

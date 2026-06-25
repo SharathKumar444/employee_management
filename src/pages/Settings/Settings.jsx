@@ -10,6 +10,8 @@ import {
   approveLeaveRequest,
   rejectLeaveRequest,
 } from '../../services/leaveService'
+import memberService from '../../services/memberService'
+import SessionMonitoring from './SessionMonitoring'
 
 import './Settings.css'
 
@@ -44,13 +46,22 @@ const Settings = () => {
   const [pendingReactivationRequests, setPendingReactivationRequests] =
     useState([])
 
+  const [pendingReinstallmentRequests, setPendingReinstallmentRequests] =
+    useState([])
+
   const [pendingLeaveRequests, setPendingLeaveRequests] =
     useState([])
 
   const [loadingReactivation, setLoadingReactivation] =
     useState(false)
 
+  const [loadingReinstallment, setLoadingReinstallment] =
+    useState(false)
+
   const [processingReactivationId, setProcessingReactivationId] =
+    useState(null)
+
+  const [processingReinstallmentId, setProcessingReinstallmentId] =
     useState(null)
 
   const [reactivationMessage, setReactivationMessage] =
@@ -85,6 +96,11 @@ const Settings = () => {
 
     if (currentUser?.role === 'admin' && companyId) {
       // eslint-disable-next-line react-hooks/immutability
+      loadReinstallmentRequests()
+    }
+
+    if (currentUser?.role === 'admin' && companyId) {
+      // eslint-disable-next-line react-hooks/immutability
       loadPendingLeaveRequests()
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -102,6 +118,23 @@ const Settings = () => {
       console.error('Load reactivation requests error:', err)
     } finally {
       setLoadingReactivation(false)
+    }
+  }
+
+  const loadReinstallmentRequests = async () => {
+    try {
+      setLoadingReinstallment(true)
+      const res = await memberService.fetchReinstallmentRequests(companyId)
+      if (res?.success) {
+        setPendingReinstallmentRequests(res.data)
+      } else {
+        setPendingReinstallmentRequests([])
+      }
+    } catch (err) {
+      console.error('Load reinstatement requests error:', err)
+      setPendingReinstallmentRequests([])
+    } finally {
+      setLoadingReinstallment(false)
     }
   }
 
@@ -486,6 +519,86 @@ const Settings = () => {
     }
   }
 
+  const handleApproveReinstallment = async (requestId) => {
+    const adminIdentifier = currentUser?.email || currentUser?.name
+
+    if (!adminIdentifier) {
+      setReactivationMessage('❌ Unable to determine admin identifier')
+      return
+    }
+
+    const comment = window.prompt('Optional comment for this approval:')
+    if (comment === null) return
+
+    try {
+      setProcessingReinstallmentId(requestId)
+      setReactivationMessage('')
+
+      const res = await memberService.approveReinstallment(
+        requestId,
+        adminIdentifier,
+        comment
+      )
+
+      if (res?.success) {
+        setReactivationMessage('✅ User reinstated successfully!')
+        setTimeout(() => setReactivationMessage(''), 3000)
+        await loadReinstallmentRequests()
+      } else {
+        const errorMsg = res?.message || res?.detail || 'Failed to reinstate user'
+        setReactivationMessage('❌ ' + errorMsg)
+        setTimeout(() => setReactivationMessage(''), 4000)
+      }
+    } catch (err) {
+      console.error('Approve reinstallment error:', err)
+      const errorMsg = err.response?.data?.message || err.response?.data?.detail || err.message || 'Failed to reinstate'
+      setReactivationMessage('❌ ' + errorMsg)
+      setTimeout(() => setReactivationMessage(''), 4000)
+    } finally {
+      setProcessingReinstallmentId(null)
+    }
+  }
+
+  const handleRejectReinstallment = async (requestId) => {
+    const adminIdentifier = currentUser?.email || currentUser?.name
+
+    if (!adminIdentifier) {
+      setReactivationMessage('❌ Unable to determine admin identifier')
+      return
+    }
+
+    const comment = window.prompt('Optional comment for this rejection:')
+    if (comment === null) return
+
+    try {
+      setProcessingReinstallmentId(requestId)
+      setReactivationMessage('')
+
+      const res = await memberService.rejectReinstallment(
+        requestId,
+        adminIdentifier,
+        comment
+      )
+
+      if (res?.success) {
+        setReactivationMessage('✅ Request rejected successfully!')
+        setTimeout(() => setReactivationMessage(''), 3000)
+        await loadReinstallmentRequests()
+      } else {
+        const errorMsg = res?.message || res?.detail || 'Failed to reject reinstatement request'
+        setReactivationMessage('❌ ' + errorMsg)
+        setTimeout(() => setReactivationMessage(''), 4000)
+      }
+    } catch (err) {
+      console.error('Reject reinstallment error:', err)
+      const errorMsg = err.response?.data?.message || err.response?.data?.detail || err.message || 'Failed to reject reinstatement request'
+      setReactivationMessage('❌ ' + errorMsg)
+      setTimeout(() => setReactivationMessage(''), 4000)
+    } finally {
+      setProcessingReinstallmentId(null)
+    }
+  }
+
   return (
     <div className="settings-page">
       <div className="settings-header">
@@ -776,6 +889,91 @@ const Settings = () => {
             )}
           </div>
 
+          <div className="settings-card pending-reinstallment-requests">
+            <div className="card-title">
+              <FaBell />
+              <h3>
+                Pending Reinstatement
+                Requests
+              </h3>
+            </div>
+
+            {reactivationMessage && (
+              <div className="reactivation-message">
+                {reactivationMessage}
+              </div>
+            )}
+
+            {loadingReinstallment ? (
+              <p>Loading requests...</p>
+            ) : pendingReinstallmentRequests.length === 0 ? (
+              <p>
+                No pending reinstatement requests.
+              </p>
+            ) : (
+              pendingReinstallmentRequests.map(
+                request => (
+                  <div
+                    key={request.id}
+                    className="request-item reinstatement"
+                  >
+                    <h4>
+                      {request.user_name || request.user_email || `User #${request.user_id}`}
+                    </h4>
+
+                    <p className="request-email">
+                      {request.user_email || 'N/A'} requested suspension reinstatement.
+                    </p>
+
+                    {request.reason && (
+                      <p className="request-message">
+                        📝 {request.reason}
+                      </p>
+                    )}
+
+                    <p className="request-date">
+                      📅 {new Date(request.created_at).toLocaleString()}
+                    </p>
+
+                    <div className="request-actions">
+                      <button
+                        className="approve-btn"
+                        onClick={() =>
+                          handleApproveReinstallment(
+                            request.id
+                          )
+                        }
+                        disabled={
+                          processingReinstallmentId === request.id
+                        }
+                      >
+                        {processingReinstallmentId === request.id
+                          ? '⏳ Processing...'
+                          : '✓ Reinstate'}
+                      </button>
+
+                      <button
+                        className="reject-btn"
+                        onClick={() =>
+                          handleRejectReinstallment(
+                            request.id
+                          )
+                        }
+                        disabled={
+                          processingReinstallmentId === request.id
+                        }
+                      >
+                        {processingReinstallmentId === request.id
+                          ? '⏳ Processing...'
+                          : '✕ Reject'}
+                      </button>
+                    </div>
+                  </div>
+                )
+              )
+            )}
+          </div>
+
           <div className="settings-card pending-leave-requests">
             <div className="card-title">
               <FaCalendarAlt />
@@ -831,6 +1029,12 @@ const Settings = () => {
         )}
 
       </div>
+
+      {currentUser?.role === 'admin' && (
+        <div className="settings-card full-width session-monitoring-card">
+          <SessionMonitoring />
+        </div>
+      )}
     </div>
   )
 }

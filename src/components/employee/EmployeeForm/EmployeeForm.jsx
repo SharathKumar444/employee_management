@@ -13,6 +13,11 @@ const EmployeeForm = ({
       role: '',
       department: '',
       designation: '',
+      phone: '',
+      address: '',
+      date_of_joining: '',
+      employee_id: '',
+      profile_picture: '',
       status: 'Active',
     })
 
@@ -33,6 +38,26 @@ const EmployeeForm = ({
           '',
         designation:
           initialData.designation ||
+          '',
+        phone:
+          initialData.phone ||
+          initialData.phone_number ||
+          '',
+        address:
+          initialData.address ||
+          '',
+        date_of_joining:
+          initialData.date_of_joining ||
+          initialData.dateOfJoining ||
+          initialData.joining_date ||
+          '',
+        employee_id:
+          initialData.employee_id ||
+          initialData.employeeId ||
+          '',
+        profile_picture:
+          initialData.profile_picture ||
+          initialData.profilePicture ||
           '',
         status:
           initialData.status ||
@@ -219,6 +244,51 @@ const EmployeeForm = ({
           type="text"
           name="designation"
           value={formData.designation}
+          onChange={handleChange}
+        />
+
+        {/* PHONE */}
+        <label>Phone Number</label>
+        <input
+          type="tel"
+          name="phone"
+          value={formData.phone}
+          onChange={handleChange}
+        />
+
+        {/* ADDRESS */}
+        <label>Address</label>
+        <input
+          type="text"
+          name="address"
+          value={formData.address}
+          onChange={handleChange}
+        />
+
+        {/* DATE OF JOINING */}
+        <label>Date of Joining</label>
+        <input
+          type="date"
+          name="date_of_joining"
+          value={formData.date_of_joining}
+          onChange={handleChange}
+        />
+
+        {/* EMPLOYEE ID */}
+        <label>Employee ID</label>
+        <input
+          type="text"
+          name="employee_id"
+          value={formData.employee_id}
+          onChange={handleChange}
+        />
+
+        {/* PROFILE PICTURE URL */}
+        <label>Profile Picture URL</label>
+        <input
+          type="text"
+          name="profile_picture"
+          value={formData.profile_picture}
           onChange={handleChange}
         />
 

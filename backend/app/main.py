@@ -17,6 +17,7 @@ from app.models.invitation_model import Invitation
 from app.models.attendance_model import Attendance, Leave
 from app.models.export_model import ExportHistory
 from app.models.reinstatement_model import ReinstallmentRequest
+from app.models.user_session_model import UserSession
 
 from app.routes.employee_routes import router as employee_router
 from app.routes.role_request_routes import router as role_request_router
@@ -33,6 +34,7 @@ from app.routes.attendance_access_routes import router as attendance_access_rout
 from app.routes.leave_routes import router as leave_router
 from app.routes.export_routes import router as export_router
 from app.routes.suspension_routes import router as suspension_router
+from app.routes.session_routes import router as session_router
 
 
 def ensure_invitation_schema():
@@ -113,6 +115,35 @@ def ensure_user_schema():
         conn.commit()
 
 
+def ensure_employee_schema():
+    db_path = DATABASE_PATH
+
+    if not os.path.exists(db_path):
+        return
+
+    with sqlite3.connect(db_path) as conn:
+        cursor = conn.cursor()
+        cursor.execute("PRAGMA table_info(employees)")
+        columns = [row[1] for row in cursor.fetchall()]
+
+        if 'phone' not in columns:
+            cursor.execute("ALTER TABLE employees ADD COLUMN phone TEXT")
+
+        if 'address' not in columns:
+            cursor.execute("ALTER TABLE employees ADD COLUMN address TEXT")
+
+        if 'date_of_joining' not in columns:
+            cursor.execute("ALTER TABLE employees ADD COLUMN date_of_joining TEXT")
+
+        if 'profile_picture' not in columns:
+            cursor.execute("ALTER TABLE employees ADD COLUMN profile_picture TEXT")
+
+        if 'employee_id' not in columns:
+            cursor.execute("ALTER TABLE employees ADD COLUMN employee_id TEXT")
+
+        conn.commit()
+
+
 def ensure_audit_schema():
     db_path = DATABASE_PATH
 
@@ -135,6 +166,7 @@ def ensure_audit_schema():
 Base.metadata.create_all(bind=engine)
 ensure_invitation_schema()
 ensure_user_schema()
+ensure_employee_schema()
 ensure_audit_schema()
 
 app = FastAPI(
@@ -210,6 +242,7 @@ app.include_router(attendance_access_router)
 app.include_router(leave_router)
 app.include_router(export_router)
 app.include_router(suspension_router)
+app.include_router(session_router)
 
 # =========================
 # DATABASE SESSION

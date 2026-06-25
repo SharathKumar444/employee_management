@@ -2,6 +2,9 @@ import {
   FaEdit,
   FaTrash,
 } from 'react-icons/fa'
+import {
+  getProfileCompletionScore,
+} from '../../../utils/profileCompletion'
 
 import './EmployeeTable.css'
 
@@ -22,6 +25,7 @@ const EmployeeTable = ({
             <th>Role</th>
             <th>Department</th>
             <th>Email</th>
+            <th>Completion</th>
             <th>Status</th>
             <th>Actions</th>
           </tr>
@@ -33,7 +37,7 @@ const EmployeeTable = ({
           0 ? (
             <tr>
               <td
-                colSpan="6"
+                colSpan="7"
                 className="empty-cell"
               >
                 No employees found
@@ -101,6 +105,25 @@ const EmployeeTable = ({
                     {
                       employee.email
                     }
+                  </td>
+
+                  {/* COMPLETION */}
+                  <td>
+                    {(() => {
+                      const score = getProfileCompletionScore(employee)
+                      const statusClass =
+                        score === 100
+                          ? 'complete'
+                          : score >= 80
+                          ? 'partial'
+                          : 'attention'
+
+                      return (
+                        <span className={`completion-pill ${statusClass}`}>
+                          {score}%
+                        </span>
+                      )
+                    })()}
                   </td>
 
                   {/* STATUS */}

@@ -21,6 +21,7 @@ import StatusChart from '../../components/analytics/StatusChart'
 import AttendanceBarChart from '../../components/analytics/AttendanceBarChart'
 import { fetchEmployees } from '../../services/employeeService'
 import { fetchDashboardAnalytics } from '../../services/analyticsService'
+import { getProfileCompletionScore } from '../../utils/profileCompletion'
 
 import './Dashboard.css'
 
@@ -138,6 +139,16 @@ const Dashboard = () => {
         )
       : 0
 
+  const averageProfileCompletion =
+    totalEmployees > 0
+      ? Math.round(
+          employees
+            .map(getProfileCompletionScore)
+            .reduce((sum, score) => sum + score, 0) /
+          totalEmployees
+        )
+      : 0
+
   const recentEmployees =
     employees.slice(-5).reverse()
 
@@ -213,6 +224,12 @@ const Dashboard = () => {
           title="Active Employees"
           value={activeEmployees}
           icon={<FaUserCheck />}
+        />
+
+        <StatisticsCard
+          title="Avg Profile Completion"
+          value={`${averageProfileCompletion}%`}
+          icon={<FaClipboardCheck />}
         />
 
         <StatisticsCard

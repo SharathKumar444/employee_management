@@ -29,6 +29,10 @@ import {
   rejectAttendanceRequestBackend,
 } from '../../../services/attendanceService'
 import {
+  getProfileCompletionScore,
+  getMissingProfileFields,
+} from '../../../utils/profileCompletion'
+import {
   approveLeaveRequest,
   rejectLeaveRequest,
 } from '../../../services/leaveService'
@@ -62,6 +66,9 @@ const Navbar = ({ toggleSidebar }) => {
   ] = useState(false)
 
   const visibleNotifications = notifications.filter(notification => !notification.is_read)
+
+  const completionScore = getProfileCompletionScore(currentUser)
+  const missingProfileFields = getMissingProfileFields(currentUser)
 
   const getCompanyId = user =>
     user?.companyId ||
@@ -837,6 +844,47 @@ const Navbar = ({ toggleSidebar }) => {
                 </strong>
 
               </div>
+
+              <div className="popup-info-card profile-completion-card">
+                <span>Profile Completion</span>
+                <div className="completion-row">
+                  <strong>{completionScore}%</strong>
+                  <small>
+                    {completionScore === 100
+                      ? 'Profile complete'
+                      : `${missingProfileFields.length} fields missing`}
+                  </small>
+                </div>
+                <div className="completion-bar">
+                  <div
+                    className="completion-fill"
+                    style={{ width: `${completionScore}%` }}
+                  />
+                </div>
+              </div>
+
+              {missingProfileFields.length > 0 && (
+                <div className="popup-info-card missing-fields-card">
+                  <span>Missing Profile Fields</span>
+                  <div className="missing-field-list">
+                    {missingProfileFields
+                      .slice(0, 5)
+                      .map(field => (
+                        <span
+                          key={field}
+                          className="missing-field-pill"
+                        >
+                          {field}
+                        </span>
+                      ))}
+                    {missingProfileFields.length > 5 && (
+                      <small>
+                        +{missingProfileFields.length - 5} more
+                      </small>
+                    )}
+                  </div>
+                </div>
+              )}
 
             </div>
 

@@ -486,6 +486,63 @@
   color: #111827;
 }
 
+.popup-info-card.profile-completion-card {
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.completion-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  margin-bottom: 10px;
+}
+
+.completion-row strong {
+  font-size: 22px;
+}
+
+.completion-row small {
+  color: #64748b;
+  font-size: 12px;
+}
+
+.completion-bar {
+  width: 100%;
+  height: 10px;
+  background: #e2e8f0;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.completion-fill {
+  height: 100%;
+  background: #2563eb;
+  border-radius: 999px;
+  transition: width 0.3s ease;
+}
+
+.missing-fields-card {
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.missing-field-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.missing-field-pill {
+  background: #eff6ff;
+  color: #1d4ed8;
+  font-size: 12px;
+  padding: 6px 10px;
+  border-radius: 999px;
+}
+
 .active-text {
   color: #16a34a !important;
 }

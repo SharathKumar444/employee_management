@@ -97,6 +97,33 @@
   color: #d97706;
 }
 
+/* COMPLETION */
+
+.completion-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 12px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.completion-pill.complete {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.completion-pill.partial {
+  background: #fef9c3;
+  color: #b45309;
+}
+
+.completion-pill.attention {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
 /* ACTION BUTTONS */
 
 .action-buttons {

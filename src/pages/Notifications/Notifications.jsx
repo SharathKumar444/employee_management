@@ -1,12 +1,34 @@
 import { useEffect, useState } from 'react'
 import { useAuth } from '../../context/AuthContext'
 import { getNotifications, markAllNotificationsRead, markNotificationRead } from '../../services/notificationService'
+import './Notifications.css'
 
 const Notifications = () => {
   const { currentUser } = useAuth()
   const [notifications, setNotifications] = useState([])
 
-  const load = async () => {
+  useEffect(() => {
+    const loadNotifications = async () => {
+      if (!currentUser) return
+      const userId =
+        currentUser.id ||
+        currentUser._id ||
+        currentUser.user_id ||
+        null
+      const userEmail =
+        currentUser.email ||
+        currentUser.user_email ||
+        null
+      const res = await getNotifications(userId, userEmail)
+      if (res?.success) {
+        setNotifications(res.data)
+      }
+    }
+
+    loadNotifications()
+  }, [currentUser])
+
+  const loadNotifications = async () => {
     if (!currentUser) return
     const userId =
       currentUser.id ||
@@ -18,21 +40,19 @@ const Notifications = () => {
       currentUser.user_email ||
       null
     const res = await getNotifications(userId, userEmail)
-    if (res?.success) setNotifications(res.data)
+    if (res?.success) {
+      setNotifications(res.data)
+    }
   }
-
-  useEffect(() => {
-    load()
-  }, [currentUser?.id])
 
   const handleMarkAll = async () => {
     await markAllNotificationsRead(currentUser.id, currentUser.email)
-    load()
+    loadNotifications()
   }
 
   const handleMark = async id => {
     await markNotificationRead(id)
-    load()
+    loadNotifications()
   }
 
   return (
@@ -45,20 +65,37 @@ const Notifications = () => {
       {notifications.length === 0 ? (
         <div>No notifications</div>
       ) : (
-        <div>
-          {notifications.map(n => (
-            <div key={n.id} style={{ padding: 12, borderBottom: '1px solid #eee' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <div>{n.message || n.payload}</div>
-                <div style={{ fontSize: 12, color: '#666' }}>{new Date(n.created_at).toLocaleString()}</div>
+        <div className="notifications-list">
+          {notifications.map(n => {
+            const createdAt =
+              n.created_at ||
+              n.time ||
+              n.timestamp ||
+              new Date().toISOString()
+            return (
+              <div
+                key={n.id}
+                className={`notification-card ${n.is_read ? 'read' : 'unread'}`}
+              >
+                <div className="notification-card-row">
+                  <div className="notification-card-text">
+                    <p>{n.message || n.payload || 'Notification received'}</p>
+                    <small>{n.type ? n.type.replace(/[-_]/g, ' ') : 'General'}</small>
+                  </div>
+                  <div className="notification-card-time">
+                    {new Date(createdAt).toLocaleString()}
+                  </div>
+                </div>
+                <div className="notification-card-actions">
+                  {!n.is_read && (
+                    <button onClick={() => handleMark(n.id)}>
+                      Mark read
+                    </button>
+                  )}
+                </div>
               </div>
-              <div style={{ marginTop: 8 }}>
-                {!n.is_read && (
-                  <button onClick={() => handleMark(n.id)}>Mark read</button>
-                )}
-              </div>
-            </div>
-          ))}
+            )
+          })}
         </div>
       )}
     </div>
